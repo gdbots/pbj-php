@@ -5,16 +5,17 @@ namespace Gdbots\Messages;
 interface Message
 {
     /**
-     * Returns the version number for this message.
-     * Default should be 1.
-     *
-     * Refers to the schema version and is used to initiate
-     * transformation when consumers receive messages with
-     * different versions.
-     *
-     * @return int
+     * @return FieldDescriptor[]
+     * @throws \LogicException
      */
-    public function getMessageVersion();
+    public static function fields();
+
+    /**
+     * @param string $name
+     * @return FieldDescriptor
+     * @throws \InvalidArgumentException
+     */
+    public static function field($name);
 
     /**
      * Returns a new message from the provided array.  The array
@@ -22,30 +23,14 @@ interface Message
      * that signature.
      *
      * @param array $data
-     * @return Message
+     * @return static
      */
     public static function fromArray(array $data = array());
 
     /**
-     * Returns the message as an associative array.  Array keys
-     * should be snake_case and setters should be CamelCase.
-     *
-     * All setters are ideally protected so your message is immutable.
-     *
-     * For example, if your toArray returns the following:
-     *      [
-     *          'first_name'   => 'John Doe',
-     *          'email'        => 'john@domain.com',
-     *          'a_third_prop' => ['some', 'things', 'andstuff']
-     *      ]
-     *
-     * You would have the following setters on your message:
-     *      setFirstName($val)
-     *      setEmail($val)
-     *      setAThirdProp(array $array = array())
+     * Returns the message as an associative array.
      *
      * @return array
-     * @throws \LogicException
      */
     public function toArray();
 }

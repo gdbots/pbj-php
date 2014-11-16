@@ -2,116 +2,77 @@
 
 namespace Gdbots\Messages;
 
-use Gdbots\Common\FromArrayInterface;
-use Gdbots\Common\ToArrayInterface;
-use Gdbots\Common\Util\StringUtils;
+use Gdbots\Common\FromArray;
+use Gdbots\Common\ToArray;
 
-abstract class AbstractMessage implements MessageInterface, FromArrayInterface, ToArrayInterface
+abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
 {
-    const TYPE_DOUBLE = 1;
-    const TYPE_FLOAT = 2;
-    const TYPE_INT64 = 3;
-    const TYPE_UINT64 = 4;
-    const TYPE_INT32 = 5;
-    const TYPE_FIXED64 = 6;
-    const TYPE_FIXED32 = 7;
-    const TYPE_BOOL = 8;
-    const TYPE_STRING = 9;
-    const TYPE_GROUP = 10;
-    const TYPE_MESSAGE = 11;
-    const TYPE_BYTES = 12;
-    const TYPE_UINT32 = 13;
-    const TYPE_ENUM = 14;
-    const TYPE_SFIXED32 = 15;
-    const TYPE_SFIXED64 = 16;
-    const TYPE_SINT32 = 17;
-    const TYPE_SINT64 = 18;
-    const MAX_FIELD_TYPE = 18;
-    const PHP_MESSAGE_OPTION = 0;
+    /**
+     * @var FieldDescriptor[]
+     */
+    private static $fields;
 
-    /* @var MessageActor */
-    private $actor;
-
-    /* @var MessageMeta */
-    private $meta;
+    /**
+     * @var array
+     */
+    private $data = [];
 
     /**
      * @param array $data
      *
      * @throws \InvalidArgumentException
      */
-    public function __construct(array $data = array())
+    final private function __construct(array $data = array())
     {
-        foreach ($data as $key => $value) {
-            if (MessageMeta::META === $key) {
-                $this->meta = new MessageMeta($this, $value);
-                continue;
-            }
-
-            if (MessageActor::ACTOR === $key) {
-                $this->actor = new MessageActor($value);
-                continue;
-            }
-
-            $method = 'set' . StringUtils::toCamelCaseFromSnakeCase($key);
-            if (method_exists($this, $method)) {
-                $this->$method($value);
-                continue;
-            }
-
-            if ('actor' === $key || 'meta' === $key) {
-                throw new \InvalidArgumentException(sprintf('The property [%s] is reserved.', $key));
-            }
-
-            if (property_exists($this, $key)) {
-                $this->$key = $value;
-            }
-        }
-
-        if (!$this->meta instanceof MessageMeta) {
-            $this->meta = new MessageMeta($this, array(
-                    MessageMeta::CURIE => MessageCurie::fromMessage($this),
-                    MessageMeta::MESSAGE_ID => $this->generateMessageId(),
-                ));
-        }
-
-        if (!$this->actor instanceof MessageActor) {
-            $this->actor = new MessageActor();
-        }
     }
 
     /**
-     * Default message version is 1.  Version is only stored
-     * or used if it's greater than 1.
-     *
-     * @return int
+     * @see Message::fields
+     * @throws \LogicException
      */
-    public function getMessageVersion()
+    final public static function fields()
     {
-        return 1;
+        if (null === self::$fields) {
+            $fields = static::getFieldDescriptors();
+            foreach ($fields as $field) {
+                if (isset(self::$fields[$field->getName()])) {
+                    throw new \LogicException(sprintf('Field [%s] can only be defined once.', $field->getName()));
+                }
+                self::$fields[$field->getName()] = $field;
+            }
+        }
+
+        return self::$fields;
     }
 
     /**
-     * @see MessageInterface::meta
+     * @return FieldDescriptor[]
      */
-    public final function meta()
+    protected static function getFieldDescriptors()
     {
-        return $this->meta;
+        return [];
     }
 
     /**
-     * @see MessageInterface::actor
+     * @param string $name
+     * @return FieldDescriptor
+     * @throws \InvalidArgumentException
      */
-    public final function actor()
+    final public static function field($name)
     {
-        return $this->actor;
+        self::fields();
+        if (!isset(self::$fields[$name])) {
+            throw new \InvalidArgumentException(sprintf('Field [%s] is not defined.', $name));
+        }
+
+        return self::$fields[$name];
     }
 
     /**
      * @param array $data
-     * @return MessageInterface|CommandBus\CommandInterface|EventBus\DomainEventInterface
+     * @return static
      */
-    public static function fromArray(array $data = array())
+    final public static function fromArray(array $data = array())
     {
         return new static($data);
     }
@@ -121,44 +82,51 @@ abstract class AbstractMessage implements MessageInterface, FromArrayInterface, 
      *
      * @throws \LogicException
      */
-    public function toArray()
+    final public function toArray()
     {
-        $payload = array_filter($this->getPayload(), function($item) {
-                return null !== $item;
-            });
+        $payload = [];
 
-        if (isset($payload[MessageMeta::META])) {
-            throw new \LogicException(sprintf('Key [%s] is reserved.', MessageMeta::META));
+        foreach (self::fields() as $field) {
+            $payload[$field->getName()] = $this->get($field->getName());
         }
 
-        if (isset($payload[MessageActor::ACTOR])) {
-            throw new \LogicException(sprintf('Key [%s] is reserved.', MessageActor::ACTOR));
-        }
-
-        return array_merge(array(
-                MessageMeta::META => $this->meta,
-                MessageActor::ACTOR => $this->actor,
-            ), $payload);
+        return $payload;
     }
 
     /**
-     * Default message id is a version 1 uuid.  Override in message
-     * class if you desire a different type of uuid.
-     *
-     * @return Uuid
-     */
-    protected function generateMessageId()
-    {
-        return Uuid::uuid1();
-    }
-
-    /**
-     * Override in your message class.
-     *
      * @return array
      */
-    protected function getPayload()
+    final public function jsonSerialize()
     {
-        return [];
+        return $this->toArray();
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    final protected function get($key)
+    {
+        // todo: handle nullable fields
+        if (!isset($this->data[$key])) {
+            return self::field($key)->getDefault();
+        }
+
+        return $this->data[$key];
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @return static
+     *
+     * @throws \Exception
+     */
+    final protected function set($key, $value)
+    {
+        $field = self::field($key);
+        $field->getType()->guard($field, $value);
+        $this->data[$field->getName()] = $value;
+        return $this;
     }
 }
