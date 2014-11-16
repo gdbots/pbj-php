@@ -1,0 +1,14 @@
+{
+    "name": "gdbots/messages-php",
+    "homepage": "https://github.com/gdbots/messages-php",
+    "description": "Protobuf inspired message tools for php.",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4",
+        "gdbots/common-php": "dev-master"
+    },
+    "autoload": {
+        "psr-0": { "Gdbots\\Messages\\": "src/" }
+    }
+}
