@@ -5,14 +5,14 @@ namespace Gdbots\Messages;
 interface Message
 {
     /**
-     * @return FieldDescriptor[]
+     * @return Field[]
      * @throws \LogicException
      */
     public static function fields();
 
     /**
      * @param string $name
-     * @return FieldDescriptor
+     * @return Field
      * @throws \InvalidArgumentException
      */
     public static function field($name);
@@ -25,7 +25,7 @@ interface Message
      * @param array $data
      * @return static
      */
-    public static function fromArray(array $data = array());
+    public static function fromArray(array $data = []);
 
     /**
      * Returns the message as an associative array.

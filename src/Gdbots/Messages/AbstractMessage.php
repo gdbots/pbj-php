@@ -8,7 +8,7 @@ use Gdbots\Common\ToArray;
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
 {
     /**
-     * @var FieldDescriptor[]
+     * @var Field[]
      */
     private static $fields;
 
@@ -24,6 +24,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final private function __construct(array $data = array())
     {
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
+        }
     }
 
     /**
@@ -33,7 +36,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     final public static function fields()
     {
         if (null === self::$fields) {
-            $fields = static::getFieldDescriptors();
+            $fields = static::getFields();
             foreach ($fields as $field) {
                 if (isset(self::$fields[$field->getName()])) {
                     throw new \LogicException(sprintf('Field [%s] can only be defined once.', $field->getName()));
@@ -46,16 +49,16 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * @return FieldDescriptor[]
+     * @return Field[]
      */
-    protected static function getFieldDescriptors()
+    protected static function getFields()
     {
         return [];
     }
 
     /**
      * @param string $name
-     * @return FieldDescriptor
+     * @return Field
      * @throws \InvalidArgumentException
      */
     final public static function field($name)
@@ -125,7 +128,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     final protected function set($key, $value)
     {
         $field = self::field($key);
-        $field->getType()->guard($field, $value);
+        $field->guardValue($value);
         $this->data[$field->getName()] = $value;
         return $this;
     }

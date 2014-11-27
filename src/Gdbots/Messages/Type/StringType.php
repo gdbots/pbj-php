@@ -3,21 +3,34 @@
 namespace Gdbots\Messages\Type;
 
 use Assert\Assertion;
-use Gdbots\Messages\FieldDescriptor;
+use Gdbots\Messages\Field;
 
 final class StringType extends AbstractType
 {
-    public function guard(FieldDescriptor $descriptor, $value)
+    /**
+     * @see Type::guard
+     */
+    public function guard($value, Field $field)
     {
-        Assertion::nullOrString($value);
+        if ($field->isNullable()) {
+            Assertion::nullOrString($value);
+        } else {
+            Assertion::string($value);
+        }
     }
 
-    public function encode(FieldDescriptor $descriptor, $value)
+    /**
+     * @see Type::encode
+     */
+    public function encode($value, Field $field)
     {
         return $value;
     }
 
-    public function decode(FieldDescriptor $descriptor, $value)
+    /**
+     * @see Type::decode
+     */
+    public function decode($value, Field $field)
     {
         return (string) $value;
     }

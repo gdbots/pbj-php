@@ -2,7 +2,7 @@
 
 namespace Gdbots\Messages\Type;
 
-use Gdbots\Messages\FieldDescriptor;
+use Gdbots\Messages\Field;
 
 interface Type
 {
@@ -12,23 +12,23 @@ interface Type
     public static function create();
 
     /**
-     * @param FieldDescriptor $descriptor
      * @param mixed $value
+     * @param Field $field
      * @throws \Exception
      */
-    public function guard(FieldDescriptor $descriptor, $value);
+    public function guard($value, Field $field);
 
     /**
-     * @param FieldDescriptor $descriptor
      * @param mixed $value
+     * @param Field $field
      * @return mixed
      */
-    public function encode(FieldDescriptor $descriptor, $value);
+    public function encode($value, Field $field);
 
     /**
-     * @param FieldDescriptor $descriptor
      * @param mixed $value
+     * @param Field $field
      * @return mixed
      */
-    public function decode(FieldDescriptor $descriptor, $value);
+    public function decode($value, Field $field);
 }

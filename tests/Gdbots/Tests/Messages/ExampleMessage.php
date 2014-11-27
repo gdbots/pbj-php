@@ -3,8 +3,9 @@
 namespace Gdbots\Tests\Messages;
 
 use Gdbots\Messages\AbstractMessage;
-use Gdbots\Messages\FieldDescriptor;
-use Gdbots\Messages\Type\StringType;
+use Gdbots\Messages\Field;
+use Gdbots\Messages\FieldBuilder;
+use Gdbots\Messages\Type;
 
 class ExampleMessage extends AbstractMessage
 {
@@ -12,13 +13,20 @@ class ExampleMessage extends AbstractMessage
     const LAST_NAME  = 'last_name';
 
     /**
-     * @return FieldDescriptor[]
+     * @return Field[]
      */
-    protected static function getFieldDescriptors()
+    protected static function getFields()
     {
         return [
-            new FieldDescriptor(self::FIRST_NAME, StringType::create()),
-            new FieldDescriptor(self::LAST_NAME,  StringType::create()),
+            FieldBuilder::create(self::FIRST_NAME, Type\StringType::create())
+                ->required()
+                ->withAssertion(function ($value, Field $field) {
+                    \Assert\that($value)->regex('/^[a-zA-Z]/', $field->getName() . ' must start with a letter.');
+                })
+                ->build(),
+
+            FieldBuilder::create(self::LAST_NAME,  Type\StringType::create())
+                ->build(),
         ];
     }
 
