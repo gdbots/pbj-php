@@ -12,11 +12,7 @@ final class StringType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        if ($field->isNullable()) {
-            Assertion::nullOrString($value);
-        } else {
-            Assertion::string($value);
-        }
+        Assertion::string($value, null, $field->getName());
     }
 
     /**
@@ -24,6 +20,10 @@ final class StringType extends AbstractType
      */
     public function encode($value, Field $field)
     {
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
         return $value;
     }
 
@@ -33,5 +33,13 @@ final class StringType extends AbstractType
     public function decode($value, Field $field)
     {
         return (string) $value;
+    }
+
+    /**
+     * @see Type::isString
+     */
+    public function isString()
+    {
+        return true;
     }
 }

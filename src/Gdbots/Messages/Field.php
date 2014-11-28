@@ -20,9 +20,6 @@ final class Field
     /** @var bool */
     private $required = false;
 
-    /** @var bool */
-    private $nullable = true;
-
     /** @var mixed */
     private $default;
 
@@ -34,7 +31,6 @@ final class Field
      * @param Type $type
      * @param FieldRule $rule
      * @param bool $required
-     * @param bool $nullable
      * @param mixed|null $default
      * @param \Closure $assertion = null
      */
@@ -43,24 +39,24 @@ final class Field
             Type $type,
             FieldRule $rule = null,
             $required = false,
-            $nullable = true,
             $default = null,
             \Closure $assertion = null
     ) {
         Assertion::string($name);
         Assertion::boolean($required);
-        Assertion::boolean($nullable);
 
         $this->name = $name;
         $this->type = $type;
         $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         $this->required = $required;
-        $this->nullable = !$required && $nullable;
         $this->default = $default;
         $this->assertion = $assertion;
 
-        if (null !== $default) {
+        // todo: handle multi-valued fields
+        if ($this->hasDefault()) {
             $this->guardValue($default);
+        } else {
+            $this->default = $this->type->getDefault();
         }
     }
 
@@ -123,9 +119,9 @@ final class Field
     /**
      * @return bool
      */
-    public function isNullable()
+    public function hasDefault()
     {
-        return $this->nullable;
+        return null !== $this->default;
     }
 
     /**
@@ -142,7 +138,14 @@ final class Field
      */
     public function guardValue($value)
     {
-        $this->type->guard($value, $this);
+        if ($this->required) {
+            Assertion::notNull($value, sprintf('Field [%s] is required and cannot be null.', $this->name), $this->name);
+        }
+
+        if (null !== $value) {
+            $this->type->guard($value, $this);
+        }
+
         if (null !== $this->assertion) {
             call_user_func($this->assertion, $value, $this);
         }

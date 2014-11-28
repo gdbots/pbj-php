@@ -11,6 +11,8 @@ class ExampleMessage extends AbstractMessage
 {
     const FIRST_NAME = 'first_name';
     const LAST_NAME  = 'last_name';
+    const AN_INT     = 'an_int';
+    const A_BIG_INT  = 'a_big_int';
 
     /**
      * @return Field[]
@@ -25,8 +27,9 @@ class ExampleMessage extends AbstractMessage
                 })
                 ->build(),
 
-            FieldBuilder::create(self::LAST_NAME,  Type\StringType::create())
-                ->build(),
+            FieldBuilder::create(self::LAST_NAME, Type\StringType::create())->build(),
+            FieldBuilder::create(self::AN_INT,    Type\IntType::create())->build(),
+            FieldBuilder::create(self::A_BIG_INT, Type\BigIntType::create())->build(),
         ];
     }
 
@@ -49,6 +52,28 @@ class ExampleMessage extends AbstractMessage
     public function setLastName($str)
     {
         $this->set(self::LAST_NAME, $str);
+        return $this;
+    }
+
+    public function getAnInt()
+    {
+        return $this->get(self::AN_INT);
+    }
+
+    public function setAnInt($int)
+    {
+        $this->set(self::AN_INT, $int);
+        return $this;
+    }
+
+    public function getABigInt()
+    {
+        return $this->get(self::A_BIG_INT);
+    }
+
+    public function setABigInt($int)
+    {
+        $this->set(self::A_BIG_INT, $int);
         return $this;
     }
 }

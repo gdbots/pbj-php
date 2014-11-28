@@ -19,19 +19,29 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * @param array $data
-     *
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     final private function __construct(array $data = array())
     {
         foreach ($data as $key => $value) {
-            $this->set($key, $value);
+            $field = self::field($key);
+            $this->set($key, $field->getType()->decode($value, $field));
+        }
+
+        foreach (self::fields() as $field) {
+            if (!$field->isRequired()) {
+                continue;
+            }
+
+            if (!$this->has($field->getName())) {
+                $this->set($field->getName(), $field->getDefault());
+                throw new \LogicException(sprintf('Field [%s] is required.', $field->getName()));
+            }
         }
     }
 
     /**
      * @see Message::fields
-     * @throws \LogicException
      */
     final public static function fields()
     {
@@ -57,9 +67,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * @param string $name
-     * @return Field
-     * @throws \InvalidArgumentException
+     * @see Message::field
      */
     final public static function field($name)
     {
@@ -75,22 +83,28 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @param array $data
      * @return static
      */
-    final public static function fromArray(array $data = array())
+    final public static function fromArray(array $data = [])
     {
         return new static($data);
     }
 
     /**
      * @return array
-     *
-     * @throws \LogicException
      */
     final public function toArray()
     {
         $payload = [];
 
         foreach (self::fields() as $field) {
-            $payload[$field->getName()] = $this->get($field->getName());
+            if (!array_key_exists($field->getName(), $this->data)) {
+                if (!$field->hasDefault()) {
+                    continue;
+                }
+                $value = $field->getDefault();
+            } else {
+                $value = $this->data[$field->getName()];
+            }
+            $payload[$field->getName()] = $field->getType()->encode($value, $field);
         }
 
         return $payload;
@@ -106,11 +120,19 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * @param string $key
+     * @return bool
+     */
+    final protected function has($key)
+    {
+        return isset($this->data[$key]);
+    }
+
+    /**
+     * @param string $key
      * @return mixed
      */
     final protected function get($key)
     {
-        // todo: handle nullable fields
         if (!isset($this->data[$key])) {
             return self::field($key)->getDefault();
         }

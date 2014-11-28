@@ -20,9 +20,6 @@ final class FieldBuilder
     /** @var bool */
     private $required = false;
 
-    /** @var bool */
-    private $nullable = true;
-
     /** @var mixed */
     private $default;
 
@@ -57,7 +54,15 @@ final class FieldBuilder
     public function required()
     {
         $this->required = true;
-        $this->nullable = false;
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function optional()
+    {
+        $this->required = false;
         return $this;
     }
 
@@ -98,6 +103,16 @@ final class FieldBuilder
     }
 
     /**
+     * @param mixed $default
+     * @return self
+     */
+    public function withDefault($default)
+    {
+        $this->default = $default;
+        return $this;
+    }
+
+    /**
      * @param \Closure $assertion
      * @return self
      */
@@ -121,7 +136,6 @@ final class FieldBuilder
             $this->type,
             $this->rule,
             $this->required,
-            $this->nullable,
             $this->default,
             $this->assertion
         );

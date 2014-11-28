@@ -31,4 +31,24 @@ interface Type
      * @return mixed
      */
     public function decode($value, Field $field);
+
+    /**
+     * @return mixed
+     */
+    public function getDefault();
+
+    /**
+     * @return bool
+     */
+    public function isScalar();
+
+    /**
+     * @return bool
+     */
+    public function isNumeric();
+
+    /**
+     * @return bool
+     */
+    public function isString();
 }

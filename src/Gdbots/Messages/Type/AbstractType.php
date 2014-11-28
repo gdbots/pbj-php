@@ -4,7 +4,7 @@ namespace Gdbots\Messages\Type;
 
 abstract class AbstractType implements Type
 {
-    private static $instance;
+    private static $instances = [];
 
     /**
      * private constructor to ensure flyweight construction.
@@ -16,9 +16,42 @@ abstract class AbstractType implements Type
      */
     final public static function create()
     {
-        if (null === self::$instance) {
-            self::$instance = new static();
+        $type = get_called_class();
+        if (!isset(self::$instances[$type])) {
+            self::$instances[$type] = new static();
         }
-        return self::$instance;
+        return self::$instances[$type];
+    }
+
+    /**
+     * @see Type::getDefault
+     */
+    public function getDefault()
+    {
+        return null;
+    }
+
+    /**
+     * @see Type::isScalar
+     */
+    public function isScalar()
+    {
+        return true;
+    }
+
+    /**
+     * @see Type::isNumeric
+     */
+    public function isNumeric()
+    {
+        return false;
+    }
+
+    /**
+     * @see Type::isString
+     */
+    public function isString()
+    {
+        return false;
     }
 }
