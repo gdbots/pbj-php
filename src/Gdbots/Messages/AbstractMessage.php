@@ -34,8 +34,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             }
 
             if (!$this->has($field->getName())) {
+                if (!$field->hasDefault()) {
+                    throw new \LogicException(sprintf('Field [%s] is required.', $field->getName()));
+                }
                 $this->set($field->getName(), $field->getDefault());
-                throw new \LogicException(sprintf('Field [%s] is required.', $field->getName()));
             }
         }
     }

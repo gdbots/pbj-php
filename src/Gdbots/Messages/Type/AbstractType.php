@@ -40,6 +40,14 @@ abstract class AbstractType implements Type
     }
 
     /**
+     * @see Type::isBoolean
+     */
+    public function isBoolean()
+    {
+        return false;
+    }
+
+    /**
      * @see Type::isNumeric
      */
     public function isNumeric()

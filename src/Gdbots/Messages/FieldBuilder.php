@@ -23,6 +23,9 @@ final class FieldBuilder
     /** @var mixed */
     private $default;
 
+    /** @var string */
+    private $className;
+
     /** @var \Closure */
     private $assertion;
 
@@ -113,6 +116,16 @@ final class FieldBuilder
     }
 
     /**
+     * @param string $className
+     * @return self
+     */
+    public function usingClass($className)
+    {
+        $this->className = $className;
+        return $this;
+    }
+
+    /**
      * @param \Closure $assertion
      * @return self
      */
@@ -137,6 +150,7 @@ final class FieldBuilder
             $this->rule,
             $this->required,
             $this->default,
+            $this->className,
             $this->assertion
         );
     }

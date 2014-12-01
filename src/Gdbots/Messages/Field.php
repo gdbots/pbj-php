@@ -4,6 +4,8 @@ namespace Gdbots\Messages;
 
 use Assert\Assertion;
 use Gdbots\Messages\Enum\FieldRule;
+use Gdbots\Messages\Type\IntEnumType;
+use Gdbots\Messages\Type\StringEnumType;
 use Gdbots\Messages\Type\Type;
 
 final class Field
@@ -23,6 +25,9 @@ final class Field
     /** @var mixed */
     private $default;
 
+    /** @var string */
+    private $className;
+
     /** @var \Closure */
     private $assertion;
 
@@ -32,6 +37,7 @@ final class Field
      * @param FieldRule $rule
      * @param bool $required
      * @param mixed|null $default
+     * @param string $className
      * @param \Closure $assertion = null
      */
     public function __construct(
@@ -40,17 +46,24 @@ final class Field
             FieldRule $rule = null,
             $required = false,
             $default = null,
+            $className = null,
             \Closure $assertion = null
     ) {
         Assertion::string($name);
         Assertion::boolean($required);
+        Assertion::nullOrString($className);
 
         $this->name = $name;
         $this->type = $type;
         $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         $this->required = $required;
         $this->default = $default;
+        $this->className = $className;
         $this->assertion = $assertion;
+
+        if ($this->type instanceof IntEnumType || $this->type instanceof StringEnumType) {
+            Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name), $this->name);
+        }
 
         // todo: handle multi-valued fields
         if ($this->hasDefault()) {
@@ -130,6 +143,22 @@ final class Field
     public function getDefault()
     {
         return $this->default;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasClassName()
+    {
+        return null !== $this->className;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName()
+    {
+        return $this->className;
     }
 
     /**

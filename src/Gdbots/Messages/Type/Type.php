@@ -45,6 +45,11 @@ interface Type
     /**
      * @return bool
      */
+    public function isBoolean();
+
+    /**
+     * @return bool
+     */
     public function isNumeric();
 
     /**
