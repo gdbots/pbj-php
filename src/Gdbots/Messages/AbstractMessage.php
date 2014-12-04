@@ -2,6 +2,7 @@
 
 namespace Gdbots\Messages;
 
+use Assert\Assertion;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 
@@ -23,9 +24,21 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final private function __construct(array $data = array())
     {
-        foreach ($data as $key => $value) {
-            $field = self::field($key);
-            $this->set($key, $field->getType()->decode($value, $field));
+        foreach ($data as $name => $value) {
+            $field = self::field($name);
+
+            if ($field->isASingleValue()) {
+                $this->set($name, $field->getType()->decode($value, $field));
+
+            } elseif ($field->isASet()) {
+                Assertion::isArray($value, sprintf('Field [%s] must be an array.', $name), $name);
+                foreach ($value as $v) {
+                    $this->addToSet($name, $field->getType()->decode($v, $field));
+                }
+
+            } elseif ($field->isAMap()) {
+
+            }
         }
 
         foreach (self::fields() as $field) {
@@ -37,7 +50,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
                 if (!$field->hasDefault()) {
                     throw new \LogicException(sprintf('Field [%s] is required.', $field->getName()));
                 }
-                $this->set($field->getName(), $field->getDefault());
+                $this->data[$field->getName()] = $field->getDefault();
             }
         }
     }
@@ -98,15 +111,29 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $payload = [];
 
         foreach (self::fields() as $field) {
-            if (!array_key_exists($field->getName(), $this->data)) {
-                if (!$field->hasDefault()) {
+            if ($field->isASingleValue()) {
+                if (!array_key_exists($field->getName(), $this->data)) {
+                    if (!$field->hasDefault()) {
+                        continue;
+                    }
+                    $value = $field->getDefault();
+                } else {
+                    $value = $this->data[$field->getName()];
+                }
+                $payload[$field->getName()] = $field->getType()->encode($value, $field);
+
+            } elseif ($field->isASet()) {
+                if (!$this->has($field->getName()) || empty($this->data[$field->getName()])) {
                     continue;
                 }
-                $value = $field->getDefault();
-            } else {
-                $value = $this->data[$field->getName()];
+
+                $payload[$field->getName()] = array_map(function($value) use ($field) {
+                        return $field->getType()->encode($value, $field);
+                    }, array_values($this->data[$field->getName()]));
+
+            } elseif ($field->isAMap()) {
+
             }
-            $payload[$field->getName()] = $field->getType()->encode($value, $field);
         }
 
         return $payload;
@@ -121,39 +148,71 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * @param string $key
+     * @param string $name
      * @return bool
      */
-    final protected function has($key)
+    final protected function has($name)
     {
-        return isset($this->data[$key]);
+        return isset($this->data[$name]);
     }
 
     /**
-     * @param string $key
+     * @param string $name
      * @return mixed
      */
-    final protected function get($key)
+    final protected function get($name)
     {
-        if (!isset($this->data[$key])) {
-            return self::field($key)->getDefault();
+        if (!isset($this->data[$name])) {
+            return self::field($name)->getDefault();
         }
 
-        return $this->data[$key];
+        return $this->data[$name];
     }
 
     /**
-     * @param string $key
-     * @param string $value
+     * @param string $name
+     * @param mixed $value
      * @return static
      *
      * @throws \Exception
      */
-    final protected function set($key, $value)
+    final protected function set($name, $value)
     {
-        $field = self::field($key);
+        $field = self::field($name);
+        Assertion::true(
+                $field->isASingleValue(),
+                sprintf('Field [%s] is not a single value and cannot use $this->set().', $name),
+                $name
+            );
+
         $field->guardValue($value);
         $this->data[$field->getName()] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return static
+     *
+     * @throws \Exception
+     */
+    final protected function addToSet($name, $value)
+    {
+        $field = self::field($name);
+        Assertion::true(
+                $field->isASet(),
+                sprintf('Field [%s] is not a set and cannot use $this->addToSet().', $name),
+                $name
+            );
+
+        if (!$this->has($name)) {
+            $this->data[$field->getName()] = [];
+        }
+
+        $field->guardValue($value);
+        $key = strtolower(trim($value));
+        $this->data[$field->getName()][$key] = $value;
         return $this;
     }
 }

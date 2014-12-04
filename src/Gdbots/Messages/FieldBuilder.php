@@ -83,6 +83,11 @@ final class FieldBuilder
      */
     public function asASet()
     {
+        Assertion::true(
+                $this->type->isScalar(),
+                sprintf('Field [%s] must be scalar to be used in a set.', $this->name),
+                $this->name
+            );
         $this->rule = FieldRule::A_SET();
         return $this;
     }
@@ -92,6 +97,11 @@ final class FieldBuilder
      */
     public function asAList()
     {
+        Assertion::true(
+                $this->type->isScalar(),
+                sprintf('Field [%s] must be scalar to be used in a list.', $this->name),
+                $this->name
+            );
         $this->rule = FieldRule::A_LIST();
         return $this;
     }

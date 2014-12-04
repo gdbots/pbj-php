@@ -16,10 +16,17 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $message = EmailMessage::fromArray([
                 EmailMessage::FROM_NAME  => $fromName,
                 EmailMessage::FROM_EMAIL => $fromEmail,
+                EmailMessage::LABELS => [$fromEmail, $fromEmail, 'donuts'],
             ]);
 
-        $message->setPriority(Priority::HIGH());
-        $message->setABigInt(new BigNumber('1337'));
+        $message
+            ->setPriority(Priority::HIGH())
+            ->setABigInt(new BigNumber('1337'))
+            ->addLabel('DoNuts')
+            ->addLabel('Donuts')
+            ->addLabel('mmmm')
+            ->addLabel('mmmM')
+            ->addLabel('Mmmm');
 
         $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
         $this->assertTrue($fromName === $message->getFromName());
@@ -30,9 +37,11 @@ class MessageTest extends \PHPUnit_Framework_TestCase
 
         $arr = json_decode($json, true);
         $message2 = EmailMessage::fromArray($arr);
-        $message2->markAsSent();
-        $message2->setPriority(Priority::LOW());
-        $message2->setProvider(Provider::AOL());
+        $message2
+            ->markAsSent()
+            ->setPriority(Priority::LOW())
+            ->setProvider(Provider::AOL());
+
         echo json_encode($message2, JSON_PRETTY_PRINT) . PHP_EOL;
     }
 }

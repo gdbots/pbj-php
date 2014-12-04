@@ -19,6 +19,7 @@ class EmailMessage extends AbstractMessage
     const PRIORITY   = 'priority';
     const SENT       = 'sent';
     const PROVIDER   = 'provider';
+    const LABELS     = 'labels';
     const A_BIG_INT  = 'a_big_int';
 
     /**
@@ -46,6 +47,7 @@ class EmailMessage extends AbstractMessage
                 ->usingClass('Gdbots\Tests\Messages\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
+            Fb::create(self::LABELS,    T\StringType::create())->asASet()->build(),
             Fb::create(self::A_BIG_INT, T\BigIntType::create())->build(),
         ];
     }
@@ -64,8 +66,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setFromName($fromName)
     {
-        $this->set(self::FROM_NAME, $fromName);
-        return $this;
+        return $this->set(self::FROM_NAME, $fromName);
     }
 
     /**
@@ -82,8 +83,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setFromEmail($email)
     {
-        $this->set(self::FROM_EMAIL, $email);
-        return $this;
+        return $this->set(self::FROM_EMAIL, $email);
     }
 
     /**
@@ -100,8 +100,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setSubject($subject)
     {
-        $this->set(self::SUBJECT, $subject);
-        return $this;
+        return $this->set(self::SUBJECT, $subject);
     }
 
     /**
@@ -118,8 +117,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setBody($body)
     {
-        $this->set(self::BODY, $body);
-        return $this;
+        return $this->set(self::BODY, $body);
     }
 
     /**
@@ -136,8 +134,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setPriority(Priority $priority)
     {
-        $this->set(self::PRIORITY, $priority);
-        return $this;
+        return $this->set(self::PRIORITY, $priority);
     }
 
     /**
@@ -153,8 +150,7 @@ class EmailMessage extends AbstractMessage
      */
     public function markAsSent()
     {
-        $this->set(self::SENT, true);
-        return $this;
+        return $this->set(self::SENT, true);
     }
 
     /**
@@ -171,8 +167,16 @@ class EmailMessage extends AbstractMessage
      */
     public function setProvider(Provider $provider)
     {
-        $this->set(self::PROVIDER, $provider);
-        return $this;
+        return $this->set(self::PROVIDER, $provider);
+    }
+
+    /**
+     * @param string $label
+     * @return self
+     */
+    public function addLabel($label)
+    {
+        return $this->addToSet(self::LABELS, $label);
     }
 
     /**
@@ -189,7 +193,6 @@ class EmailMessage extends AbstractMessage
      */
     public function setABigInt(BigNumber $aBigInt)
     {
-        $this->set(self::A_BIG_INT, $aBigInt);
-        return $this;
+        return $this->set(self::A_BIG_INT, $aBigInt);
     }
 }
