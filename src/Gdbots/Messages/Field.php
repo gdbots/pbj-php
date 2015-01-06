@@ -3,6 +3,7 @@
 namespace Gdbots\Messages;
 
 use Assert\Assertion;
+use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Messages\Enum\FieldRule;
 use Gdbots\Messages\Type\IntEnumType;
 use Gdbots\Messages\Type\StringEnumType;
@@ -65,11 +66,31 @@ final class Field
             Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name), $this->name);
         }
 
-        // todo: handle multi-valued fields
-        if ($this->hasDefault()) {
-            $this->guardValue($default);
+        if ($this->isASingleValue()) {
+            if ($this->hasDefault()) {
+                $this->guardValue($default);
+            } else {
+                $this->default = $this->type->getDefault();
+            }
         } else {
-            $this->default = $this->type->getDefault();
+            Assertion::nullOrIsArray($this->default, sprintf('Field [%s] default must be an array.', $this->name), $this->name);
+            if ($this->isASet() || $this->isAList()) {
+                Assertion::true($this->type->isScalar(), sprintf('Field [%s] must be scalar to be used in a set or list.', $this->name), $this->name);
+            } elseif ($this->isAMap()) {
+                // todo: review, must a map be scalar too?
+                Assertion::true(ArrayUtils::isAssoc($this->default), sprintf('Field [%s] default must be an associative array.', $this->name), $this->name);
+            }
+
+            if (is_array($this->default)) {
+                //Assertion::true(count($this->default) > 0, sprintf('Field [%s] default cannot be an empty array.', $this->name), $this->name);
+                foreach ($this->default as $k => $v) {
+                    Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k), $this->name);
+                    if ($this->isAMap()) {
+                        Assertion::string($k, sprintf('Field [%s] default key [%s] must be a string.', $this->name, $k), $this->name);
+                    }
+                    $this->guardValue($v);
+                }
+            }
         }
     }
 
@@ -87,6 +108,14 @@ final class Field
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @return FieldRule
+     */
+    public function getRule()
+    {
+        return $this->rule;
     }
 
     /**

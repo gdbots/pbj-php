@@ -12,15 +12,17 @@ use Moontoast\Math\BigNumber;
 
 class EmailMessage extends AbstractMessage
 {
-    const FROM_NAME  = 'from_name';
-    const FROM_EMAIL = 'from_email';
-    const SUBJECT    = 'subject';
-    const BODY       = 'body';
-    const PRIORITY   = 'priority';
-    const SENT       = 'sent';
-    const PROVIDER   = 'provider';
-    const LABELS     = 'labels';
-    const A_BIG_INT  = 'a_big_int';
+    const FROM_NAME     = 'from_name';
+    const FROM_EMAIL    = 'from_email';
+    const SUBJECT       = 'subject';
+    const BODY          = 'body';
+    const PRIORITY      = 'priority';
+    const SENT          = 'sent';
+    const DATE_SENT     = 'date_sent';
+    const PROVIDER      = 'provider';
+    const LABELS        = 'labels';
+    const A_BIG_INT     = 'a_big_int';
+    const A_STRING_LIST = 'a_string_list';
 
     /**
      * @return Field[]
@@ -42,13 +44,17 @@ class EmailMessage extends AbstractMessage
                 ->usingClass('Gdbots\Tests\Messages\Enum\Priority')
                 ->withDefault(Priority::NORMAL())
                 ->build(),
-            Fb::create(self::SENT,     T\BooleanType::create())->build(),
-            Fb::create(self::PROVIDER, T\StringEnumType::create())
+            Fb::create(self::SENT,      T\BooleanType::create())->build(),
+            Fb::create(self::DATE_SENT, T\DateType::create())->build(),
+            Fb::create(self::PROVIDER,  T\StringEnumType::create())
                 ->usingClass('Gdbots\Tests\Messages\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
-            Fb::create(self::LABELS,    T\StringType::create())->asASet()->build(),
-            Fb::create(self::A_BIG_INT, T\BigIntType::create())->build(),
+            Fb::create(self::LABELS,        T\StringType::create())->asASet()->build(),
+            Fb::create(self::A_BIG_INT,     T\BigIntType::create())->build(),
+            Fb::create(self::A_STRING_LIST, T\StringType::create())
+                ->asAList()
+                ->build(),
         ];
     }
 
@@ -66,7 +72,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setFromName($fromName)
     {
-        return $this->set(self::FROM_NAME, $fromName);
+        return $this->setSingleValue(self::FROM_NAME, $fromName);
     }
 
     /**
@@ -83,7 +89,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setFromEmail($email)
     {
-        return $this->set(self::FROM_EMAIL, $email);
+        return $this->setSingleValue(self::FROM_EMAIL, $email);
     }
 
     /**
@@ -100,7 +106,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setSubject($subject)
     {
-        return $this->set(self::SUBJECT, $subject);
+        return $this->setSingleValue(self::SUBJECT, $subject);
     }
 
     /**
@@ -117,7 +123,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setBody($body)
     {
-        return $this->set(self::BODY, $body);
+        return $this->setSingleValue(self::BODY, $body);
     }
 
     /**
@@ -134,7 +140,7 @@ class EmailMessage extends AbstractMessage
      */
     public function setPriority(Priority $priority)
     {
-        return $this->set(self::PRIORITY, $priority);
+        return $this->setSingleValue(self::PRIORITY, $priority);
     }
 
     /**
@@ -150,7 +156,15 @@ class EmailMessage extends AbstractMessage
      */
     public function markAsSent()
     {
-        return $this->set(self::SENT, true);
+        return $this->setSingleValue(self::SENT, true);
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDateSent()
+    {
+        return $this->get(self::DATE_SENT);
     }
 
     /**
@@ -167,7 +181,15 @@ class EmailMessage extends AbstractMessage
      */
     public function setProvider(Provider $provider)
     {
-        return $this->set(self::PROVIDER, $provider);
+        return $this->setSingleValue(self::PROVIDER, $provider);
+    }
+
+    /**
+     * @return array
+     */
+    public function getLabels()
+    {
+        return $this->get(self::LABELS);
     }
 
     /**
@@ -176,7 +198,16 @@ class EmailMessage extends AbstractMessage
      */
     public function addLabel($label)
     {
-        return $this->addToSet(self::LABELS, $label);
+        return $this->addValuesToSet(self::LABELS, [$label]);
+    }
+
+    /**
+     * @param string $label
+     * @return self
+     */
+    public function removeLabel($label)
+    {
+        return $this->removeValuesFromSet(self::LABELS, [$label]);
     }
 
     /**
@@ -193,6 +224,32 @@ class EmailMessage extends AbstractMessage
      */
     public function setABigInt(BigNumber $aBigInt)
     {
-        return $this->set(self::A_BIG_INT, $aBigInt);
+        return $this->setSingleValue(self::A_BIG_INT, $aBigInt);
+    }
+
+    /**
+     * @return array
+     */
+    public function getAStringList()
+    {
+        return $this->get(self::A_STRING_LIST);
+    }
+
+    /**
+     * @param string $str
+     * @return self
+     */
+    public function addString($str)
+    {
+        return $this->addValuesToList(self::A_STRING_LIST, [$str]);
+    }
+
+    /**
+     * @param string $str
+     * @return self
+     */
+    public function removeString($str)
+    {
+        return $this->removeValuesFromList(self::A_STRING_LIST, [$str]);
     }
 }

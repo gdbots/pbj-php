@@ -43,6 +43,9 @@ final class BigIntType extends AbstractType
      */
     public function decode($value, Field $field)
     {
+        if ($value instanceof BigNumber) {
+            return $value;
+        }
         return new BigNumber((string) $value);
     }
 

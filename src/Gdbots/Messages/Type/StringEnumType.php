@@ -3,7 +3,7 @@
 namespace Gdbots\Messages\Type;
 
 use Assert\Assertion;
-use Gdbots\Common\AbstractEnum;
+use Gdbots\Common\Enum;
 use Gdbots\Messages\Field;
 
 final class StringEnumType extends AbstractType
@@ -13,7 +13,7 @@ final class StringEnumType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var AbstractEnum $value */
+        /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         Assertion::string($value->getValue(), null, $field->getName());
     }
@@ -23,7 +23,7 @@ final class StringEnumType extends AbstractType
      */
     public function encode($value, Field $field)
     {
-        if ($value instanceof AbstractEnum) {
+        if ($value instanceof Enum) {
             return (string) $value->getValue();
         }
         return null;
@@ -34,7 +34,7 @@ final class StringEnumType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        /** @var AbstractEnum $className */
+        /** @var Enum $className */
         $className = $field->getClassName();
         if (empty($value) && $field->hasDefault()) {
             return $field->getDefault();

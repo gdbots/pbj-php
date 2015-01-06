@@ -2,7 +2,7 @@
 
 namespace Gdbots\Messages\Enum;
 
-use Gdbots\Common\AbstractEnum;
+use Gdbots\Common\Enum;
 
 /**
  * @method static FieldRule A_SINGLE_VALUE()
@@ -10,7 +10,7 @@ use Gdbots\Common\AbstractEnum;
  * @method static FieldRule A_LIST()
  * @method static FieldRule A_MAP()
  */
-final class FieldRule extends AbstractEnum
+final class FieldRule extends Enum
 {
     const A_SINGLE_VALUE = 1;
     const A_SET = 2;
