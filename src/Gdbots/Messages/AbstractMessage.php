@@ -31,27 +31,27 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $this->setSingleValue($name, $field->getType()->decode($value, $field));
+                    $this->setSingleValue($name, $field->decodeValue($value));
                     break;
 
                 case FieldRule::A_SET:
                     Assertion::isArray($value, sprintf('Field [%s] must be an array.', $name), $name);
                     foreach ($value as $v) {
-                        $this->addValuesToSet($name, [$field->getType()->decode($v, $field)]);
+                        $this->addValuesToSet($name, [$field->decodeValue($v)]);
                     }
                     break;
 
                 case FieldRule::A_LIST:
                     Assertion::isArray($value, sprintf('Field [%s] must be an array.', $name), $name);
                     foreach ($value as $v) {
-                        $this->addValuesToList($name, [$field->getType()->decode($v, $field)]);
+                        $this->addValuesToList($name, [$field->decodeValue($v)]);
                     }
                     break;
 
                 case FieldRule::A_MAP:
                     Assertion::true(ArrayUtils::isAssoc($value), sprintf('Field [%s] must be an associative array.', $name), $name);
                     foreach ($value as $k => $v) {
-                        $this->addValuesToList($name, [$field->getType()->decode($v, $field)]);
+                        $this->addValuesToList($name, [$field->decodeValue($v)]);
                     }
                     break;
 
@@ -150,25 +150,25 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $payload[$field->getName()] = $field->getType()->encode($this->data[$field->getName()], $field);
+                    $payload[$field->getName()] = $field->encodeValue($this->data[$field->getName()]);
                     break;
 
                 case FieldRule::A_SET:
                     $payload[$field->getName()] = array_map(function($value) use ($field) {
-                            return $field->getType()->encode($value, $field);
+                            return $field->encodeValue($value);
                         }, array_values($this->data[$field->getName()]));
                     break;
 
                 case FieldRule::A_LIST:
                     $payload[$field->getName()] = array_map(function($value) use ($field) {
-                            return $field->getType()->encode($value, $field);
+                            return $field->encodeValue($value);
                         }, $this->data[$field->getName()]);
                     break;
 
                 case FieldRule::A_MAP:
                     $payload[$field->getName()] = [];
                     foreach ($this->data[$field->getName()] as $key => $value) {
-                        $payload[$field->getName()][$key] = $field->getType()->encode($value, $field);
+                        $payload[$field->getName()][$key] = $field->encodeValue($value);
                     }
                     break;
 

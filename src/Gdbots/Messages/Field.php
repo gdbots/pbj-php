@@ -208,4 +208,22 @@ final class Field
             call_user_func($this->assertion, $value, $this);
         }
     }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    public function encodeValue($value)
+    {
+        return $this->type->encode($value, $this);
+    }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    public function decodeValue($value)
+    {
+        return $this->type->decode($value, $this);
+    }
 }
