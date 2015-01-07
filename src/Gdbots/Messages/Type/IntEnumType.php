@@ -15,7 +15,9 @@ final class IntEnumType extends AbstractType
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
-        Assertion::integer($value->getValue(), null, $field->getName());
+        \Assert\that($value->getValue(), null, $field->getName())
+            ->integer()
+            ->range(0, 4294967295);
     }
 
     /**

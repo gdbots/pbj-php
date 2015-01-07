@@ -76,7 +76,7 @@ final class Field
             Assertion::nullOrIsArray($this->default, sprintf('Field [%s] default must be an array.', $this->name), $this->name);
             if ($this->isASet() || $this->isAList()) {
                 Assertion::true($this->type->isScalar(), sprintf('Field [%s] must be scalar to be used in a set or list.', $this->name), $this->name);
-            } elseif ($this->isAMap()) {
+            } elseif ($this->isAMap() && null !== $this->default) {
                 // todo: review, must a map be scalar too?
                 Assertion::true(ArrayUtils::isAssoc($this->default), sprintf('Field [%s] default must be an associative array.', $this->name), $this->name);
             }

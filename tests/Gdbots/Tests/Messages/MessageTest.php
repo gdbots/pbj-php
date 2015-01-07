@@ -69,10 +69,6 @@ JSON;
             ->addLabel('DoNUTS')
             ->addLabel('chicKen');
 
-        var_dump($message->getLabels());
-        var_dump($message->getAStringList());
-        var_dump($message->getDateSent());
-
         $this->assertCount(3, $message->getLabels());
         $this->assertSame($message->getLabels(), ['DoNUTS', 'mmmm', 'chicKen']);
     }
