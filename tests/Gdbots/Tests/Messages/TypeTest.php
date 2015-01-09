@@ -2,7 +2,10 @@
 
 namespace Gdbots\Tests\Messages;
 
+use Gdbots\Common\Util\StringUtils;
 use Gdbots\Tests\Messages\Enum\IntEnum;
+use Gdbots\Tests\Messages\Enum\Priority;
+use Gdbots\Tests\Messages\Enum\Provider;
 use Gdbots\Tests\Messages\Enum\StringEnum;
 use Moontoast\Math\BigNumber;
 
@@ -30,31 +33,70 @@ class TypeTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testMap()
+    protected function getInvalidTypeValues()
     {
-        $message = MapsMessage::fromArray()
-            ->addToAMap('String', 'test1', '123')
-            ->addToAMap('String', 'test2', '456');
-
-        $this->assertSame($message->getAMap('String'), ['test1' => '123', 'test2' => '456']);
-
-        $message->removeFromAMap('String', 'test2');
-        $this->assertSame($message->getAMap('String'), ['test1' => '123']);
-
-        $message->addToAMap('String', 'test2', '456');
-        $this->assertSame($message->getAMap('String'), ['test1' => '123', 'test2' => '456']);
+        return [
+            'BigInt'          => [new BigNumber(-1), new BigNumber('18446744073709551616')],
+            'Boolean'         => 'not_a_bool',
+            'Date'            => 'not_a_date',
+            'Decimal'         => 1,
+            'Float'           => 1,
+            'IntEnum'         => Priority::NORMAL(), // not the correct enum
+            'Int'             => [-1, 4294967296],
+            'MediumInt'       => [-1, 16777216],
+            'SignedBigInt'    => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
+            'SignedMediumInt' => [-8388609, 8388608],
+            'SignedSmallInt'  => [-32769, 32768],
+            'SignedTinyInt'   => [-129, 128],
+            'SmallInt'        => [-1, 65536],
+            'StringEnum'      => Provider::AOL(), // not the correct enum
+            'String'          => false,
+            'TinyInt'         => [-1, 256],
+        ];
     }
 
-    /**
-     * expectedException \Assert\InvalidArgumentException
-     */
+    public function testAddInvalidTypes()
+    {
+        $message = MapsMessage::create();
+
+        foreach ($this->getInvalidTypeValues() as $k => $v) {
+            $thrown = false;
+            try {
+                if (is_array($v)) {
+                    $message->addToAMap($k, 'test1', $v[0]);
+                    $message->addToAMap($k, 'test2', $v[1]);
+                } else {
+                    $message->addToAMap($k, 'test1', $v);
+                }
+            } catch (\Exception $e) {
+                $thrown = true;
+            }
+
+            if (!$thrown) {
+                if (is_array($v)) {
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v[0])));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v[1])));
+                } else {
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v)));
+                }
+            }
+        }
+    }
+
     public function testAddInvalidTypeToMap()
     {
-        $shouldWork = MapsMessage::fromArray();
+        $shouldWork = MapsMessage::create();
         $shouldFail = clone $shouldWork;
+
+        /*
+         * some int types won't fail because they're all ints of course, just different ranges.
+         * e.g. an Int is also all other unsigned ints (except BigInt but that's a class so we're fine)
+         */
+        $allInts = ['TinyInt', 'SmallInt', 'MediumInt', 'Int', 'SignedTinyInt', 'SignedSmallInt', 'SignedMediumInt', 'SignedInt'];
 
         foreach ($shouldWork::getAllTypes() as $type => $class) {
             foreach ($this->getTypeValues() as $k => $v) {
+                $thrown = false;
                 if ($type == $k) {
                     if (is_array($v)) {
                         $shouldWork->addToAMap($type, 'test1', $v[0]);
@@ -73,12 +115,24 @@ class TypeTest extends \PHPUnit_Framework_TestCase
                         $shouldFail->addToAMap($type, 'test1', $v);
                     }
 
-                    $this->fail(sprintf('[%s] map accepted a [%s] value', $type, $k));
+                    if ('Decimal' == $type && 'Float' == $k || 'Float' == $type && 'Decimal' == $k) {
+                        continue;
+                    } elseif (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
+                        continue;
+                     }
                 } catch (\Exception $e) {
+                    $thrown = true;
+                }
+
+                if (!$thrown) {
+                    if (is_array($v)) {
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[0])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[1])));
+                    } else {
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v)));
+                    }
                 }
             }
         }
-
-        //echo json_encode($shouldWork, JSON_PRETTY_PRINT) . PHP_EOL;
     }
 }

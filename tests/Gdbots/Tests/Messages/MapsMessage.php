@@ -7,7 +7,7 @@ use Gdbots\Messages\Field;
 use Gdbots\Messages\FieldBuilder as Fb;
 use Gdbots\Messages\Type as T;
 
-class MapsMessage extends AbstractMessage
+final class MapsMessage extends AbstractMessage
 {
     /**
      * @return array

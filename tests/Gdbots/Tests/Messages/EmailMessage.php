@@ -8,21 +8,18 @@ use Gdbots\Messages\FieldBuilder as Fb;
 use Gdbots\Messages\Type as T;
 use Gdbots\Tests\Messages\Enum\Priority;
 use Gdbots\Tests\Messages\Enum\Provider;
-use Moontoast\Math\BigNumber;
 
 class EmailMessage extends AbstractMessage
 {
-    const FROM_NAME     = 'from_name';
-    const FROM_EMAIL    = 'from_email';
-    const SUBJECT       = 'subject';
-    const BODY          = 'body';
-    const PRIORITY      = 'priority';
-    const SENT          = 'sent';
-    const DATE_SENT     = 'date_sent';
-    const PROVIDER      = 'provider';
-    const LABELS        = 'labels';
-    const A_BIG_INT     = 'a_big_int';
-    const A_STRING_LIST = 'a_string_list';
+    const FROM_NAME  = 'from_name';
+    const FROM_EMAIL = 'from_email';
+    const SUBJECT    = 'subject';
+    const BODY       = 'body';
+    const PRIORITY   = 'priority';
+    const SENT       = 'sent';
+    const DATE_SENT  = 'date_sent';
+    const PROVIDER   = 'provider';
+    const LABELS     = 'labels';
 
     /**
      * @return Field[]
@@ -37,7 +34,11 @@ class EmailMessage extends AbstractMessage
                     \Assert\that($value)->email(null, $field->getName());
                 })
                 ->build(),
-            Fb::create(self::SUBJECT,  T\StringType::create())->build(),
+            Fb::create(self::SUBJECT,  T\StringType::create())
+                ->withDefault(function (EmailMessage $message) {
+                    return implode(',', $message->getLabels()) . ' test';
+                })
+                ->build(),
             Fb::create(self::BODY,     T\StringType::create())->build(),
             Fb::create(self::PRIORITY, T\IntEnumType::create())
                 ->required()
@@ -50,11 +51,7 @@ class EmailMessage extends AbstractMessage
                 ->usingClass('Gdbots\Tests\Messages\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
-            Fb::create(self::LABELS,        T\StringType::create())->asASet()->build(),
-            Fb::create(self::A_BIG_INT,     T\BigIntType::create())->build(),
-            Fb::create(self::A_STRING_LIST, T\StringType::create())
-                ->asAList()
-                ->build(),
+            Fb::create(self::LABELS,    T\StringType::create())->asASet()->build(),
         ];
     }
 
@@ -208,48 +205,5 @@ class EmailMessage extends AbstractMessage
     public function removeLabel($label)
     {
         return $this->removeValuesFromSet(self::LABELS, [$label]);
-    }
-
-    /**
-     * @return BigNumber
-     */
-    public function getABigInt()
-    {
-        return $this->get(self::A_BIG_INT);
-    }
-
-    /**
-     * @param BigNumber $aBigInt
-     * @return self
-     */
-    public function setABigInt(BigNumber $aBigInt)
-    {
-        return $this->setSingleValue(self::A_BIG_INT, $aBigInt);
-    }
-
-    /**
-     * @return array
-     */
-    public function getAStringList()
-    {
-        return $this->get(self::A_STRING_LIST);
-    }
-
-    /**
-     * @param string $str
-     * @return self
-     */
-    public function addString($str)
-    {
-        return $this->addValuesToList(self::A_STRING_LIST, [$str]);
-    }
-
-    /**
-     * @param string $str
-     * @return self
-     */
-    public function removeString($str)
-    {
-        return $this->removeValuesFromList(self::A_STRING_LIST, [$str]);
     }
 }

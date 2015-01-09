@@ -4,7 +4,6 @@ namespace Gdbots\Tests\Messages;
 
 use Gdbots\Tests\Messages\Enum\Priority;
 use Gdbots\Tests\Messages\Enum\Provider;
-use Moontoast\Math\BigNumber;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,9 +24,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         "donuts",
         "mmmm",
         "chicken"
-    ],
-    "a_big_int": "1337",
-    "a_string_list": ["a", "a", "b", "c"]
+    ]
 }
 JSON;
         return EmailMessage::fromArray(json_decode($json, true));
@@ -35,15 +32,11 @@ JSON;
 
     public function testCreateMessageFromArray()
     {
-        //$i = 0;
-        //do {
-        //    $i++;
+        $i = 0;
+        do {
+            $i++;
             $message = $this->createEmailMessage();
-            $message
-                ->setPriority(Priority::HIGH())
-                ->setABigInt(new BigNumber('1337'))
-                ->addString('y')
-                ->addString('z');
+            $message->setPriority(Priority::HIGH());
 
             $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
             $this->assertTrue(Priority::HIGH() === $message->getPriority());
@@ -56,7 +49,7 @@ JSON;
                 ->markAsSent()
                 ->setPriority(Priority::LOW())
                 ->setProvider(Provider::AOL());
-        //} while ($i < 500);
+        } while ($i < 1);
 
         echo json_encode($message2, JSON_PRETTY_PRINT) . PHP_EOL;
     }

@@ -66,31 +66,8 @@ final class Field
             Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name), $this->name);
         }
 
-        if ($this->isASingleValue()) {
-            if ($this->hasDefault()) {
-                $this->guardValue($default);
-            } else {
-                $this->default = $this->type->getDefault();
-            }
-        } else {
-            Assertion::nullOrIsArray($this->default, sprintf('Field [%s] default must be an array.', $this->name), $this->name);
-            if ($this->isASet() || $this->isAList()) {
-                Assertion::true($this->type->isScalar(), sprintf('Field [%s] must be scalar to be used in a set or list.', $this->name), $this->name);
-            } elseif ($this->isAMap() && null !== $this->default) {
-                // todo: review, must a map be scalar too?
-                Assertion::true(ArrayUtils::isAssoc($this->default), sprintf('Field [%s] default must be an associative array.', $this->name), $this->name);
-            }
-
-            if (is_array($this->default)) {
-                //Assertion::true(count($this->default) > 0, sprintf('Field [%s] default cannot be an empty array.', $this->name), $this->name);
-                foreach ($this->default as $k => $v) {
-                    Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k), $this->name);
-                    if ($this->isAMap()) {
-                        Assertion::string($k, sprintf('Field [%s] default key [%s] must be a string.', $this->name, $k), $this->name);
-                    }
-                    $this->guardValue($v);
-                }
-            }
+        if (null !== $this->default && !$this->default instanceof \Closure) {
+            $this->guardDefault($this->default);
         }
     }
 
@@ -159,19 +136,57 @@ final class Field
     }
 
     /**
-     * @return bool
+     * @param Message $message
+     * @return mixed
      */
-    public function hasDefault()
+    public function getDefault(Message $message)
     {
-        return null !== $this->default;
+        if (null === $this->default) {
+            return $this->isASingleValue() ? $this->type->getDefault() : [];
+        }
+
+        if ($this->default instanceof \Closure) {
+            $default = call_user_func($this->default, $message);
+            $this->guardDefault($default);
+            if (null === $default) {
+                return $this->isASingleValue() ? $this->type->getDefault() : [];
+            }
+            return $default;
+        }
+
+        return $this->default;
     }
 
     /**
-     * @return mixed
+     * @param mixed $default
+     * @throws \Exception
      */
-    public function getDefault()
+    private function guardDefault($default)
     {
-        return $this->default;
+        if ($this->isASingleValue()) {
+            $this->guardValue($default);
+        } else {
+            Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name), $this->name);
+            if ($this->isAMap()) {
+                // todo: review, must a map be scalar too?
+                if (null !== $default) {
+                    Assertion::true(ArrayUtils::isAssoc($default), sprintf('Field [%s] default must be an associative array.', $this->name), $this->name);
+                }
+            } else {
+                Assertion::true($this->type->isScalar(), sprintf('Field [%s] must be scalar to be used in a set or list.', $this->name), $this->name);
+            }
+
+            if (null !== $default) {
+                Assertion::true(!empty($default), sprintf('Field [%s] default cannot be an empty array.', $this->name), $this->name);
+                foreach ($default as $k => $v) {
+                    Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k), $this->name);
+                    if ($this->isAMap()) {
+                        Assertion::string($k, sprintf('Field [%s] default key [%s] must be a string.', $this->name, $k), $this->name);
+                    }
+                    $this->guardValue($v);
+                }
+            }
+        }
     }
 
     /**

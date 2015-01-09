@@ -14,7 +14,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * An array of fields per message type.
      * ['Fully\Qualified\ClassName' => [ array of Field objects ]
-     * @var []
+     * @var array
      */
     private static $fields = [];
 
@@ -54,7 +54,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
                 case FieldRule::A_MAP:
                     Assertion::true(ArrayUtils::isAssoc($value), sprintf('Field [%s] must be an associative array.', $name), $name);
                     foreach ($value as $k => $v) {
-                        $this->addValuesToList($name, [$field->decodeValue($v)]);
+                        $this->addValueToMap($name, $k, $field->decodeValue($v));
                     }
                     break;
 
@@ -73,22 +73,38 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * @param Field $field
+     * @return static
      */
-    private function populateDefault(Field $field)
+    final protected function populateDefault(Field $field)
     {
-        if (!$field->hasDefault() || $this->has($field)) {
-            return;
+        if ($this->has($field)) {
+            return $this;
+        }
+
+        $default = $field->getDefault($this);
+        if (null === $default) {
+            return $this;
+        }
+
+        if ($field->isASingleValue()) {
+            $this->data[$field->getName()] = $default;
+            return $this;
+        }
+
+        if (empty($default)) {
+            return $this;
         }
 
         /*
          * sets have a special handling to deal with unique values
          */
         if ($field->isASet()) {
-            $this->addValuesToSet($field->getName(), $field->getDefault());
-            return;
+            $this->addValuesToSet($field->getName(), $default);
+            return $this;
         }
 
-        $this->data[$field->getName()] = $field->getDefault();
+        $this->data[$field->getName()] = $default;
+        return $this;
     }
 
     /**
@@ -135,6 +151,15 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @param array $data
      * @return static
      */
+    final public static function create(array $data = [])
+    {
+        return new static($data);
+    }
+
+    /**
+     * @param array $data
+     * @return static
+     */
     final public static function fromArray(array $data = [])
     {
         return new static($data);
@@ -152,27 +177,28 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
                 continue;
             }
 
+            $name = $field->getName();
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $payload[$field->getName()] = $field->encodeValue($this->data[$field->getName()]);
+                    $payload[$name] = $field->encodeValue($this->data[$name]);
                     break;
 
                 case FieldRule::A_SET:
-                    $payload[$field->getName()] = array_map(function($value) use ($field) {
+                    $payload[$name] = array_map(function($value) use ($field) {
                             return $field->encodeValue($value);
-                        }, array_values($this->data[$field->getName()]));
+                        }, array_values($this->data[$name]));
                     break;
 
                 case FieldRule::A_LIST:
-                    $payload[$field->getName()] = array_map(function($value) use ($field) {
+                    $payload[$name] = array_map(function($value) use ($field) {
                             return $field->encodeValue($value);
-                        }, $this->data[$field->getName()]);
+                        }, $this->data[$name]);
                     break;
 
                 case FieldRule::A_MAP:
-                    $payload[$field->getName()] = [];
-                    foreach ($this->data[$field->getName()] as $key => $value) {
-                        $payload[$field->getName()][$key] = $field->encodeValue($value);
+                    $payload[$name] = [];
+                    foreach ($this->data[$name] as $key => $value) {
+                        $payload[$name][$key] = $field->encodeValue($value);
                     }
                     break;
 
@@ -196,7 +222,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @param Field|string $nameOrField
      * @return bool
      */
-    final protected function has($nameOrField)
+    final public function has($nameOrField)
     {
         $field = $nameOrField instanceof Field ? $nameOrField : static::field($nameOrField);
         if ($field->isASingleValue()) {
@@ -209,37 +235,38 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @param Field|string $nameOrField
      * @return mixed
      */
-    final protected function get($nameOrField)
+    final public function get($nameOrField)
     {
         $field = $nameOrField instanceof Field ? $nameOrField : static::field($nameOrField);
 
-        switch ($field->getRule()->getValue()) {
-            case FieldRule::A_SINGLE_VALUE:
-                return $this->has($field) ? $this->data[$field->getName()] : $field->getDefault();
-            case FieldRule::A_SET:
-                return $this->has($field) ? array_values($this->data[$field->getName()]) : [];
-            default:
-                return $this->has($field) ? $this->data[$field->getName()] : [];
+        if (!$this->has($field)) {
+            return $field->isASingleValue() ? $field->getDefault($this) : [];
         }
+
+        if ($field->isASet()) {
+            return array_values($this->data[$field->getName()]);
+        }
+
+        return $this->data[$field->getName()];
     }
 
     /**
      * Clears the value of a field and restores the default if available.  Clearing a
      * required field that has no default will throw an exception.
      *
-     * @param string $name
+     * @param Field|string $nameOrField
      * @return static
      *
      * @throws \LogicException
      */
-    final protected function clear($name)
+    final protected function clear($nameOrField)
     {
-        $field = static::field($name);
-        unset($this->data[$name]);
+        $field = $nameOrField instanceof Field ? $nameOrField : static::field($nameOrField);
+        unset($this->data[$field->getName()]);
         $this->populateDefault($field);
 
         if ($field->isRequired() && !$this->has($field)) {
-            throw new \LogicException(sprintf('Field [%s] is required.', $name));
+            throw new \LogicException(sprintf('Field [%s] is required.', $field->getName()));
         }
 
         return $this;
@@ -284,7 +311,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         foreach ($values as $value) {
             $field->guardValue($value);
-            $key = strtolower(trim($value));
+            $key = strtolower(trim((string) $value));
             $this->data[$name][$key] = $value;
         }
 
@@ -306,7 +333,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $name), $name);
 
         foreach ($values as $value) {
-            $key = strtolower(trim($value));
+            $key = strtolower(trim((string) $value));
             unset($this->data[$name][$key]);
         }
 
