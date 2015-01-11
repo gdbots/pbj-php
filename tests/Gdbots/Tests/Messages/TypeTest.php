@@ -2,12 +2,12 @@
 
 namespace Gdbots\Tests\Messages;
 
+use Gdbots\Common\BigNumber;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Tests\Messages\Enum\IntEnum;
 use Gdbots\Tests\Messages\Enum\Priority;
 use Gdbots\Tests\Messages\Enum\Provider;
 use Gdbots\Tests\Messages\Enum\StringEnum;
-use Moontoast\Math\BigNumber;
 
 class TypeTest extends \PHPUnit_Framework_TestCase
 {

@@ -2,7 +2,6 @@
 
 namespace Gdbots\Messages;
 
-use Assert\Assertion;
 use Gdbots\Messages\Enum\FieldRule;
 use Gdbots\Messages\Type\Type;
 

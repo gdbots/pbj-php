@@ -2,11 +2,11 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
+use Gdbots\Common\BigNumber;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
-use Moontoast\Math\BigNumber;
 
-final class SignedBigIntType extends AbstractType
+final class SignedBigInt extends AbstractType
 {
     /**
      * @see Type::guard
@@ -14,7 +14,7 @@ final class SignedBigIntType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var BigNumber $value */
-        Assertion::isInstanceOf($value, 'Moontoast\Math\BigNumber', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Common\BigNumber', null, $field->getName());
         Assertion::true(
                 $value->isGreaterThanOrEqualTo('-9223372036854775808'),
                 sprintf('Field [%s] cannot be less than [-9223372036854775808].', $field->getName()),

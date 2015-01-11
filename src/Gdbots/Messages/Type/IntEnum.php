@@ -2,11 +2,11 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
 use Gdbots\Common\Enum;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
 
-final class IntEnumType extends AbstractType
+final class IntEnum extends AbstractType
 {
     /**
      * @see Type::guard
@@ -15,9 +15,8 @@ final class IntEnumType extends AbstractType
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
-        \Assert\that($value->getValue(), null, $field->getName())
-            ->integer()
-            ->range(0, 4294967295);
+        Assertion::integer($value->getValue(), null, $field->getName());
+        Assertion::range($value->getValue(), 0, 4294967295, null, $field->getName());
     }
 
     /**
@@ -38,7 +37,7 @@ final class IntEnumType extends AbstractType
     {
         /** @var Enum $className */
         $className = $field->getClassName();
-        if (null === $value && $field->hasDefault()) {
+        if (null === $value) {
             return $field->getDefault();
         }
         return $className::create((int) $value);

@@ -2,10 +2,10 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
 
-final class DateType extends AbstractType
+final class Date extends AbstractType
 {
     /**
      * @see Type::guard

@@ -2,11 +2,10 @@
 
 namespace Gdbots\Messages;
 
-use Assert\Assertion;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Messages\Enum\FieldRule;
-use Gdbots\Messages\Type\IntEnumType;
-use Gdbots\Messages\Type\StringEnumType;
+use Gdbots\Messages\Type\IntEnum;
+use Gdbots\Messages\Type\StringEnum;
 use Gdbots\Messages\Type\Type;
 
 final class Field
@@ -31,6 +30,12 @@ final class Field
 
     /** @var \Closure */
     private $assertion;
+
+    /** @var int */
+    private $min = 0;
+
+    /** @var int */
+    private $max = 0;
 
     /**
      * @param string $name
@@ -62,7 +67,7 @@ final class Field
         $this->className = $className;
         $this->assertion = $assertion;
 
-        if ($this->type instanceof IntEnumType || $this->type instanceof StringEnumType) {
+        if ($this->type instanceof IntEnum || $this->type instanceof StringEnum) {
             Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name), $this->name);
         }
 
@@ -139,7 +144,7 @@ final class Field
      * @param Message $message
      * @return mixed
      */
-    public function getDefault(Message $message)
+    public function getDefault(Message $message = null)
     {
         if (null === $this->default) {
             return $this->isASingleValue() ? $this->type->getDefault() : [];

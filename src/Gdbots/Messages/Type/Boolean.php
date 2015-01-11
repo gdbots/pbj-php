@@ -2,17 +2,17 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
 
-final class FloatType extends AbstractType
+final class Boolean extends AbstractType
 {
     /**
      * @see Type::guard
      */
     public function guard($value, Field $field)
     {
-        Assertion::float($value, null, $field->getName());
+        Assertion::boolean($value, null, $field->getName());
     }
 
     /**
@@ -20,7 +20,7 @@ final class FloatType extends AbstractType
      */
     public function encode($value, Field $field)
     {
-        return (float) $value;
+        return (bool) $value;
     }
 
     /**
@@ -28,7 +28,7 @@ final class FloatType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        return (float) $value;
+        return (bool) $value;
     }
 
     /**
@@ -36,13 +36,13 @@ final class FloatType extends AbstractType
      */
     public function getDefault()
     {
-        return 0.0;
+        return false;
     }
 
     /**
-     * @see Type::isNumeric
+     * @see Type::isBoolean
      */
-    public function isNumeric()
+    public function isBoolean()
     {
         return true;
     }

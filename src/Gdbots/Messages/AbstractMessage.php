@@ -2,7 +2,6 @@
 
 namespace Gdbots\Messages;
 
-use Assert\Assertion;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;

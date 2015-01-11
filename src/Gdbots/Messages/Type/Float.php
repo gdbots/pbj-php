@@ -2,16 +2,25 @@
 
 namespace Gdbots\Messages\Type;
 
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
 
-abstract class AbstractIntType extends AbstractType
+final class Float extends AbstractType
 {
+    /**
+     * @see Type::guard
+     */
+    public function guard($value, Field $field)
+    {
+        Assertion::float($value, null, $field->getName());
+    }
+
     /**
      * @see Type::encode
      */
     public function encode($value, Field $field)
     {
-        return (int) $value;
+        return (float) $value;
     }
 
     /**
@@ -19,7 +28,7 @@ abstract class AbstractIntType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        return (int) $value;
+        return (float) $value;
     }
 
     /**
@@ -27,7 +36,7 @@ abstract class AbstractIntType extends AbstractType
      */
     public function getDefault()
     {
-        return 0;
+        return 0.0;
     }
 
     /**

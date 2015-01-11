@@ -2,11 +2,11 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
 use Gdbots\Common\Enum;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
 
-final class StringEnumType extends AbstractType
+final class StringEnum extends AbstractType
 {
     /**
      * @see Type::guard
@@ -36,7 +36,7 @@ final class StringEnumType extends AbstractType
     {
         /** @var Enum $className */
         $className = $field->getClassName();
-        if (empty($value) && $field->hasDefault()) {
+        if (empty($value)) {
             return $field->getDefault();
         }
         return $className::create((string) $value);

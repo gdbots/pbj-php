@@ -2,17 +2,17 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
 
-final class BooleanType extends AbstractType
+final class String extends AbstractType
 {
     /**
      * @see Type::guard
      */
     public function guard($value, Field $field)
     {
-        Assertion::boolean($value, null, $field->getName());
+        Assertion::string($value, null, $field->getName());
     }
 
     /**
@@ -20,7 +20,11 @@ final class BooleanType extends AbstractType
      */
     public function encode($value, Field $field)
     {
-        return (bool) $value;
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+        return $value;
     }
 
     /**
@@ -28,21 +32,13 @@ final class BooleanType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        return (bool) $value;
+        return (string) $value;
     }
 
     /**
-     * @see Type::getDefault
+     * @see Type::isString
      */
-    public function getDefault()
-    {
-        return false;
-    }
-
-    /**
-     * @see Type::isBoolean
-     */
-    public function isBoolean()
+    public function isString()
     {
         return true;
     }

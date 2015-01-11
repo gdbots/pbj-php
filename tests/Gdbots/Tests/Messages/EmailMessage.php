@@ -27,31 +27,31 @@ class EmailMessage extends AbstractMessage
     protected static function getFields()
     {
         return [
-            Fb::create(self::FROM_NAME,  T\StringType::create())->build(),
-            Fb::create(self::FROM_EMAIL, T\StringType::create())
+            Fb::create(self::FROM_NAME,  T\String::create())->build(),
+            Fb::create(self::FROM_EMAIL, T\String::create())
                 ->required()
                 ->withAssertion(function ($value, Field $field) {
                     \Assert\that($value)->email(null, $field->getName());
                 })
                 ->build(),
-            Fb::create(self::SUBJECT,  T\StringType::create())
+            Fb::create(self::SUBJECT,  T\String::create())
                 ->withDefault(function (EmailMessage $message) {
                     return implode(',', $message->getLabels()) . ' test';
                 })
                 ->build(),
-            Fb::create(self::BODY,     T\StringType::create())->build(),
-            Fb::create(self::PRIORITY, T\IntEnumType::create())
+            Fb::create(self::BODY,     T\String::create())->build(),
+            Fb::create(self::PRIORITY, T\IntEnum::create())
                 ->required()
                 ->usingClass('Gdbots\Tests\Messages\Enum\Priority')
                 ->withDefault(Priority::NORMAL())
                 ->build(),
-            Fb::create(self::SENT,      T\BooleanType::create())->build(),
-            Fb::create(self::DATE_SENT, T\DateType::create())->build(),
-            Fb::create(self::PROVIDER,  T\StringEnumType::create())
+            Fb::create(self::SENT,      T\Boolean::create())->build(),
+            Fb::create(self::DATE_SENT, T\Date::create())->build(),
+            Fb::create(self::PROVIDER,  T\StringEnum::create())
                 ->usingClass('Gdbots\Tests\Messages\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
-            Fb::create(self::LABELS,    T\StringType::create())->asASet()->build(),
+            Fb::create(self::LABELS,    T\String::create())->asASet()->build(),
         ];
     }
 

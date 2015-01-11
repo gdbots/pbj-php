@@ -2,11 +2,11 @@
 
 namespace Gdbots\Messages\Type;
 
-use Assert\Assertion;
+use Gdbots\Common\BigNumber;
+use Gdbots\Messages\Assertion;
 use Gdbots\Messages\Field;
-use Moontoast\Math\BigNumber;
 
-final class BigIntType extends AbstractType
+final class BigInt extends AbstractType
 {
     /**
      * @see Type::guard
@@ -14,7 +14,7 @@ final class BigIntType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var BigNumber $value */
-        Assertion::isInstanceOf($value, 'Moontoast\Math\BigNumber', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Common\BigNumber', null, $field->getName());
         Assertion::true(
                 !$value->isNegative(),
                 sprintf('Field [%s] cannot be negative.', $field->getName()),
