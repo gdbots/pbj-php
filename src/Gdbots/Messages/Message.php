@@ -2,33 +2,42 @@
 
 namespace Gdbots\Messages;
 
+use Gdbots\Messages\Exception\FieldAlreadyDefinedException;
+use Gdbots\Messages\Exception\FieldNotDefinedException;
+use Gdbots\Messages\Exception\RequiredFieldNotSetException;
+
 interface Message
 {
     /**
      * @return Field[]
-     * @throws \LogicException
+     * @throws FieldAlreadyDefinedException
+     * @throws \Exception
      */
     public static function fields();
 
     /**
-     * @param string $name
-     * @return Field
-     * @throws \InvalidArgumentException
+     * @param string $fieldName
+     * @return bool
      */
-    public static function field($name);
+    public static function hasField($fieldName);
 
     /**
-     * Performs the same function as "fromArray"
+     * @param string $fieldName
+     * @return Field
+     * @throws FieldNotDefinedException
+     */
+    public static function field($fieldName);
+
+    /**
+     * Creates a new message
      *
-     * @param array $data
      * @return static
      */
-    public static function create(array $data = []);
+    public static function create();
 
     /**
-     * Returns a new message from the provided array.  The array
-     * should be data returned from toArray or at least match
-     * that signature.
+     * Returns a new message from the provided array using the PhpArray Codec.
+     * @see Gdbots\Messages\Codec\PhpArray::decode
      *
      * @param array $data
      * @return static
@@ -36,17 +45,54 @@ interface Message
     public static function fromArray(array $data = []);
 
     /**
-     * Returns the message as an associative array.
+     * Returns the message as an associative array using the PhpArray Codec.
+     * @see Gdbots\Messages\Codec\PhpArray::encode
      *
      * @return array
      */
     public function toArray();
 
     /**
-     * Return the value for the given field.
+     * Encodes the message using the provided codec.
      *
-     * @param Field|string $nameOrField
+     * @param Codec $codec
      * @return mixed
      */
-    public function get($nameOrField);
+    //public function encode(Codec $codec);
+
+    /**
+     * Decodes the message using the provided codec.
+     *
+     * @param Codec $codec
+     * @return static
+     * @throws RequiredFieldNotSetException
+     * @throws \Exception
+     */
+    //public static function decode(Codec $codec);
+
+    /**
+     * Returns true if the field has been populated.
+     *
+     * @param string $fieldName
+     * @return bool
+     */
+    public function has($fieldName);
+
+    /**
+     * Returns the value for the given field.  If the field has not
+     * been set you will get a null value.
+     *
+     * @param string $fieldName
+     * @return mixed
+     */
+    public function get($fieldName);
+
+    /**
+     * Clears the value of a field.
+     *
+     * @param string $fieldName
+     * @return static
+     * @throws RequiredFieldNotSetException
+     */
+    public function clear($fieldName);
 }

@@ -9,18 +9,18 @@ use Gdbots\Messages\Field;
 final class IntEnum extends AbstractType
 {
     /**
-     * @see Type::guard
+     * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         Assertion::integer($value->getValue(), null, $field->getName());
-        Assertion::range($value->getValue(), 0, 4294967295, null, $field->getName());
+        Assertion::range($value->getValue(), 0, 65535, null, $field->getName());
     }
 
     /**
-     * @see Type::encode
+     * {@inheritdoc}
      */
     public function encode($value, Field $field)
     {
@@ -31,7 +31,7 @@ final class IntEnum extends AbstractType
     }
 
     /**
-     * @see Type::decode
+     * {@inheritdoc}
      */
     public function decode($value, Field $field)
     {
@@ -44,7 +44,7 @@ final class IntEnum extends AbstractType
     }
 
     /**
-     * @see Type::isNumeric
+     * {@inheritdoc}
      */
     public function isNumeric()
     {

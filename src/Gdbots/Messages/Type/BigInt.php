@@ -9,7 +9,7 @@ use Gdbots\Messages\Field;
 final class BigInt extends AbstractType
 {
     /**
-     * @see Type::guard
+     * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
@@ -28,7 +28,7 @@ final class BigInt extends AbstractType
     }
 
     /**
-     * @see Type::encode
+     * {@inheritdoc}
      */
     public function encode($value, Field $field)
     {
@@ -39,7 +39,7 @@ final class BigInt extends AbstractType
     }
 
     /**
-     * @see Type::decode
+     * {@inheritdoc}
      */
     public function decode($value, Field $field)
     {
@@ -50,7 +50,7 @@ final class BigInt extends AbstractType
     }
 
     /**
-     * @see Type::getDefault
+     * {@inheritdoc}
      */
     public function getDefault()
     {
@@ -58,7 +58,7 @@ final class BigInt extends AbstractType
     }
 
     /**
-     * @see Type::isNumeric
+     * {@inheritdoc}
      */
     public function isNumeric()
     {

@@ -24,7 +24,7 @@ abstract class AbstractType implements Type
     }
 
     /**
-     * @see Type::getDefault
+     * {@inheritdoc}
      */
     public function getDefault()
     {
@@ -32,7 +32,7 @@ abstract class AbstractType implements Type
     }
 
     /**
-     * @see Type::isScalar
+     * {@inheritdoc}
      */
     public function isScalar()
     {
@@ -40,7 +40,7 @@ abstract class AbstractType implements Type
     }
 
     /**
-     * @see Type::isBoolean
+     * {@inheritdoc}
      */
     public function isBoolean()
     {
@@ -48,7 +48,7 @@ abstract class AbstractType implements Type
     }
 
     /**
-     * @see Type::isNumeric
+     * {@inheritdoc}
      */
     public function isNumeric()
     {
@@ -56,7 +56,7 @@ abstract class AbstractType implements Type
     }
 
     /**
-     * @see Type::isString
+     * {@inheritdoc}
      */
     public function isString()
     {

@@ -9,17 +9,18 @@ use Gdbots\Messages\Field;
 final class StringEnum extends AbstractType
 {
     /**
-     * @see Type::guard
+     * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         Assertion::string($value->getValue(), null, $field->getName());
+        Assertion::betweenLength($value->getValue(), 1, 100, null, $field->getName());
     }
 
     /**
-     * @see Type::encode
+     * {@inheritdoc}
      */
     public function encode($value, Field $field)
     {
@@ -30,7 +31,7 @@ final class StringEnum extends AbstractType
     }
 
     /**
-     * @see Type::decode
+     * {@inheritdoc}
      */
     public function decode($value, Field $field)
     {
@@ -43,7 +44,7 @@ final class StringEnum extends AbstractType
     }
 
     /**
-     * @see Type::isString
+     * {@inheritdoc}
      */
     public function isString()
     {

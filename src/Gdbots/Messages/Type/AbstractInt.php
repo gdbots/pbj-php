@@ -7,7 +7,7 @@ use Gdbots\Messages\Field;
 abstract class AbstractInt extends AbstractType
 {
     /**
-     * @see Type::encode
+     * {@inheritdoc}
      */
     public function encode($value, Field $field)
     {
@@ -15,7 +15,7 @@ abstract class AbstractInt extends AbstractType
     }
 
     /**
-     * @see Type::decode
+     * {@inheritdoc}
      */
     public function decode($value, Field $field)
     {
@@ -23,7 +23,7 @@ abstract class AbstractInt extends AbstractType
     }
 
     /**
-     * @see Type::getDefault
+     * {@inheritdoc}
      */
     public function getDefault()
     {
@@ -31,7 +31,7 @@ abstract class AbstractInt extends AbstractType
     }
 
     /**
-     * @see Type::isNumeric
+     * {@inheritdoc}
      */
     public function isNumeric()
     {

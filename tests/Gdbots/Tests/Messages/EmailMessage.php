@@ -24,7 +24,7 @@ class EmailMessage extends AbstractMessage
     /**
      * @return Field[]
      */
-    protected static function getFields()
+    protected static function defineFields()
     {
         return [
             Fb::create(self::FROM_NAME,  T\String::create())->build(),
@@ -49,6 +49,7 @@ class EmailMessage extends AbstractMessage
             Fb::create(self::DATE_SENT, T\Date::create())->build(),
             Fb::create(self::PROVIDER,  T\StringEnum::create())
                 ->usingClass('Gdbots\Tests\Messages\Enum\Provider')
+                // gdbots:tests.messages:enum:provider {"AOL": 1, "gmail", "yahoo"}
                 ->withDefault(Provider::GMAIL())
                 ->build(),
             Fb::create(self::LABELS,    T\String::create())->asASet()->build(),
@@ -186,7 +187,7 @@ class EmailMessage extends AbstractMessage
      */
     public function getLabels()
     {
-        return $this->get(self::LABELS);
+        return $this->get(self::LABELS) ?: [];
     }
 
     /**
@@ -195,7 +196,7 @@ class EmailMessage extends AbstractMessage
      */
     public function addLabel($label)
     {
-        return $this->addValuesToSet(self::LABELS, [$label]);
+        return $this->addToSet(self::LABELS, [$label]);
     }
 
     /**
@@ -204,6 +205,6 @@ class EmailMessage extends AbstractMessage
      */
     public function removeLabel($label)
     {
-        return $this->removeValuesFromSet(self::LABELS, [$label]);
+        return $this->removeFromSet(self::LABELS, [$label]);
     }
 }

@@ -8,7 +8,7 @@ use Gdbots\Messages\Field;
 final class SmallInt extends AbstractInt
 {
     /**
-     * @see Type::guard
+     * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {

@@ -32,7 +32,7 @@ final class MapsMessage extends AbstractMessage
     /**
      * @return Field[]
      */
-    protected static function getFields()
+    protected static function defineFields()
     {
         $fields = [];
 
@@ -67,7 +67,7 @@ final class MapsMessage extends AbstractMessage
      */
     public function getAMap($name)
     {
-        return $this->get($name);
+        return $this->get($name) ?: [];
     }
 
     /**
@@ -78,7 +78,7 @@ final class MapsMessage extends AbstractMessage
      */
     public function addToAMap($name, $key, $value)
     {
-        return $this->addValueToMap($name, $key, $value);
+        return $this->addToMap($name, $key, $value);
     }
 
     /**
@@ -88,6 +88,6 @@ final class MapsMessage extends AbstractMessage
      */
     public function removeFromAMap($name, $key)
     {
-        return $this->removeValueFromMap($name, $key);
+        return $this->removeFromMap($name, $key);
     }
 }

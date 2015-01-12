@@ -8,7 +8,7 @@ use Gdbots\Messages\Field;
 final class Date extends AbstractType
 {
     /**
-     * @see Type::guard
+     * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
@@ -17,7 +17,7 @@ final class Date extends AbstractType
     }
 
     /**
-     * @see Type::encode
+     * {@inheritdoc}
      */
     public function encode($value, Field $field)
     {
@@ -28,7 +28,7 @@ final class Date extends AbstractType
     }
 
     /**
-     * @see Type::decode
+     * {@inheritdoc}
      */
     public function decode($value, Field $field)
     {
