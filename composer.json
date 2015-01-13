@@ -1,7 +1,7 @@
 {
-  "name": "gdbots/messages-php",
-  "homepage": "https://github.com/gdbots/messages-php",
-  "description": "Protobuf inspired message tools for php.",
+  "name": "gdbots/pbj-php",
+  "homepage": "https://github.com/gdbots/pbj-php",
+  "description": "Protobuf inspired message tools for php and json.",
   "type": "library",
   "license": "Apache-2.0",
   "require": {
@@ -14,7 +14,7 @@
   },
   "autoload": {
     "psr-0": {
-      "Gdbots\\Messages\\": "src/"
+      "Gdbots\\Pbj\\": "src/"
     }
   }
 }
