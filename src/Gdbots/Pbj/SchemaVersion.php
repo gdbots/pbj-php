@@ -45,7 +45,7 @@ final class SchemaVersion implements \JsonSerializable
      */
     public static function fromString($version = '1-0-0')
     {
-        Assertion::regex($version, '^\d{1,3}-\d{1,3}-\d{1,3}$', null, 'version');
+        Assertion::regex($version, '/^\d{1,3}-\d{1,3}-\d{1,3}$/', null, 'version');
         if (!isset(self::$instances[$version])) {
             list($major, $minor, $patch) = explode('-', $version);
             $major = (int) $major;

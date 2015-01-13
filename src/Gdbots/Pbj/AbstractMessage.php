@@ -443,7 +443,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function addToMap($fieldName, $key, $value)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
         Assertion::string($key, sprintf('Field [%s] key [%s] must be a string.', $fieldName, StringUtils::varToString($key)), $fieldName);
 

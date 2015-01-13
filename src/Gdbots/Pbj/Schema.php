@@ -43,6 +43,8 @@ final class Schema
         foreach ($fields as $field) {
             $schema->addField($field);
         }
+
+        return $schema;
     }
 
     /**
