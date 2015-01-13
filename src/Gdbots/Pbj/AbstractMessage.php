@@ -141,6 +141,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     protected static function defineSchema()
     {
+        // by default an empty schema is created
         return Schema::create(get_called_class());
     }
 
@@ -230,15 +231,17 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Sets a single value field.
-     *
-     * @param string $fieldName
-     * @param mixed $value
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function setSingleValue($fieldName, $value)
+    final public function getClearedFields()
+    {
+        return array_keys($this->clearedFields);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function setSingleValue($fieldName, $value)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASingleValue(), sprintf('Field [%s] must be a single value.', $fieldName), $fieldName);
@@ -253,15 +256,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Adds an array of unique values to an unsorted set of values.
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function addToSet($fieldName, array $values)
+    final public function addToSet($fieldName, array $values)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
@@ -276,15 +273,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Removes an array of values from a set.
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function removeFromSet($fieldName, array $values)
+    final public function removeFromSet($fieldName, array $values)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
@@ -302,15 +293,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Adds an array of values to an unsorted list/array (not unique).
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function addToList($fieldName, array $values)
+    final public function addToList($fieldName, array $values)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
@@ -324,15 +309,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Removes an array of values from a list.
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function removeFromList($fieldName, array $values)
+    final public function removeFromList($fieldName, array $values)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
@@ -348,16 +327,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Adds a key/value pair to a map.
-     *
-     * @param string $fieldName
-     * @param string $key
-     * @param mixed $value
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function addToMap($fieldName, $key, $value)
+    final public function addToMap($fieldName, $key, $value)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
@@ -370,15 +342,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Removes a key/value pair from a map.
-     *
-     * @param string $fieldName
-     * @param string $key
-     * @return static
-     *
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    final protected function removeFromMap($fieldName, $key)
+    final public function removeFromMap($fieldName, $key)
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);

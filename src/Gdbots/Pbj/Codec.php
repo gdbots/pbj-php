@@ -17,8 +17,8 @@ interface Codec
     public function encode(Message $message, $includeAllFields = false);
 
     /**
-     * @param Message $message
      * @param mixed $data
+     * @return Message
      */
-    public function decode(Message $message, $data);
+    public function decode($data);
 }

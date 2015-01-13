@@ -8,6 +8,9 @@ use Gdbots\Pbj\Exception\FieldNotDefinedException;
 // todo: implement toArray and JsonSerializable
 final class Schema
 {
+    const CURIE_FIELD_NAME = '_curie';
+    const VERSION_FIELD_NAME = '_sv';
+
     /** @var string */
     private $className;
 
@@ -25,6 +28,8 @@ final class Schema
     {
         $this->className = $className;
         $this->version = $version;
+
+        // todo: add fixed fields
     }
 
     /**

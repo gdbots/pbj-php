@@ -2,6 +2,7 @@
 
 namespace Gdbots\Pbj;
 
+use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
 
 interface Message
@@ -48,8 +49,9 @@ interface Message
      *
      * @param Codec $codec
      * @return static
+     *
+     * @throws GdbotsPbjException
      * @throws RequiredFieldNotSetException
-     * @throws \Exception
      */
     //public static function decode(Codec $codec);
 
@@ -75,7 +77,94 @@ interface Message
      *
      * @param string $fieldName
      * @return static
+     *
+     * @throws GdbotsPbjException
      * @throws RequiredFieldNotSetException
      */
     public function clear($fieldName);
+
+    /**
+     * Returns an array of field names that have been cleared.
+     *
+     * @return array
+     */
+    public function getClearedFields();
+
+    /**
+     * Sets a single value field.
+     *
+     * @param string $fieldName
+     * @param mixed $value
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function setSingleValue($fieldName, $value);
+
+    /**
+     * Adds an array of unique values to an unsorted set of values.
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function addToSet($fieldName, array $values);
+
+    /**
+     * Removes an array of values from a set.
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function removeFromSet($fieldName, array $values);
+
+    /**
+     * Adds an array of values to an unsorted list/array (not unique).
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function addToList($fieldName, array $values);
+
+    /**
+     * Removes an array of values from a list.
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function removeFromList($fieldName, array $values);
+
+    /**
+     * Adds a key/value pair to a map.
+     *
+     * @param string $fieldName
+     * @param string $key
+     * @param mixed $value
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function addToMap($fieldName, $key, $value);
+
+    /**
+     * Removes a key/value pair from a map.
+     *
+     * @param string $fieldName
+     * @param string $key
+     * @return static
+     *
+     * @throws \Exception
+     */
+    public function removeFromMap($fieldName, $key);
 }

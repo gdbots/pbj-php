@@ -2,6 +2,7 @@
 
 namespace Gdbots\Pbj\Codec;
 
+use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Message;
 
@@ -62,7 +63,12 @@ class PhpArray extends AbstractCodec
     /**
      * {@inheritdoc}
      */
-    public function decode(Message $message, $data)
+    public function decode($data)
     {
+        Assertion::isArray($data, sprintf('Codec [%s] requires a php array'));
+
+        // todo: get _curie field and generate MessageCurie
+        // todo: get _sv field and generate SchemaVersion
+        // todo: create MessageResolver to get className for curie and curie for className.
     }
 }

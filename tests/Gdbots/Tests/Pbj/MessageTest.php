@@ -3,7 +3,6 @@
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Tests\Pbj\Enum\Priority;
-use Gdbots\Tests\Pbj\Enum\Provider;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
@@ -32,26 +31,17 @@ JSON;
 
     public function testCreateMessageFromArray()
     {
-        $i = 0;
-        do {
-            $i++;
-            $message = $this->createEmailMessage();
-            $message->setPriority(Priority::HIGH());
+        $message = $this->createEmailMessage();
+        $message->setPriority(Priority::HIGH());
 
-            $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
-            $this->assertTrue(Priority::HIGH() === $message->getPriority());
+        $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
+        $this->assertTrue(Priority::HIGH() === $message->getPriority());
 
-            $json = json_encode($message, JSON_PRETTY_PRINT) . PHP_EOL;
-            $arr = json_decode($json, true);
+        $json = json_encode($message);
+        $message = EmailMessage::fromArray(json_decode($json, true));
 
-            $message2 = EmailMessage::fromArray($arr);
-            $message2
-                ->markAsSent()
-                ->setPriority(Priority::LOW())
-                ->setProvider(Provider::AOL());
-        } while ($i < 1);
-
-        echo json_encode($message2, JSON_PRETTY_PRINT) . PHP_EOL;
+        $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
+        $this->assertTrue(Priority::HIGH() === $message->getPriority());
     }
 
     public function testUniqueItemsInSet()
