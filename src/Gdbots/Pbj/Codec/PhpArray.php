@@ -13,8 +13,9 @@ class PhpArray extends AbstractCodec
     public function encode(Message $message, $includeAllFields = false)
     {
         $payload = [];
+        $schema = $message::schema();
 
-        foreach ($message::fields() as $field) {
+        foreach ($schema->getFields() as $field) {
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {

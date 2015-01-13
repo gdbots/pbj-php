@@ -3,8 +3,8 @@
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Pbj\AbstractMessage;
-use Gdbots\Pbj\Field;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
 
 final class MapsMessage extends AbstractMessage
@@ -30,9 +30,9 @@ final class MapsMessage extends AbstractMessage
     }
 
     /**
-     * @return Field[]
+     * @return Schema
      */
-    protected static function defineFields()
+    protected static function defineSchema()
     {
         $fields = [];
 
@@ -58,7 +58,7 @@ final class MapsMessage extends AbstractMessage
             }
         }
 
-        return $fields;
+        return Schema::create(__CLASS__, '1-0-0', $fields);
     }
 
     /**

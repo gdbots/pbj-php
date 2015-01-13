@@ -8,8 +8,6 @@ use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Codec\PhpArray;
 use Gdbots\Pbj\Enum\FieldRule;
-use Gdbots\Pbj\Exception\FieldAlreadyDefinedException;
-use Gdbots\Pbj\Exception\FieldNotDefinedException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
 
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
@@ -20,13 +18,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @var array
      */
     private static $schemas = [];
-
-    /**
-     * An array of fields per message type.
-     * ['Fully\Qualified\ClassName' => [ array of Field objects ]
-     * @var array
-     */
-    private static $fields = [];
 
     /**
      * @var array
@@ -48,13 +39,15 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final private function __construct(array $data = array())
     {
+        $schema = static::schema();
+
         foreach ($data as $fieldName => $value) {
-            if (!static::hasField($fieldName)) {
+            if (!$schema->hasField($fieldName)) {
                 // todo: review, what to do with unknown fields
                 continue;
             }
 
-            $field = static::field($fieldName);
+            $field = $schema->getField($fieldName);
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
@@ -87,7 +80,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             }
         }
 
-        foreach (static::fields() as $field) {
+        foreach ($schema->getFields() as $field) {
             $this->populateDefault($field);
             if ($field->isRequired() && !$this->has($field->getName())) {
                 throw new RequiredFieldNotSetException($this, $field);
@@ -138,57 +131,17 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $type = get_called_class();
         if (!isset(self::$schemas[$type])) {
-            self::$schemas[$type] = Schema::create($type, '1-0-0', static::defineFields());
+            self::$schemas[$type] = static::defineSchema();
         }
         return self::$schemas[$type];
     }
 
     /**
-     * {@inheritdoc}
+     * @return Schema
      */
-    final public static function fields()
+    protected static function defineSchema()
     {
-        $type = get_called_class();
-        if (!isset(self::$fields[$type])) {
-            $fields = static::defineFields();
-            foreach ($fields as $field) {
-                if (isset(self::$fields[$type][$field->getName()])) {
-                    throw new FieldAlreadyDefinedException($type, $field->getName());
-                }
-                self::$fields[$type][$field->getName()] = $field;
-            }
-        }
-
-        return self::$fields[$type];
-    }
-
-    /**
-     * @return Field[]
-     */
-    protected static function defineFields()
-    {
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public static function hasField($fieldName)
-    {
-        $fields = static::fields();
-        return isset($fields[$fieldName]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public static function field($fieldName)
-    {
-        $fields = static::fields();
-        if (!isset($fields[$fieldName])) {
-            throw new FieldNotDefinedException(get_called_class(), $fieldName);
-        }
-        return $fields[$fieldName];
+        return Schema::create(get_called_class());
     }
 
     /**
@@ -212,46 +165,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function toArray()
     {
-        //return PhpArray::create()->encode($this);
-        $payload = [];
-
-        foreach (static::fields() as $field) {
-            $name = $field->getName();
-
-            if (!$this->has($name)) {
-                continue;
-            }
-
-            switch ($field->getRule()->getValue()) {
-                case FieldRule::A_SINGLE_VALUE:
-                    $payload[$name] = $field->encodeValue($this->data[$name]);
-                    break;
-
-                case FieldRule::A_SET:
-                    $payload[$name] = array_map(function($value) use ($field) {
-                            return $field->encodeValue($value);
-                        }, array_values($this->data[$name]));
-                    break;
-
-                case FieldRule::A_LIST:
-                    $payload[$name] = array_map(function($value) use ($field) {
-                            return $field->encodeValue($value);
-                        }, $this->data[$name]);
-                    break;
-
-                case FieldRule::A_MAP:
-                    $payload[$name] = [];
-                    foreach ($this->data[$name] as $key => $value) {
-                        $payload[$name][$key] = $field->encodeValue($value);
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        return $payload;
+        return PhpArray::create()->encode($this);
     }
 
     /**
@@ -267,11 +181,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function has($fieldName)
     {
-        if (!static::hasField($fieldName)) {
+        $schema = static::schema();
+        if (!$schema->hasField($fieldName)) {
             return false;
         }
 
-        $field = static::field($fieldName);
+        $field = $schema->getField($fieldName);
         if ($field->isASingleValue()) {
             return isset($this->data[$field->getName()]);
         }
@@ -288,7 +203,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             return null;
         }
 
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         if ($field->isASet()) {
             return array_values($this->data[$field->getName()]);
         }
@@ -301,7 +216,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function clear($fieldName)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
+
         unset($this->data[$field->getName()]);
         $this->clearedFields[$field->getName()] = true;
         $this->populateDefault($field);
@@ -324,7 +240,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function setSingleValue($fieldName, $value)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASingleValue(), sprintf('Field [%s] must be a single value.', $fieldName), $fieldName);
 
         if (null === $value) {
@@ -347,7 +263,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function addToSet($fieldName, array $values)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
         foreach ($values as $value) {
@@ -370,7 +286,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function removeFromSet($fieldName, array $values)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
         foreach ($values as $value) {
@@ -396,7 +312,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function addToList($fieldName, array $values)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
 
         foreach ($values as $value) {
@@ -418,7 +334,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function removeFromList($fieldName, array $values)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
 
         $values = array_diff((array)$this->data[$fieldName], $values);
@@ -464,7 +380,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final protected function removeFromMap($fieldName, $key)
     {
-        $field = static::field($fieldName);
+        $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
         Assertion::string($key, sprintf('Field [%s] key [%s] must be a string.', $fieldName, StringUtils::varToString($key)), $fieldName);
 

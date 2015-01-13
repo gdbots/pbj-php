@@ -2,8 +2,6 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\FieldAlreadyDefinedException;
-use Gdbots\Pbj\Exception\FieldNotDefinedException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
 
 interface Message
@@ -12,36 +10,6 @@ interface Message
      * @return Schema
      */
     public static function schema();
-
-
-
-
-
-
-    /**
-     * @return Field[]
-     * @throws FieldAlreadyDefinedException
-     * @throws \Exception
-     */
-    public static function fields();
-
-    /**
-     * @param string $fieldName
-     * @return bool
-     */
-    public static function hasField($fieldName);
-
-    /**
-     * @param string $fieldName
-     * @return Field
-     * @throws FieldNotDefinedException
-     */
-    public static function field($fieldName);
-
-
-
-
-
 
     /**
      * Creates a new message
