@@ -2,28 +2,31 @@
 
 namespace Gdbots\Messages\Exception;
 
-class FieldAlreadyDefinedException extends \LogicException
+use Gdbots\Messages\Field;
+use Gdbots\Messages\Schema;
+
+class FieldAlreadyDefinedException extends SchemaException
 {
-    private $type;
-    private $fieldName;
+    /** @var Field */
+    private $field;
 
     /**
-     * @param string $type Fully qualified class name
-     * @param string $fieldName Name of
+     * @param Schema $schema
+     * @param string $fieldName
      */
-    public function __construct($type, $fieldName)
+    public function __construct(Schema $schema, $fieldName)
     {
-        $this->type = $type;
-        $this->fieldName = $fieldName;
-        parent::__construct(sprintf('Field [%s] is already defined on message [%s].', $fieldName, $type));
+        $this->schema = $schema;
+        $this->field = $this->schema->getField($fieldName);
+        parent::__construct(sprintf('Field [%s] is already defined on message [%s].', $this->field->getName(), $this->schema->getClassName()));
     }
 
     /**
-     * @return string
+     * @return Field
      */
-    public function getType()
+    public function getField()
     {
-        return $this->type;
+        return $this->field;
     }
 
     /**
@@ -31,6 +34,6 @@ class FieldAlreadyDefinedException extends \LogicException
      */
     public function getFieldName()
     {
-        return $this->fieldName;
+        return $this->field->getName();
     }
 }

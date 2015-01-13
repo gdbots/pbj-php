@@ -5,7 +5,7 @@ namespace Gdbots\Messages\Exception;
 use Gdbots\Messages\Field;
 use Gdbots\Messages\Message;
 
-class RequiredFieldNotSetException extends \LogicException
+class RequiredFieldNotSetException extends SchemaException
 {
     /** @var Message */
     private $type;
@@ -20,14 +20,15 @@ class RequiredFieldNotSetException extends \LogicException
     public function __construct(Message $type, Field $field)
     {
         $this->type = $type;
+        $this->schema = $type->schema();
         $this->field = $field;
-        parent::__construct(sprintf('Required field [%s] must be set on message [%s].', $field->getName(), get_class($type)));
+        parent::__construct(sprintf('Required field [%s] must be set on message [%s].', $this->field->getName(), $this->schema->getClassName()));
     }
 
     /**
      * @return Message
      */
-    public function getType()
+    public function get()
     {
         return $this->type;
     }

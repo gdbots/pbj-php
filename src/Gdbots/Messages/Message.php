@@ -9,6 +9,16 @@ use Gdbots\Messages\Exception\RequiredFieldNotSetException;
 interface Message
 {
     /**
+     * @return Schema
+     */
+    public static function schema();
+
+
+
+
+
+
+    /**
      * @return Field[]
      * @throws FieldAlreadyDefinedException
      * @throws \Exception
@@ -27,6 +37,11 @@ interface Message
      * @throws FieldNotDefinedException
      */
     public static function field($fieldName);
+
+
+
+
+
 
     /**
      * Creates a new message

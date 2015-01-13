@@ -2,28 +2,22 @@
 
 namespace Gdbots\Messages\Exception;
 
-class FieldNotDefinedException extends \InvalidArgumentException
+use Gdbots\Messages\Schema;
+
+class FieldNotDefinedException extends SchemaException
 {
-    private $type;
+    /** @var string */
     private $fieldName;
 
     /**
-     * @param string $type Fully qualified class name
-     * @param string $fieldName Name of
+     * @param Schema $schema
+     * @param string $fieldName
      */
-    public function __construct($type, $fieldName)
+    public function __construct(Schema $schema, $fieldName)
     {
-        $this->type = $type;
+        $this->schema = $schema;
         $this->fieldName = $fieldName;
-        parent::__construct(sprintf('Field [%s] is not defined on message [%s].', $fieldName, $type));
-    }
-
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
+        parent::__construct(sprintf('Field [%s] is not defined on message [%s].', $this->fieldName, $this->schema->getClassName()));
     }
 
     /**

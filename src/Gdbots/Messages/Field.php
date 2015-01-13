@@ -8,6 +8,7 @@ use Gdbots\Messages\Type\IntEnum;
 use Gdbots\Messages\Type\StringEnum;
 use Gdbots\Messages\Type\Type;
 
+// todo: implement toArray and JsonSerializable
 final class Field
 {
     /** @var string */

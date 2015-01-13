@@ -15,6 +15,13 @@ use Gdbots\Messages\Exception\RequiredFieldNotSetException;
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
 {
     /**
+     * An array of schemas per message type.
+     * ['Fully\Qualified\ClassName' => [ array of Schema objects ]
+     * @var array
+     */
+    private static $schemas = [];
+
+    /**
      * An array of fields per message type.
      * ['Fully\Qualified\ClassName' => [ array of Field objects ]
      * @var array
@@ -122,6 +129,18 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         $this->data[$field->getName()] = $default;
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public static function schema()
+    {
+        $type = get_called_class();
+        if (!isset(self::$schemas[$type])) {
+            self::$schemas[$type] = Schema::create($type, '1-0-0', static::defineFields());
+        }
+        return self::$schemas[$type];
     }
 
     /**
@@ -287,7 +306,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->clearedFields[$field->getName()] = true;
         $this->populateDefault($field);
 
-        if ($field->isRequired() && !$this->has($field)) {
+        if ($field->isRequired() && !$this->has($fieldName)) {
             throw new RequiredFieldNotSetException($this, $field);
         }
 
@@ -359,7 +378,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             unset($this->data[$fieldName][$key]);
         }
 
-        if ($field->isRequired() && !$this->has($field)) {
+        if ($field->isRequired() && !$this->has($fieldName)) {
             throw new RequiredFieldNotSetException($this, $field);
         }
 
@@ -405,7 +424,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $values = array_diff((array)$this->data[$fieldName], $values);
         $this->data[$fieldName] = $values;
 
-        if ($field->isRequired() && !$this->has($field)) {
+        if ($field->isRequired() && !$this->has($fieldName)) {
             throw new RequiredFieldNotSetException($this, $field);
         }
 
@@ -451,7 +470,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         unset($this->data[$fieldName][$key]);
 
-        if ($field->isRequired() && !$this->has($field)) {
+        if ($field->isRequired() && !$this->has($fieldName)) {
             throw new RequiredFieldNotSetException($this, $field);
         }
     }
