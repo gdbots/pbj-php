@@ -37,6 +37,16 @@ interface Message
     public function toArray();
 
     /**
+     * Checks all fields
+     *
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     * @throws RequiredFieldNotSetException
+     */
+    //public function validate();
+
+    /**
      * Populates the defaults on all fields or just the fieldName provided.
      * Operation will NOT overwrite any fields already set.
      *
@@ -182,7 +192,7 @@ interface Message
      * @param string $key
      * @return static
      *
-     * @throws \Exception
+     * @throws GdbotsPbjException
      */
     public function removeFromMap($fieldName, $key);
 }

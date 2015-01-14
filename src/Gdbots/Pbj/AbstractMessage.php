@@ -308,11 +308,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             unset($this->data[$fieldName][$key]);
         }
 
-        if (!$this->has($fieldName)) {
+        if (empty($this->data[$fieldName])) {
             $this->clearedFields[$fieldName] = true;
-            if ($field->isRequired()) {
-                throw new RequiredFieldNotSetException($this, $field);
-            }
         }
 
         return $this;
@@ -346,11 +343,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $values = array_diff((array)$this->data[$fieldName], $values);
         $this->data[$fieldName] = $values;
 
-        if (!$this->has($fieldName)) {
+        if (empty($this->data[$fieldName])) {
             $this->clearedFields[$fieldName] = true;
-            if ($field->isRequired()) {
-                throw new RequiredFieldNotSetException($this, $field);
-            }
         }
 
         return $this;
@@ -383,11 +377,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         unset($this->data[$fieldName][$key]);
 
-        if (!$this->has($fieldName)) {
+        if (empty($this->data[$fieldName])) {
             $this->clearedFields[$fieldName] = true;
-            if ($field->isRequired()) {
-                throw new RequiredFieldNotSetException($this, $field);
-            }
         }
+
+        return $this;
     }
 }
