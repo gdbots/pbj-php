@@ -73,6 +73,17 @@ interface Message
     public function get($fieldName);
 
     /**
+     * Sets the value of a field.
+     *
+     * @param string $fieldName
+     * @param mixed $value
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function set($fieldName, $value);
+
+    /**
      * Clears the value of a field.
      *
      * @param string $fieldName
@@ -91,61 +102,6 @@ interface Message
     public function getClearedFields();
 
     /**
-     * Sets a single value field.
-     *
-     * @param string $fieldName
-     * @param mixed $value
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     */
-    public function setSingleValue($fieldName, $value);
-
-    /**
-     * Adds an array of unique values to an unsorted set of values.
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     */
-    public function addToSet($fieldName, array $values);
-
-    /**
-     * Removes an array of values from a set.
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     */
-    public function removeFromSet($fieldName, array $values);
-
-    /**
-     * Adds an array of values to an unsorted list/array (not unique).
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     */
-    public function addToList($fieldName, array $values);
-
-    /**
-     * Removes an array of values from a list.
-     *
-     * @param string $fieldName
-     * @param array $values
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     */
-    public function removeFromList($fieldName, array $values);
-
-    /**
      * Adds a key/value pair to a map.
      *
      * @param string $fieldName
@@ -155,7 +111,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function addToMap($fieldName, $key, $value);
+    public function addMap($fieldName, $key, $value);
 
     /**
      * Removes a key/value pair from a map.
@@ -166,5 +122,5 @@ interface Message
      *
      * @throws \Exception
      */
-    public function removeFromMap($fieldName, $key);
+    public function removeMap($fieldName, $key);
 }

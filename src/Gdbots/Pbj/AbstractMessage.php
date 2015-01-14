@@ -187,7 +187,19 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             return false;
         }
 
-        $field = $schema->getField($fieldName);
+        return $this->doHas($schema->getField($fieldName));
+    }
+
+    /**
+     * Determines if the field has been populated.  Separated from "has" for
+     * small optimization on internal calls that don't need to fetch the
+     * schema and field since it already has it.
+     *
+     * @param Field $field
+     * @return bool
+     */
+    private function doHas(Field $field)
+    {
         if ($field->isASingleValue()) {
             return isset($this->data[$field->getName()]);
         }
@@ -215,10 +227,46 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
+    final public function set($fieldName, $value)
+    {
+        $field = static::schema()->getField($fieldName);
+        if (null === $value) {
+            return $this->clear($fieldName);
+        }
+
+        if ($field->isASingleValue()) {
+        }
+
+
+
+        $field->guardValue($value);
+        $this->data[$fieldName] = $value;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function clear($fieldName)
     {
         $field = static::schema()->getField($fieldName);
 
+        unset($this->data[$field->getName()]);
+        $this->clearedFields[$field->getName()] = true;
+        $this->populateDefault($field);
+
+        if ($field->isRequired() && !$this->has($fieldName)) {
+            throw new RequiredFieldNotSetException($this, $field);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    private function doClear(Field $field)
+    {
         unset($this->data[$field->getName()]);
         $this->clearedFields[$field->getName()] = true;
         $this->populateDefault($field);
