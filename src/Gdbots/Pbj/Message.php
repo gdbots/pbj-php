@@ -37,6 +37,16 @@ interface Message
     public function toArray();
 
     /**
+     * Populates the defaults on all fields or just the fieldName provided.
+     * Operation will NOT overwrite any fields already set.
+     *
+     * @param string $fieldName
+     * @return static
+     * @throws RequiredFieldNotSetException
+     */
+    public function populateDefaults($fieldName = null);
+
+    /**
      * Encodes the message using the provided codec.
      *
      * @param Codec $codec
@@ -73,17 +83,6 @@ interface Message
     public function get($fieldName);
 
     /**
-     * Sets the value of a field.
-     *
-     * @param string $fieldName
-     * @param mixed $value
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     */
-    public function set($fieldName, $value);
-
-    /**
      * Clears the value of a field.
      *
      * @param string $fieldName
@@ -95,11 +94,74 @@ interface Message
     public function clear($fieldName);
 
     /**
+     * Returns true if the field has been cleared.
+     *
+     * @param string $fieldName
+     * @return bool
+     */
+    public function hasClearedField($fieldName);
+
+    /**
      * Returns an array of field names that have been cleared.
      *
      * @return array
      */
     public function getClearedFields();
+
+    /**
+     * Sets a single value field.
+     *
+     * @param string $fieldName
+     * @param mixed $value
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function setSingleValue($fieldName, $value);
+
+    /**
+     * Adds an array of unique values to an unsorted set of values.
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function addToSet($fieldName, array $values);
+
+    /**
+     * Removes an array of values from a set.
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function removeFromSet($fieldName, array $values);
+
+    /**
+     * Adds an array of values to an unsorted list/array (not unique).
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function addToList($fieldName, array $values);
+
+    /**
+     * Removes an array of values from a list.
+     *
+     * @param string $fieldName
+     * @param array $values
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function removeFromList($fieldName, array $values);
 
     /**
      * Adds a key/value pair to a map.
@@ -111,7 +173,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function addMap($fieldName, $key, $value);
+    public function addToMap($fieldName, $key, $value);
 
     /**
      * Removes a key/value pair from a map.
@@ -122,5 +184,5 @@ interface Message
      *
      * @throws \Exception
      */
-    public function removeMap($fieldName, $key);
+    public function removeFromMap($fieldName, $key);
 }

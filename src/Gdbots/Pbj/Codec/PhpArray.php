@@ -20,7 +20,7 @@ class PhpArray extends AbstractCodec
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {
-                if ($includeAllFields) {
+                if ($includeAllFields || $message->hasClearedField($fieldName)) {
                     $payload[$fieldName] = null;
                 }
                 continue;
@@ -70,5 +70,6 @@ class PhpArray extends AbstractCodec
         // todo: get _curie field and generate MessageCurie
         // todo: get _sv field and generate SchemaVersion
         // todo: create MessageResolver to get className for curie and curie for className.
+
     }
 }

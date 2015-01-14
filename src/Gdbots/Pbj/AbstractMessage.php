@@ -5,7 +5,6 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Codec\PhpArray;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
@@ -80,48 +79,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             }
         }
 
-        foreach ($schema->getFields() as $field) {
-            $this->populateDefault($field);
-            if ($field->isRequired() && !$this->has($field->getName())) {
-                throw new RequiredFieldNotSetException($this, $field);
-            }
-        }
-    }
-
-    /**
-     * @param Field $field
-     * @return static
-     */
-    final protected function populateDefault(Field $field)
-    {
-        if ($this->has($field->getName())) {
-            return $this;
-        }
-
-        $default = $field->getDefault($this);
-        if (null === $default) {
-            return $this;
-        }
-
-        if ($field->isASingleValue()) {
-            $this->data[$field->getName()] = $default;
-            return $this;
-        }
-
-        if (empty($default)) {
-            return $this;
-        }
-
-        /*
-         * sets have a special handling to deal with unique values
-         */
-        if ($field->isASet()) {
-            $this->addToSet($field->getName(), $default);
-            return $this;
-        }
-
-        $this->data[$field->getName()] = $default;
-        return $this;
+        $this->populateDefaults();
     }
 
     /**
@@ -178,33 +136,77 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
+     * Populates the defaults on all fields or just the fieldName provided.
+     *
+     * @param string $fieldName
+     * @return static
+     * @throws RequiredFieldNotSetException
+     */
+    final public function populateDefaults($fieldName = null)
+    {
+        if (!empty($fieldName)) {
+            $this->populateDefault(static::schema()->getField($fieldName));
+            return $this;
+        }
+
+        foreach (static::schema()->getFields() as $field) {
+            $this->populateDefault($field);
+            if ($field->isRequired() && !$this->has($field->getName())) {
+                throw new RequiredFieldNotSetException($this, $field);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Field $field
+     * @return static
+     */
+    private function populateDefault(Field $field)
+    {
+        if ($this->has($field->getName())) {
+            return $this;
+        }
+
+        $default = $field->getDefault($this);
+        if (null === $default) {
+            return $this;
+        }
+
+        if ($field->isASingleValue()) {
+            $this->data[$field->getName()] = $default;
+            unset($this->clearedFields[$field->getName()]);
+            return $this;
+        }
+
+        if (empty($default)) {
+            return $this;
+        }
+
+        /*
+         * sets have a special handling to deal with unique values
+         */
+        if ($field->isASet()) {
+            $this->addToSet($field->getName(), $default);
+            return $this;
+        }
+
+        $this->data[$field->getName()] = $default;
+        unset($this->clearedFields[$field->getName()]);
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
     final public function has($fieldName)
     {
-        $schema = static::schema();
-        if (!$schema->hasField($fieldName)) {
+        if (!isset($this->data[$fieldName])) {
             return false;
         }
 
-        return $this->doHas($schema->getField($fieldName));
-    }
-
-    /**
-     * Determines if the field has been populated.  Separated from "has" for
-     * small optimization on internal calls that don't need to fetch the
-     * schema and field since it already has it.
-     *
-     * @param Field $field
-     * @return bool
-     */
-    private function doHas(Field $field)
-    {
-        if ($field->isASingleValue()) {
-            return isset($this->data[$field->getName()]);
-        }
-
-        return !empty($this->data[$field->getName()]);
+        return !empty($this->data[$fieldName]);
     }
 
     /**
@@ -218,30 +220,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         $field = static::schema()->getField($fieldName);
         if ($field->isASet()) {
-            return array_values($this->data[$field->getName()]);
+            return array_values($this->data[$fieldName]);
         }
 
-        return $this->data[$field->getName()];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public function set($fieldName, $value)
-    {
-        $field = static::schema()->getField($fieldName);
-        if (null === $value) {
-            return $this->clear($fieldName);
-        }
-
-        if ($field->isASingleValue()) {
-        }
-
-
-
-        $field->guardValue($value);
-        $this->data[$fieldName] = $value;
-        return $this;
+        return $this->data[$fieldName];
     }
 
     /**
@@ -250,9 +232,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     final public function clear($fieldName)
     {
         $field = static::schema()->getField($fieldName);
-
-        unset($this->data[$field->getName()]);
-        $this->clearedFields[$field->getName()] = true;
+        unset($this->data[$fieldName]);
+        $this->clearedFields[$fieldName] = true;
         $this->populateDefault($field);
 
         if ($field->isRequired() && !$this->has($fieldName)) {
@@ -265,17 +246,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
-    private function doClear(Field $field)
+    final public function hasClearedField($fieldName)
     {
-        unset($this->data[$field->getName()]);
-        $this->clearedFields[$field->getName()] = true;
-        $this->populateDefault($field);
-
-        if ($field->isRequired() && !$this->has($fieldName)) {
-            throw new RequiredFieldNotSetException($this, $field);
-        }
-
-        return $this;
+        return isset($this->clearedFields[$fieldName]);
     }
 
     /**
@@ -300,6 +273,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         $field->guardValue($value);
         $this->data[$fieldName] = $value;
+        unset($this->clearedFields[$fieldName]);
         return $this;
     }
 
@@ -317,6 +291,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             $this->data[$fieldName][$key] = $value;
         }
 
+        unset($this->clearedFields[$fieldName]);
         return $this;
     }
 
@@ -333,8 +308,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             unset($this->data[$fieldName][$key]);
         }
 
-        if ($field->isRequired() && !$this->has($fieldName)) {
-            throw new RequiredFieldNotSetException($this, $field);
+        if (!$this->has($fieldName)) {
+            $this->clearedFields[$fieldName] = true;
+            if ($field->isRequired()) {
+                throw new RequiredFieldNotSetException($this, $field);
+            }
         }
 
         return $this;
@@ -353,6 +331,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             $this->data[$fieldName][] = $value;
         }
 
+        unset($this->clearedFields[$fieldName]);
         return $this;
     }
 
@@ -367,8 +346,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $values = array_diff((array)$this->data[$fieldName], $values);
         $this->data[$fieldName] = $values;
 
-        if ($field->isRequired() && !$this->has($fieldName)) {
-            throw new RequiredFieldNotSetException($this, $field);
+        if (!$this->has($fieldName)) {
+            $this->clearedFields[$fieldName] = true;
+            if ($field->isRequired()) {
+                throw new RequiredFieldNotSetException($this, $field);
+            }
         }
 
         return $this;
@@ -381,10 +363,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
-        Assertion::string($key, sprintf('Field [%s] key [%s] must be a string.', $fieldName, StringUtils::varToString($key)), $fieldName);
+        Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);
 
         $field->guardValue($value);
         $this->data[$fieldName][$key] = $value;
+        unset($this->clearedFields[$fieldName]);
 
         return $this;
     }
@@ -396,12 +379,15 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
-        Assertion::string($key, sprintf('Field [%s] key [%s] must be a string.', $fieldName, StringUtils::varToString($key)), $fieldName);
+        Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);
 
         unset($this->data[$fieldName][$key]);
 
-        if ($field->isRequired() && !$this->has($fieldName)) {
-            throw new RequiredFieldNotSetException($this, $field);
+        if (!$this->has($fieldName)) {
+            $this->clearedFields[$fieldName] = true;
+            if ($field->isRequired()) {
+                throw new RequiredFieldNotSetException($this, $field);
+            }
         }
     }
 }
