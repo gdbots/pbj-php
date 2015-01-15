@@ -52,7 +52,6 @@ interface Message
      *
      * @param string $fieldName
      * @return static
-     * @throws RequiredFieldNotSetException
      */
     public function populateDefaults($fieldName = null);
 

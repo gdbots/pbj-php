@@ -32,7 +32,11 @@ final class String extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        return (string) $value;
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+        return $value;
     }
 
     /**

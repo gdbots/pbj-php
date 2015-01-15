@@ -136,11 +136,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Populates the defaults on all fields or just the fieldName provided.
-     *
-     * @param string $fieldName
-     * @return static
-     * @throws RequiredFieldNotSetException
+     * {@inheritdoc}
      */
     final public function populateDefaults($fieldName = null)
     {
@@ -151,37 +147,37 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         foreach (static::schema()->getFields() as $field) {
             $this->populateDefault($field);
-            if ($field->isRequired() && !$this->has($field->getName())) {
-                throw new RequiredFieldNotSetException($this, $field);
-            }
         }
 
         return $this;
     }
 
     /**
+     * Populates the default on a single field if it's not already set
+     * and the default generated is not a null/empty value.
+     *
      * @param Field $field
-     * @return static
+     * @return bool Returns true if a non null/empty default was applied or already present.
      */
     private function populateDefault(Field $field)
     {
         if ($this->has($field->getName())) {
-            return $this;
+            return true;
         }
 
         $default = $field->getDefault($this);
         if (null === $default) {
-            return $this;
+            return false;
         }
 
         if ($field->isASingleValue()) {
             $this->data[$field->getName()] = $default;
             unset($this->clearedFields[$field->getName()]);
-            return $this;
+            return true;
         }
 
         if (empty($default)) {
-            return $this;
+            return false;
         }
 
         /*
@@ -189,12 +185,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
          */
         if ($field->isASet()) {
             $this->addToSet($field->getName(), $default);
-            return $this;
+            return true;
         }
 
         $this->data[$field->getName()] = $default;
         unset($this->clearedFields[$field->getName()]);
-        return $this;
+        return true;
     }
 
     /**
@@ -234,9 +230,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         unset($this->data[$fieldName]);
         $this->clearedFields[$fieldName] = true;
-        $this->populateDefault($field);
 
-        if ($field->isRequired() && !$this->has($fieldName)) {
+        if (!$this->populateDefault($field) && $field->isRequired()) {
             throw new RequiredFieldNotSetException($this, $field);
         }
 

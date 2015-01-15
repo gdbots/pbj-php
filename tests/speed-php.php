@@ -2,12 +2,16 @@
 
 require 'speed-bootstrap.php';
 
+use Gdbots\Tests\Pbj\EmailMessage;
+
 $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
+$array = $message->toArray();
 
 do {
     $i++;
+    $message = EmailMessage::fromArray($array);
     $str = serialize($message);
     $message = unserialize($str);
 } while ($i < numTimes());
