@@ -20,8 +20,8 @@ interface Message
     public static function create();
 
     /**
-     * Returns a new message from the provided array using the PhpArray Codec.
-     * @see Gdbots\Pbj\Codec\PhpArray::decode
+     * Returns a new message from the provided array using the PhpArray Serializer.
+     * @see Gdbots\Pbj\Serializer\PhpArray::serialize
      *
      * @param array $data
      * @return static
@@ -29,22 +29,22 @@ interface Message
     public static function fromArray(array $data = []);
 
     /**
-     * Returns the message as an associative array using the PhpArray Codec.
-     * @see Gdbots\Pbj\Codec\PhpArray::encode
+     * Returns the message as an associative array using the PhpArray Serializer.
+     * @see Gdbots\Pbj\Serializer\PhpArray::deserialize
      *
      * @return array
      */
     public function toArray();
 
     /**
-     * Checks all fields
+     * Verifies all required fields have been populated.
      *
      * @return static
      *
      * @throws GdbotsPbjException
      * @throws RequiredFieldNotSetException
      */
-    //public function validate();
+    public function validate();
 
     /**
      * Populates the defaults on all fields or just the fieldName provided.
@@ -54,25 +54,6 @@ interface Message
      * @return static
      */
     public function populateDefaults($fieldName = null);
-
-    /**
-     * Encodes the message using the provided codec.
-     *
-     * @param Codec $codec
-     * @return mixed
-     */
-    //public function encode(Codec $codec);
-
-    /**
-     * Decodes the message using the provided codec.
-     *
-     * @param Codec $codec
-     * @return static
-     *
-     * @throws GdbotsPbjException
-     * @throws RequiredFieldNotSetException
-     */
-    //public static function decode(Codec $codec);
 
     /**
      * Returns true if the field has been populated.

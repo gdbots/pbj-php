@@ -1,20 +1,21 @@
 <?php
 
-namespace Gdbots\Pbj\Codec;
+namespace Gdbots\Pbj\Serializer;
 
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Message;
 
-class PhpArray extends AbstractCodec
+class PhpArray extends AbstractSerializer
 {
     /**
      * {@inheritdoc}
      */
-    public function encode(Message $message, $includeAllFields = false)
+    public function serialize(Message $message, array $options = [])
     {
         $payload = [];
         $schema = $message::schema();
+        $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];
 
         foreach ($schema->getFields() as $field) {
             $fieldName = $field->getName();
@@ -63,9 +64,9 @@ class PhpArray extends AbstractCodec
     /**
      * {@inheritdoc}
      */
-    public function decode($data)
+    public function deserialize($data, array $options = [])
     {
-        Assertion::isArray($data, sprintf('Codec [%s] requires a php array'));
+        Assertion::isArray($data, sprintf('[%s::%s] requires a php array', __CLASS__, __FUNCTION__));
 
         // todo: get _curie field and generate MessageCurie
         // todo: get _sv field and generate SchemaVersion

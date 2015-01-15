@@ -20,6 +20,9 @@ final class Schema
     /** @var Field[] */
     private $fields = [];
 
+    /** @var Field[] */
+    private $requiredFields = [];
+
     /**
      * @param string $className
      * @param SchemaVersion $version
@@ -62,6 +65,9 @@ final class Schema
             throw new FieldAlreadyDefinedException($this, $field->getName());
         }
         $this->fields[$field->getName()] = $field;
+        if ($field->isRequired()) {
+            $this->requiredFields[$field->getName()] = $field;
+        }
     }
 
     /**
@@ -86,6 +92,14 @@ final class Schema
     public function getFields()
     {
         return $this->fields;
+    }
+
+    /**
+     * @return Field[]
+     */
+    public function getRequiredFields()
+    {
+        return $this->requiredFields;
     }
 
     /**

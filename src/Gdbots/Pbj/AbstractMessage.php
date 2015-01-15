@@ -5,7 +5,7 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Pbj\Codec\PhpArray;
+use Gdbots\Pbj\Serializer\PhpArray;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
 
@@ -17,6 +17,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @var array
      */
     private static $schemas = [];
+
+    /** @var PhpArray */
+    private static $serializer;
 
     /**
      * @var array
@@ -124,7 +127,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function toArray()
     {
-        return PhpArray::create()->encode($this);
+        if (null === self::$serializer) {
+            self::$serializer = new PhpArray();
+        }
+        return self::$serializer->serialize($this);
     }
 
     /**
@@ -133,6 +139,20 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     final public function jsonSerialize()
     {
         return $this->toArray();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function validate()
+    {
+        foreach (static::schema()->getRequiredFields() as $field) {
+            if (!$this->has($field->getName())) {
+                throw new RequiredFieldNotSetException($this, $field);
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -230,10 +250,13 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         unset($this->data[$fieldName]);
         $this->clearedFields[$fieldName] = true;
+        $this->populateDefault($field);
 
+        /*
         if (!$this->populateDefault($field) && $field->isRequired()) {
             throw new RequiredFieldNotSetException($this, $field);
         }
+        */
 
         return $this;
     }
