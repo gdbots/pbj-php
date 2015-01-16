@@ -5,6 +5,7 @@ namespace Gdbots\Pbj\Serializer;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\Schema;
 
 class PhpArray extends AbstractSerializer
 {
@@ -13,8 +14,12 @@ class PhpArray extends AbstractSerializer
      */
     public function serialize(Message $message, array $options = [])
     {
-        $payload = [];
         $schema = $message::schema();
+        $message
+            ->setSingleValue($schema::FIELD_NAME, $schema->getKey())
+            ->validate();
+
+        $payload = [];
         $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];
 
         foreach ($schema->getFields() as $field) {

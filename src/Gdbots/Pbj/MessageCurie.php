@@ -12,11 +12,14 @@ final class MessageCurie implements \JsonSerializable
 
     /**
      * Regular expression pattern for matching a valid message curie.
-     * Format = namespace:type:service:message
+     * Format = namespace:service:type:message:version
+     *
+     *
+     * acme:videos.moderation:event:video-uploaded:1-0-0
      *
      * @constant string
      */
-    const VALID_PATTERN = '^[a-z]+[0-9a-z-]+:(cmd|evt|req):[a-z]+[0-9a-z\.-]+:[a-z]+[0-9a-z-]+$';
+    const VALID_PATTERN = '^[a-z]+[0-9a-z-]+:[a-z]+[0-9a-z\.-]+:[a-z]+[0-9a-z-]+:[a-z]+[0-9a-z-]+$';
 
     /**
      * Map of message type short names to their package name / class suffix

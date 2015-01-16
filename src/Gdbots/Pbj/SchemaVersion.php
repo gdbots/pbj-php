@@ -2,57 +2,99 @@
 
 namespace Gdbots\Pbj;
 
+use Gdbots\Pbj\Exception\InvalidSchemaVersionException;
+
+/**
+ * Similar to semantic versioning but with dashes and no "alpha, beta, etc." qualifiers.
+ *
+ * E.g. 1-0-0.0 (model-revision-addition.patch)
+ *
+ * MODEL
+ * Is incremented when a change is made which breaks the rules of Thrift backward compatibility,
+ * such as changing the type of a field.
+ *
+ * REVISION
+ * Is a change which is backward compatible but not forward compatible. Records created from
+ * the old version of the schema can be deserialized using the new schema, but not the other way
+ * around.  Example: adding a new field to a union type
+ *
+ * ADDITION
+ * Is a change which is both backward compatible and forward compatible. The previous version of
+ * the schema can be used to deserialize records created from the new version of the schema, and
+ * vice versa. Example: adding a new optional field.
+ *
+ * PATCH
+ * Is incremented for changes which fix mistakes in the definition of the schema, rather than changes
+ * to the model of the data.
+ *
+ * @link http://semver.org/
+ * @link http://snowplowanalytics.com/blog/2014/05/13/introducing-schemaver-for-semantic-versioning-of-schemas/
+ *
+ */
+
 final class SchemaVersion implements \JsonSerializable
 {
+    /**
+     * Regular expression pattern for matching a valid SchemaVersion string.
+     * @constant string
+     */
+    const VALID_PATTERN = '/^([0-9]+)-([0-9]+)-([0-9]+)\.([0-9]+)$/';
+
     private static $instances = [];
 
     /**
-     * A string representing the schema version.  Similar to semantic versioning
-     * but with dashes and no "alpha, beta, etc." qualifiers.
-     *
-     * @link http://semver.org/
-     * @link http://snowplowanalytics.com/blog/2014/05/13/introducing-schemaver-for-semantic-versioning-of-schemas/
+     * E.g. 1-0-0.0 (model-revision-addition.patch)
      *
      * @var string
      */
     private $version;
 
     /** @var int */
-    private $major;
+    private $model;
 
     /** @var int */
-    private $minor;
+    private $revision;
+
+    /** @var int */
+    private $addition;
 
     /** @var int */
     private $patch;
 
     /**
-     * @param int $major
-     * @param int $minor
+     * @param int $model
+     * @param int $revision
+     * @param int $addition
      * @param int $patch
      */
-    private function __construct($major = 1, $minor = 0, $patch = 0)
+    private function __construct($model = 1, $revision = 0, $addition = 0, $patch = 0)
     {
-        $this->major = $major;
-        $this->minor = $minor;
-        $this->patch = $patch;
-        $this->version = sprintf('%d-%d-%d', $this->major, $this->minor, $this->patch);
+        $this->model = (int) $model;
+        $this->revision = (int) $revision;
+        $this->addition = (int) $addition;
+        $this->patch = (int) $patch;
+        $this->version = sprintf('%d-%d-%d.%d', $this->model, $this->revision, $this->addition, $this->patch);
     }
 
     /**
-     * @param string $version   SchemaVersion string, e.g. 1-0-0
+     * @param string $version   SchemaVersion string, e.g. 1-0-0.0
      * @return SchemaVersion
+     * @throws InvalidSchemaVersionException
      */
-    public static function fromString($version = '1-0-0')
+    public static function fromString($version = '1-0-0.0')
     {
-        Assertion::regex($version, '/^\d{1,3}-\d{1,3}-\d{1,3}$/', null, 'version');
-        if (!isset(self::$instances[$version])) {
-            list($major, $minor, $patch) = explode('-', $version);
-            $major = (int) $major;
-            $minor = (int) $minor;
-            $patch = (int) $patch;
-            self::$instances[$version] = new self($major, $minor, $patch);
+        if (!preg_match(self::VALID_PATTERN, $version, $matches)) {
+            throw new InvalidSchemaVersionException(
+                sprintf('Schema version [%s] is invalid.  It must match the pattern [%s].',
+                    $version,
+                    self::VALID_PATTERN
+                ));
         }
+
+        if (!isset(self::$instances[$version])) {
+            self::$instances[$version] = new self($matches[1], $matches[2], $matches[3], $matches[4]);
+        }
+
         return self::$instances[$version];
     }
 
@@ -83,17 +125,25 @@ final class SchemaVersion implements \JsonSerializable
     /**
      * @return int
      */
-    public function getMajor()
+    public function getModel()
     {
-        return $this->major;
+        return $this->model;
     }
 
     /**
      * @return int
      */
-    public function getMinor()
+    public function getRevision()
     {
-        return $this->minor;
+        return $this->revision;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAddition()
+    {
+        return $this->addition;
     }
 
     /**

@@ -27,7 +27,7 @@ class EmailMessage extends AbstractMessage
      */
     protected static function defineSchema()
     {
-        return Schema::create(__CLASS__, '1-0-0', [
+        return Schema::create(__CLASS__, '1-0-0.0', [
             Fb::create(self::FROM_NAME,  T\String::create())->build(),
             Fb::create(self::FROM_EMAIL, T\String::create())
                 ->required()

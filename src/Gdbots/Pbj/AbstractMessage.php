@@ -251,13 +251,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         unset($this->data[$fieldName]);
         $this->clearedFields[$fieldName] = true;
         $this->populateDefault($field);
-
-        /*
-        if (!$this->populateDefault($field) && $field->isRequired()) {
-            throw new RequiredFieldNotSetException($this, $field);
-        }
-        */
-
         return $this;
     }
 

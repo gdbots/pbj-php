@@ -58,7 +58,7 @@ final class MapsMessage extends AbstractMessage
             }
         }
 
-        return Schema::create(__CLASS__, '1-0-0', $fields);
+        return Schema::create(__CLASS__, '1-0-0.0', $fields);
     }
 
     /**

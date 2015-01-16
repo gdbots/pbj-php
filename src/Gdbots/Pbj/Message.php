@@ -50,7 +50,7 @@ interface Message
      * Populates the defaults on all fields or just the fieldName provided.
      * Operation will NOT overwrite any fields already set.
      *
-     * @param string $fieldName
+     * @param string|null $fieldName
      * @return static
      */
     public function populateDefaults($fieldName = null);

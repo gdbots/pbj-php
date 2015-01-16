@@ -42,6 +42,8 @@ JSON;
 
         $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
         $this->assertTrue(Priority::HIGH() === $message->getPriority());
+
+        echo json_encode($message, JSON_PRETTY_PRINT);
     }
 
     public function testUniqueItemsInSet()
