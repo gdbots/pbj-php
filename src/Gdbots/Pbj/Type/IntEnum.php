@@ -46,6 +46,14 @@ final class IntEnum extends AbstractType
     /**
      * {@inheritdoc}
      */
+    public function decodesToScalar()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function isNumeric()
     {
         return true;

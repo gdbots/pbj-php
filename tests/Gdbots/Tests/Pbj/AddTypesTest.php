@@ -4,12 +4,13 @@ namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Common\BigNumber;
 use Gdbots\Common\Util\StringUtils;
-use Gdbots\Tests\Pbj\Enum\IntEnum;
-use Gdbots\Tests\Pbj\Enum\Priority;
-use Gdbots\Tests\Pbj\Enum\Provider;
-use Gdbots\Tests\Pbj\Enum\StringEnum;
+use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
+use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
+use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 
-class TypeTest extends \PHPUnit_Framework_TestCase
+class AddTypesTest extends \PHPUnit_Framework_TestCase
 {
     protected function getTypeValues()
     {

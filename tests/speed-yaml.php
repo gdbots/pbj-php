@@ -2,7 +2,7 @@
 
 require 'speed-bootstrap.php';
 
-use Gdbots\Tests\Pbj\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Symfony\Component\Yaml\Yaml;
 
 $startTime = microtime(true);

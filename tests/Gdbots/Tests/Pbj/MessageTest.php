@@ -2,7 +2,8 @@
 
 namespace Gdbots\Tests\Pbj;
 
-use Gdbots\Tests\Pbj\Enum\Priority;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
@@ -43,7 +44,8 @@ JSON;
         $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
         $this->assertTrue(Priority::HIGH() === $message->getPriority());
 
-        echo json_encode($message, JSON_PRETTY_PRINT);
+        //echo json_encode($message, JSON_PRETTY_PRINT);
+        //echo json_encode($message->schema(), JSON_PRETTY_PRINT);
     }
 
     public function testUniqueItemsInSet()

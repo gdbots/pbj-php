@@ -2,14 +2,14 @@
 
 namespace Gdbots\Pbj;
 
+use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Type\IntEnum;
 use Gdbots\Pbj\Type\StringEnum;
 use Gdbots\Pbj\Type\Type;
 
-// todo: implement toArray and JsonSerializable
-final class Field
+final class Field implements ToArray, \JsonSerializable
 {
     /** @var string */
     private $name;
@@ -48,13 +48,13 @@ final class Field
      * @param \Closure $assertion = null
      */
     public function __construct(
-            $name,
-            Type $type,
-            FieldRule $rule = null,
-            $required = false,
-            $default = null,
-            $className = null,
-            \Closure $assertion = null
+        $name,
+        Type $type,
+        FieldRule $rule = null,
+        $required = false,
+        $default = null,
+        $className = null,
+        \Closure $assertion = null
     ) {
         Assertion::string($name);
         Assertion::boolean($required);
@@ -69,7 +69,7 @@ final class Field
         $this->assertion = $assertion;
 
         if ($this->type instanceof IntEnum || $this->type instanceof StringEnum) {
-            Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name), $this->name);
+            Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name));
         }
 
         if (null !== $this->default && !$this->default instanceof \Closure) {
@@ -172,22 +172,39 @@ final class Field
         if ($this->isASingleValue()) {
             $this->guardValue($default);
         } else {
-            Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name), $this->name);
+            Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name));
             if ($this->isAMap()) {
                 // todo: review, must a map be scalar too?
                 if (null !== $default) {
-                    Assertion::true(ArrayUtils::isAssoc($default), sprintf('Field [%s] default must be an associative array.', $this->name), $this->name);
+                    Assertion::true(
+                        ArrayUtils::isAssoc($default),
+                        sprintf('Field [%s] default must be an associative array.', $this->name)
+                    );
                 }
             } else {
-                Assertion::true($this->type->isScalar(), sprintf('Field [%s] must be scalar to be used in a set or list.', $this->name), $this->name);
+                Assertion::true(
+                    $this->type->decodesToScalar(),
+                    sprintf('Field [%s] must decode as a scalar to be used in a set or list.', $this->name)
+                );
             }
 
             if (null !== $default) {
-                Assertion::true(!empty($default), sprintf('Field [%s] default cannot be an empty array.', $this->name), $this->name);
+                Assertion::true(
+                    !empty($default),
+                    sprintf('Field [%s] default cannot be an empty array.', $this->name)
+                );
+
                 foreach ($default as $k => $v) {
-                    Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k), $this->name);
+                    Assertion::notNull(
+                        $v,
+                        sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k)
+                    );
+
                     if ($this->isAMap()) {
-                        Assertion::string($k, sprintf('Field [%s] default key [%s] must be a string.', $this->name, $k), $this->name);
+                        Assertion::string(
+                            $k,
+                            sprintf('Field [%s] default key [%s] must be a string.', $this->name, $k)
+                        );
                     }
                     $this->guardValue($v);
                 }
@@ -218,7 +235,7 @@ final class Field
     public function guardValue($value)
     {
         if ($this->required) {
-            Assertion::notNull($value, sprintf('Field [%s] is required and cannot be null.', $this->name), $this->name);
+            Assertion::notNull($value, sprintf('Field [%s] is required and cannot be null.', $this->name));
         }
 
         if (null !== $value) {
@@ -246,5 +263,29 @@ final class Field
     public function decodeValue($value)
     {
         return $this->type->decode($value, $this);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        return [
+            'name' => $this->name,
+            'type' => $this->type->getTypeName()->getValue(),
+            'rule' => $this->rule->getName(),
+            'required' => $this->required,
+            'default' => $this->getDefault(),
+            'class_name' => $this->className,
+            'has_assertion' => null !== $this->assertion
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 }

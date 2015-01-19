@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\Tests\Pbj\Enum;
+namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
 use Gdbots\Common\Enum;
 

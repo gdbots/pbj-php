@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\Tests\Pbj;
+namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
@@ -42,14 +42,14 @@ final class MapsMessage extends AbstractMessage
                 case 'IntEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->usingClass('Gdbots\Tests\Pbj\Enum\IntEnum')
+                        ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum')
                         ->build();
                     break;
 
                 case 'StringEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->usingClass('Gdbots\Tests\Pbj\Enum\StringEnum')
+                        ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum')
                         ->build();
                     break;
 
@@ -58,7 +58,7 @@ final class MapsMessage extends AbstractMessage
             }
         }
 
-        return Schema::create(__CLASS__, '1-0-0.0', $fields);
+        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:maps-message:1-0-0.0', $fields);
     }
 
     /**

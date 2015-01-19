@@ -16,15 +16,15 @@ final class BigInt extends AbstractType
         /** @var BigNumber $value */
         Assertion::isInstanceOf($value, 'Gdbots\Common\BigNumber', null, $field->getName());
         Assertion::true(
-                !$value->isNegative(),
-                sprintf('Field [%s] cannot be negative.', $field->getName()),
-                $field->getName()
-            );
+            !$value->isNegative(),
+            sprintf('Field [%s] cannot be negative.', $field->getName()),
+            $field->getName()
+        );
         Assertion::true(
-                $value->isLessThanOrEqualTo('18446744073709551615'),
-                sprintf('Field [%s] cannot be greater than [18446744073709551615].', $field->getName()),
-                $field->getName()
-            );
+            $value->isLessThanOrEqualTo('18446744073709551615'),
+            sprintf('Field [%s] cannot be greater than [18446744073709551615].', $field->getName()),
+            $field->getName()
+        );
     }
 
     /**
@@ -47,6 +47,14 @@ final class BigInt extends AbstractType
             return $value;
         }
         return new BigNumber((string) $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function decodesToScalar()
+    {
+        return false;
     }
 
     /**

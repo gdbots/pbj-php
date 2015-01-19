@@ -15,7 +15,6 @@ final class StringEnum extends AbstractType
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
-        Assertion::string($value->getValue(), null, $field->getName());
         Assertion::betweenLength($value->getValue(), 1, 100, null, $field->getName());
     }
 
@@ -41,6 +40,14 @@ final class StringEnum extends AbstractType
             return $field->getDefault();
         }
         return $className::create((string) $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function decodesToScalar()
+    {
+        return false;
     }
 
     /**

@@ -5,6 +5,8 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
+use Gdbots\Pbj\Exception\FrozenMessageException;
+use Gdbots\Pbj\Exception\SchemaNotDefinedException;
 use Gdbots\Pbj\Serializer\PhpArray;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
@@ -34,6 +36,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @var array
      */
     private $clearedFields = [];
+
+    /**
+     * @see Message::freeze
+     * @var bool
+     */
+    private $isFrozen = false;
 
     /**
      * @param array $data
@@ -92,18 +100,38 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $type = get_called_class();
         if (!isset(self::$schemas[$type])) {
-            self::$schemas[$type] = static::defineSchema();
+            $schema = static::defineSchema();
+
+            if (!$schema instanceof Schema) {
+                throw new SchemaNotDefinedException(
+                    sprintf('Message [%s] must return a Schema from the defineSchema method.', $type)
+                );
+            }
+
+            if ($schema->getClassName() !== $type) {
+                throw new SchemaNotDefinedException(
+                    sprintf(
+                        'Schema [%s] returned from defineSchema must be for class [%s], not [%s]',
+                        $schema->getId()->toString(),
+                        $type,
+                        $schema->getClassName()
+                    )
+                );
+            }
+            self::$schemas[$type] = $schema;
         }
         return self::$schemas[$type];
     }
 
     /**
      * @return Schema
+     * @throws SchemaNotDefinedException
      */
     protected static function defineSchema()
     {
-        // by default an empty schema is created
-        return Schema::create(get_called_class());
+        throw new SchemaNotDefinedException(
+            sprintf('Message [%s] must return a Schema from the defineSchema method.', get_called_class())
+        );
     }
 
     /**
@@ -134,11 +162,23 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     final public function jsonSerialize()
     {
         return $this->toArray();
+    }
+
+    /**
+     * @return static
+     */
+    public function __clone()
+    {
+        /** @var self $message */
+        $message = unserialize(serialize($this));
+        $message->isFrozen = false;
+        // todo: reset replay or transient fields?
+        return $message;
     }
 
     /**
@@ -158,8 +198,41 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
+    final public function freeze()
+    {
+        $this->isFrozen = true;
+
+        // todo: freeze all nested messages
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function isFrozen()
+    {
+        return $this->isFrozen;
+    }
+
+    /**
+     * Ensures a frozen message can't be modified.
+     * @throws FrozenMessageException
+     */
+    private function guardFrozenMessage()
+    {
+        if ($this->isFrozen) {
+            throw new FrozenMessageException($this);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function populateDefaults($fieldName = null)
     {
+        $this->guardFrozenMessage();
+
         if (!empty($fieldName)) {
             $this->populateDefault(static::schema()->getField($fieldName));
             return $this;
@@ -247,6 +320,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function clear($fieldName)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         unset($this->data[$fieldName]);
         $this->clearedFields[$fieldName] = true;
@@ -275,6 +349,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function setSingleValue($fieldName, $value)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASingleValue(), sprintf('Field [%s] must be a single value.', $fieldName), $fieldName);
 
@@ -293,6 +368,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function addToSet($fieldName, array $values)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
@@ -311,6 +387,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function removeFromSet($fieldName, array $values)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
@@ -331,6 +408,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function addToList($fieldName, array $values)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
 
@@ -348,6 +426,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function removeFromList($fieldName, array $values)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
 
@@ -366,6 +445,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function addToMap($fieldName, $key, $value)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
         Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);
@@ -382,6 +462,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function removeFromMap($fieldName, $key)
     {
+        $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
         Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);

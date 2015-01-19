@@ -1,14 +1,14 @@
 <?php
 
-namespace Gdbots\Tests\Pbj;
+namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
-use Gdbots\Tests\Pbj\Enum\Priority;
-use Gdbots\Tests\Pbj\Enum\Provider;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 
 class EmailMessage extends AbstractMessage
 {
@@ -27,33 +27,36 @@ class EmailMessage extends AbstractMessage
      */
     protected static function defineSchema()
     {
-        return Schema::create(__CLASS__, '1-0-0.0', [
-            Fb::create(self::FROM_NAME,  T\String::create())->build(),
+        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0.0', [
+            Fb::create(self::FROM_NAME, T\String::create())->build(),
             Fb::create(self::FROM_EMAIL, T\String::create())
                 ->required()
                 ->withAssertion(function ($value, Field $field) {
                     \Assert\that($value)->email(null, $field->getName());
                 })
                 ->build(),
-            Fb::create(self::SUBJECT,  T\String::create())
-                ->withDefault(function (EmailMessage $message) {
+            Fb::create(self::SUBJECT, T\String::create())
+                ->withDefault(function (EmailMessage $message = null) {
+                    // closure func default spice or gtfo and use named automagic defaults?
+                    if (!$message) {
+                        return null;
+                    }
                     return implode(',', $message->getLabels()) . ' test';
                 })
                 ->build(),
-            Fb::create(self::BODY,     T\String::create())->build(),
+            Fb::create(self::BODY, T\String::create())->build(),
             Fb::create(self::PRIORITY, T\IntEnum::create())
                 ->required()
-                ->usingClass('Gdbots\Tests\Pbj\Enum\Priority')
+                ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
                 ->withDefault(Priority::NORMAL())
                 ->build(),
-            Fb::create(self::SENT,      T\Boolean::create())->build(),
+            Fb::create(self::SENT, T\Boolean::create())->build(),
             Fb::create(self::DATE_SENT, T\Date::create())->build(),
-            Fb::create(self::PROVIDER,  T\StringEnum::create())
-                ->usingClass('Gdbots\Tests\Pbj\Enum\Provider')
-                // gdbots:tests.messages:enum:provider {"AOL": 1, "gmail", "yahoo"}
+            Fb::create(self::PROVIDER, T\StringEnum::create())
+                ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
-            Fb::create(self::LABELS,    T\String::create())->asASet()->build(),
+            Fb::create(self::LABELS, T\String::create())->asASet()->build(),
         ]);
     }
 

@@ -2,7 +2,7 @@
 
 require 'speed-bootstrap.php';
 
-use Gdbots\Tests\Pbj\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 $startTime = microtime(true);
 $i = 0;

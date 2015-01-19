@@ -39,9 +39,9 @@ final class Date extends AbstractType
     }
 
     /**
-     * @see Type::isScalar
+     * {@inheritdoc}
      */
-    public function isScalar()
+    public function decodesToScalar()
     {
         return false;
     }

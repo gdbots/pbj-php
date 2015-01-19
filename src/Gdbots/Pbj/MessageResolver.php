@@ -5,14 +5,8 @@ namespace Gdbots\Pbj;
 interface MessageResolver
 {
     /**
-     * @param string $className
-     * @return Schema
-     */
-    public static function getSchema($className);
-
-    /**
-     * @param string $schemaId
+     * @param SchemaId $schemaId
      * @return string
      */
-    public static function getClassName($schemaId);
+    public function getClassName(SchemaId $schemaId);
 }

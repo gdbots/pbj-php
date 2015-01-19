@@ -10,13 +10,13 @@ use Gdbots\Pbj\Exception\InvalidSchemaVersionException;
  * E.g. 1-0-0.0 (model-revision-addition.patch)
  *
  * MODEL
- * Is incremented when a change is made which breaks the rules of Thrift backward compatibility,
+ * Is incremented when a change is made which breaks the rules of Protobuf/Thrift backward compatibility,
  * such as changing the type of a field.
  *
  * REVISION
  * Is a change which is backward compatible but not forward compatible. Records created from
  * the old version of the schema can be deserialized using the new schema, but not the other way
- * around.  Example: adding a new field to a union type
+ * around.  Example: adding a new field to a union type.
  *
  * ADDITION
  * Is a change which is both backward compatible and forward compatible. The previous version of
@@ -39,8 +39,6 @@ final class SchemaVersion implements \JsonSerializable
      * @constant string
      */
     const VALID_PATTERN = '/^([0-9]+)-([0-9]+)-([0-9]+)\.([0-9]+)$/';
-
-    private static $instances = [];
 
     /**
      * E.g. 1-0-0.0 (model-revision-addition.patch)
@@ -85,17 +83,15 @@ final class SchemaVersion implements \JsonSerializable
     {
         if (!preg_match(self::VALID_PATTERN, $version, $matches)) {
             throw new InvalidSchemaVersionException(
-                sprintf('Schema version [%s] is invalid.  It must match the pattern [%s].',
+                sprintf(
+                    'Schema version [%s] is invalid.  It must match the pattern [%s].',
                     $version,
                     self::VALID_PATTERN
-                ));
+                )
+            );
         }
 
-        if (!isset(self::$instances[$version])) {
-            self::$instances[$version] = new self($matches[1], $matches[2], $matches[3], $matches[4]);
-        }
-
-        return self::$instances[$version];
+        return new self($matches[1], $matches[2], $matches[3], $matches[4]);
     }
 
     /**
@@ -111,7 +107,7 @@ final class SchemaVersion implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return $this->version;
+        return $this->toString();
     }
 
     /**
@@ -119,7 +115,7 @@ final class SchemaVersion implements \JsonSerializable
      */
     public function __toString()
     {
-        return $this->version;
+        return $this->toString();
     }
 
     /**

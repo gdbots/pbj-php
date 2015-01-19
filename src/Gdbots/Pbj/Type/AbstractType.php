@@ -2,14 +2,25 @@
 
 namespace Gdbots\Pbj\Type;
 
+use Gdbots\Common\Util\StringUtils;
+use Gdbots\Pbj\Enum\TypeName;
+
 abstract class AbstractType implements Type
 {
     private static $instances = [];
 
+    /** @var TypeName */
+    private $typeName;
+
     /**
-     * private constructor to ensure flyweight construction.
+     * Private constructor to ensure flyweight construction.
+     *
+     * @param TypeName $typeName
      */
-    final private function __construct() {}
+    final private function __construct(TypeName $typeName)
+    {
+        $this->typeName = $typeName;
+    }
 
     /**
      * @return static
@@ -18,9 +29,35 @@ abstract class AbstractType implements Type
     {
         $type = get_called_class();
         if (!isset(self::$instances[$type])) {
-            self::$instances[$type] = new static();
+            $a = explode('\\', $type);
+            $typeName = StringUtils::toSlugFromCamelCase(end($a));
+            self::$instances[$type] = new static(TypeName::create($typeName));
         }
         return self::$instances[$type];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getTypeName()
+    {
+        return $this->typeName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function decodesToScalar()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function encodesToScalar()
+    {
+        return true;
     }
 
     /**
@@ -29,14 +66,6 @@ abstract class AbstractType implements Type
     public function getDefault()
     {
         return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
-    {
-        return true;
     }
 
     /**

@@ -3,12 +3,14 @@
 namespace Gdbots\Pbj;
 
 use Gdbots\Pbj\Exception\GdbotsPbjException;
+use Gdbots\Pbj\Exception\SchemaNotDefinedException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
 
 interface Message
 {
     /**
      * @return Schema
+     * @throws SchemaNotDefinedException
      */
     public static function schema();
 
@@ -47,6 +49,21 @@ interface Message
     public function validate();
 
     /**
+     * Freezes the message, making it immutable.
+     *
+     * @return static
+     */
+    public function freeze();
+
+    /**
+     * Returns true if the message has been frozen.  A frozen message is
+     * immutable and cannot be modified.
+     *
+     * @return bool
+     */
+    public function isFrozen();
+
+    /**
      * Populates the defaults on all fields or just the fieldName provided.
      * Operation will NOT overwrite any fields already set.
      *
@@ -54,6 +71,17 @@ interface Message
      * @return static
      */
     public function populateDefaults($fieldName = null);
+
+    /**
+     * Merges the field values from the provided message into this message.
+     * Only fields with matching field names and types will be copied.
+     *
+     * todo: review, possible optimized merge when schemas match
+     *
+     * @param Message $message
+     * @return static
+     */
+    //public function mergeFrom(Message $message);
 
     /**
      * Returns true if the field has been populated.

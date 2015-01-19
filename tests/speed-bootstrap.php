@@ -4,7 +4,7 @@ require 'bootstrap.php';
 
 header('Content-Type: text/plain');
 
-use Gdbots\Tests\Pbj\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 /**
  * @return EmailMessage

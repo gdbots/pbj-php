@@ -12,7 +12,7 @@ final class String extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        Assertion::string($value, null, $field->getName());
+        Assertion::maxLength($value, 255, null, $field->getName());
     }
 
     /**
@@ -32,6 +32,8 @@ final class String extends AbstractType
      */
     public function decode($value, Field $field)
     {
+        // todo: do we auto truncate string or let the exception get thrown?
+        // we cast ints and bools, so do we autofix this shit or not
         $value = trim((string) $value);
         if ($value === '') {
             return null;
@@ -45,5 +47,19 @@ final class String extends AbstractType
     public function isString()
     {
         return true;
+    }
+
+    /**
+     * @param string $str
+     * @param int $length
+     * @return string
+     */
+    private function truncate($str, $length = 255)
+    {
+        $strLength = mb_strlen($str);
+        if ($strLength <= $length) {
+            return $str;
+        }
+        return mb_substr($str, 0, $length);
     }
 }

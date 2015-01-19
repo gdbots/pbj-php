@@ -2,28 +2,19 @@
 
 namespace Gdbots\Pbj;
 
+use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Exception\FieldAlreadyDefinedException;
 use Gdbots\Pbj\Exception\FieldNotDefinedException;
 
-// todo: implement toArray and JsonSerializable
-final class Schema
+final class Schema implements ToArray, \JsonSerializable
 {
-    const FIELD_NAME = '_schema';
-
-    /** @var string */
-    private $vendor;
-
-    /** @var string */
-    private $package;
-
-    /** @var string */
-    private $type;
+    const FIELD_NAME = '_pbj';
 
     /** @var string */
     private $className;
 
-    /** @var SchemaVersion */
-    private $version;
+    /** @var SchemaId */
+    private $id;
 
     /** @var Field[] */
     private $fields = [];
@@ -33,35 +24,35 @@ final class Schema
 
     /**
      * @param string $className
-     * @param SchemaVersion $version
+     * @param SchemaId $id
      */
-    private function __construct($className, SchemaVersion $version)
+    private function __construct($className, SchemaId $id)
     {
         $this->className = $className;
-        $this->version = $version;
+        $this->id = $id;
 
         // todo: add fixed fields and regex pattern for assertion on schema field
         $this->addField(
             FieldBuilder::create(self::FIELD_NAME, Type\String::create())
                 ->required()
-                //->withDefault($this->getKey())
+                //->withDefault($this->id->toString())
                 ->build()
         );
     }
 
     /**
      * @param string $className
-     * @param SchemaVersion|string $version
+     * @param SchemaId|string $schemaId
      * @param Field[] $fields
      * @return Schema
      */
-    public static function create($className, $version = '1-0-0.0', array $fields = [])
+    public static function create($className, $schemaId, array $fields = [])
     {
-        $version = $version instanceof SchemaVersion ? $version : SchemaVersion::fromString($version);
-        Assertion::string($className, null, 'className');
+        $id = $schemaId instanceof SchemaId ? $schemaId : SchemaId::fromString($schemaId);
+        Assertion::classExists($className, null, 'className');
         Assertion::allIsInstanceOf($fields, 'Gdbots\Pbj\Field', null, 'fields');
 
-        $schema = new self($className, $version);
+        $schema = new self($className, $id);
         foreach ($fields as $field) {
             $schema->addField($field);
         }
@@ -72,9 +63,37 @@ final class Schema
     /**
      * @return string
      */
+    public function toString()
+    {
+        return $this->id->toString();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        return [
+            'id' => $this->id->toString(),
+            'class_name' => $this->className,
+            'fields' => $this->fields
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
-        return $this->getKey();
+        return $this->id->toString();
     }
 
     /**
@@ -93,11 +112,11 @@ final class Schema
     }
 
     /**
-     * @return string
+     * @return SchemaId
      */
-    public function getKey()
+    public function getId()
     {
-        return $this->className . ':' . $this->version;
+        return $this->id;
     }
 
     /**
@@ -106,14 +125,6 @@ final class Schema
     public function getClassName()
     {
         return $this->className;
-    }
-
-    /**
-     * @return SchemaVersion
-     */
-    public function getVersion()
-    {
-        return $this->version;
     }
 
     /**

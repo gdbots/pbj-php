@@ -2,7 +2,9 @@
 
 namespace Gdbots\Tests\Pbj;
 
-class MapTest extends \PHPUnit_Framework_TestCase
+use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
+
+class MapsTest extends \PHPUnit_Framework_TestCase
 {
     public function testStringMap()
     {
