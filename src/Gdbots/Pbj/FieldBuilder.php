@@ -19,6 +19,30 @@ final class FieldBuilder
     /** @var bool */
     private $required = false;
 
+    /** @var int */
+    private $minLength = 0;
+
+    /** @var int */
+    private $maxLength = 0;
+
+    /** @var string */
+    private $pattern;
+
+    /** @var string */
+    private $format;
+
+    /** @var int */
+    private $min = 0;
+
+    /** @var int */
+    private $max = 0;
+
+    /** @var int */
+    private $precision = 10;
+
+    /** @var int */
+    private $scale = 0;
+
     /** @var mixed */
     private $default;
 
@@ -113,6 +137,62 @@ final class FieldBuilder
     }
 
     /**
+     * @param int $minLength
+     * @param int $maxLength
+     * @return self
+     */
+    public function betweenLength($minLength = 0, $maxLength = 0)
+    {
+        $this->minLength = $minLength;
+        $this->maxLength = $maxLength;
+        return $this;
+    }
+
+    /**
+     * @param string $pattern
+     * @return self
+     */
+    public function pattern($pattern)
+    {
+        $this->pattern = $pattern;
+        return $this;
+    }
+
+    /**
+     * @param string $format
+     * @return self
+     */
+    public function format($format)
+    {
+        $this->format = $format;
+        return $this;
+    }
+
+    /**
+     * @param int $min
+     * @param int $max
+     * @return self
+     */
+    public function range($min = 0, $max = 0)
+    {
+        $this->min = $min;
+        $this->max = $max;
+        return $this;
+    }
+
+    /**
+     * @param int $precision
+     * @param int $scale
+     * @return self
+     */
+    public function precision($precision = 10, $scale = 0)
+    {
+        $this->precision = $precision;
+        $this->scale = $scale;
+        return $this;
+    }
+
+    /**
      * @param mixed $default
      * @return self
      */
@@ -126,7 +206,7 @@ final class FieldBuilder
      * @param string $className
      * @return self
      */
-    public function usingClass($className)
+    public function className($className)
     {
         $this->className = $className;
         return $this;
@@ -136,7 +216,7 @@ final class FieldBuilder
      * @param \Closure $assertion
      * @return self
      */
-    public function withAssertion(\Closure $assertion)
+    public function assertion(\Closure $assertion)
     {
         $this->assertion = $assertion;
         return $this;
@@ -156,6 +236,14 @@ final class FieldBuilder
             $this->type,
             $this->rule,
             $this->required,
+            $this->minLength,
+            $this->maxLength,
+            $this->pattern,
+            $this->format,
+            $this->min,
+            $this->max,
+            $this->precision,
+            $this->scale,
             $this->default,
             $this->className,
             $this->assertion

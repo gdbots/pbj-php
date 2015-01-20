@@ -42,14 +42,14 @@ final class MapsMessage extends AbstractMessage
                 case 'IntEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum')
+                        ->className('Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum')
                         ->build();
                     break;
 
                 case 'StringEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum')
+                        ->className('Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum')
                         ->build();
                     break;
 

@@ -5,6 +5,7 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Enum\FieldRule;
+use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Type\IntEnum;
 use Gdbots\Pbj\Type\StringEnum;
 use Gdbots\Pbj\Type\Type;
@@ -23,6 +24,40 @@ final class Field implements ToArray, \JsonSerializable
     /** @var bool */
     private $required = false;
 
+    /** @var int */
+    private $minLength = 0;
+
+    /** @var int */
+    private $maxLength = 0;
+
+    /**
+     * A regular expression to match against for string types.
+     * @link http://spacetelescope.github.io/understanding-json-schema/reference/string.html#pattern
+     *
+     * @var string
+     */
+    private $pattern;
+
+    /**
+     * todo: create Format enum for all formats we can implement
+     * @link http://spacetelescope.github.io/understanding-json-schema/reference/string.html#format
+     *
+     * @var string
+     */
+    private $format;
+
+    /** @var int */
+    private $min = 0;
+
+    /** @var int */
+    private $max = 0;
+
+    /** @var int */
+    private $precision = 10;
+
+    /** @var int */
+    private $scale = 0;
+
     /** @var mixed */
     private $default;
 
@@ -32,26 +67,36 @@ final class Field implements ToArray, \JsonSerializable
     /** @var \Closure */
     private $assertion;
 
-    /** @var int */
-    private $min = 0;
-
-    /** @var int */
-    private $max = 0;
-
     /**
      * @param string $name
      * @param Type $type
      * @param FieldRule $rule
      * @param bool $required
-     * @param mixed|null $default
-     * @param string $className
-     * @param \Closure $assertion = null
+     * @param int $minLength
+     * @param int $maxLength
+     * @param null|string $pattern
+     * @param null|string $format
+     * @param int $min
+     * @param int $max
+     * @param int $precision
+     * @param int $scale
+     * @param null|mixed $default
+     * @param null|string $className
+     * @param callable|null $assertion
      */
     public function __construct(
         $name,
         Type $type,
         FieldRule $rule = null,
         $required = false,
+        $minLength = 0,
+        $maxLength = 0,
+        $pattern = null,
+        $format = null,
+        $min = 0,
+        $max = 0,
+        $precision = 0,
+        $scale = 0,
         $default = null,
         $className = null,
         \Closure $assertion = null
@@ -64,6 +109,15 @@ final class Field implements ToArray, \JsonSerializable
         $this->type = $type;
         $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         $this->required = $required;
+
+        // string constraints
+        $this->minLength = abs((int) $minLength);
+        $this->maxLength = abs((int) $maxLength);
+        $this->pattern = $pattern;
+        $this->format = empty($format) ? null : Format::create($format);
+
+        // numeric constraints (wip)
+
         $this->default = $default;
         $this->className = $className;
         $this->assertion = $assertion;
@@ -139,6 +193,70 @@ final class Field implements ToArray, \JsonSerializable
     public function isRequired()
     {
         return $this->required;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMinLength()
+    {
+        return $this->minLength;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxLength()
+    {
+        return $this->maxLength;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPattern()
+    {
+        return $this->pattern;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMin()
+    {
+        return $this->min;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMax()
+    {
+        return $this->max;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPrecision()
+    {
+        return $this->precision;
+    }
+
+    /**
+     * @return int
+     */
+    public function getScale()
+    {
+        return $this->scale;
     }
 
     /**
@@ -282,7 +400,7 @@ final class Field implements ToArray, \JsonSerializable
     }
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
     final public function jsonSerialize()
     {

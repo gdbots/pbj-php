@@ -39,8 +39,6 @@ use Gdbots\Pbj\Exception\InvalidSchemaIdException;
  * model revision specific.  As in GetVideoV1, GetVideoV2, etc.  Only "model" revisions
  * should require a unique class since all other schema changes should not break anything.
  *
- * Message Resolvers MUST be able to map a schema id to a class and a class to a schema id.
- *
  * @see SchemaVersion
  *
  */

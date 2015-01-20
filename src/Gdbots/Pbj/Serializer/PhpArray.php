@@ -16,8 +16,7 @@ class PhpArray extends AbstractSerializer
         $schema = $message::schema();
         $message
             ->setSingleValue($schema::FIELD_NAME, $schema->getId()->toString())
-            ->validate()
-            ->freeze();
+            ->validate();
 
         $payload = [];
         $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];

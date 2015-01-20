@@ -31,7 +31,7 @@ class EmailMessage extends AbstractMessage
             Fb::create(self::FROM_NAME, T\String::create())->build(),
             Fb::create(self::FROM_EMAIL, T\String::create())
                 ->required()
-                ->withAssertion(function ($value, Field $field) {
+                ->assertion(function ($value, Field $field) {
                     \Assert\that($value)->email(null, $field->getName());
                 })
                 ->build(),
@@ -47,13 +47,13 @@ class EmailMessage extends AbstractMessage
             Fb::create(self::BODY, T\String::create())->build(),
             Fb::create(self::PRIORITY, T\IntEnum::create())
                 ->required()
-                ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
+                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
                 ->withDefault(Priority::NORMAL())
                 ->build(),
             Fb::create(self::SENT, T\Boolean::create())->build(),
             Fb::create(self::DATE_SENT, T\Date::create())->build(),
             Fb::create(self::PROVIDER, T\StringEnum::create())
-                ->usingClass('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
             Fb::create(self::LABELS, T\String::create())->asASet()->build(),
