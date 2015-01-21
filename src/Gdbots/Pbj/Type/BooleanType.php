@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class Boolean extends AbstractType
+final class BooleanType extends AbstractType
 {
     /**
      * {@inheritdoc}

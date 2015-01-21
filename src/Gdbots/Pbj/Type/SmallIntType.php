@@ -5,14 +5,14 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class SignedSmallInt extends AbstractInt
+final class SmallIntType extends AbstractIntType
 {
     /**
      * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
-        Assertion::integer($value, null, $field->getName());
-        Assertion::range($value, -32768, 32767, null, $field->getName());
+        parent::guard($value, $field);
+        Assertion::range($value, 0, 65535, null, $field->getName());
     }
 }

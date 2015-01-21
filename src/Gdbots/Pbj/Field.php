@@ -4,6 +4,7 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
+use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Type\IntEnum;
@@ -39,10 +40,9 @@ final class Field implements ToArray, \JsonSerializable
     private $pattern;
 
     /**
-     * todo: create Format enum for all formats we can implement
      * @link http://spacetelescope.github.io/understanding-json-schema/reference/string.html#format
      *
-     * @var string
+     * @var Format
      */
     private $format;
 
@@ -95,7 +95,7 @@ final class Field implements ToArray, \JsonSerializable
         $format = null,
         $min = 0,
         $max = 0,
-        $precision = 0,
+        $precision = 10,
         $scale = 0,
         $default = null,
         $className = null,
@@ -120,7 +120,14 @@ final class Field implements ToArray, \JsonSerializable
             $this->format = Format::UNKNOWN();
         }
 
-        // numeric constraints (wip)
+        // numeric constraints
+        $this->min = (int) $min;
+        $this->max = (int) $max;
+        if ($this->min > $this->max) {
+            $this->min = $this->max < 0 ? $this->max : 0;
+        }
+        $this->precision = NumberUtils::bound((int) $precision, 1, 65);
+        $this->scale = NumberUtils::bound((int) $scale, 0, $this->precision);
 
         $this->default = $default;
         $this->className = $className;

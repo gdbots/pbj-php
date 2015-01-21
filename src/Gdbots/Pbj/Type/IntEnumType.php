@@ -6,7 +6,7 @@ use Gdbots\Common\Enum;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class StringEnum extends AbstractType
+final class IntEnumType extends AbstractType
 {
     /**
      * {@inheritdoc}
@@ -15,7 +15,8 @@ final class StringEnum extends AbstractType
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
-        Assertion::betweenLength($value->getValue(), 1, 100, null, $field->getName());
+        Assertion::integer($value->getValue(), null, $field->getName());
+        Assertion::range($value->getValue(), 0, 65535, null, $field->getName());
     }
 
     /**
@@ -24,9 +25,9 @@ final class StringEnum extends AbstractType
     public function encode($value, Field $field)
     {
         if ($value instanceof Enum) {
-            return (string) $value->getValue();
+            return (int) $value->getValue();
         }
-        return null;
+        return 0;
     }
 
     /**
@@ -36,10 +37,10 @@ final class StringEnum extends AbstractType
     {
         /** @var Enum $className */
         $className = $field->getClassName();
-        if (empty($value)) {
+        if (null === $value) {
             return $field->getDefault();
         }
-        return $className::create((string) $value);
+        return $className::create((int) $value);
     }
 
     /**
@@ -53,7 +54,7 @@ final class StringEnum extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function isString()
+    public function isNumeric()
     {
         return true;
     }

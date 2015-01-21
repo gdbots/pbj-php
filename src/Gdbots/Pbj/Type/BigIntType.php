@@ -6,7 +6,7 @@ use Gdbots\Common\BigNumber;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class BigInt extends AbstractType
+final class BigIntType extends AbstractType
 {
     /**
      * {@inheritdoc}

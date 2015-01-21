@@ -27,13 +27,13 @@ class EmailMessage extends AbstractMessage
     protected static function defineSchema()
     {
         return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0.0', [
-            Fb::create(self::FROM_NAME, T\String::create())
+            Fb::create(self::FROM_NAME, T\StringType::create())
                 ->build(),
-            Fb::create(self::FROM_EMAIL, T\String::create())
+            Fb::create(self::FROM_EMAIL, T\StringType::create())
                 ->required()
                 ->format('email')
                 ->build(),
-            Fb::create(self::SUBJECT, T\String::create())
+            Fb::create(self::SUBJECT, T\StringType::create())
                 ->withDefault(function (EmailMessage $message = null) {
                     // closure func default spice or gtfo and use named automagic defaults?
                     if (!$message) {
@@ -42,19 +42,19 @@ class EmailMessage extends AbstractMessage
                     return implode(',', $message->getLabels()) . ' test';
                 })
                 ->build(),
-            Fb::create(self::BODY, T\String::create())->build(),
-            Fb::create(self::PRIORITY, T\IntEnum::create())
+            Fb::create(self::BODY, T\StringType::create())->build(),
+            Fb::create(self::PRIORITY, T\IntEnumType::create())
                 ->required()
                 ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
                 ->withDefault(Priority::NORMAL())
                 ->build(),
-            Fb::create(self::SENT, T\Boolean::create())->build(),
-            Fb::create(self::DATE_SENT, T\Date::create())->build(),
-            Fb::create(self::PROVIDER, T\StringEnum::create())
+            Fb::create(self::SENT, T\BooleanType::create())->build(),
+            Fb::create(self::DATE_SENT, T\DateType::create())->build(),
+            Fb::create(self::PROVIDER, T\StringEnumType::create())
                 ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
                 ->build(),
-            Fb::create(self::LABELS, T\String::create())->asASet()->build(),
+            Fb::create(self::LABELS, T\StringType::create())->asASet()->build(),
         ]);
     }
 

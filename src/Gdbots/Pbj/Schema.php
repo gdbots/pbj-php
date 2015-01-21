@@ -30,10 +30,8 @@ final class Schema implements ToArray, \JsonSerializable
     {
         $this->className = $className;
         $this->id = $id;
-
-        // todo: add fixed fields and regex pattern for assertion on schema field
         $this->addField(
-            FieldBuilder::create(self::FIELD_NAME, Type\String::create())
+            FieldBuilder::create(self::FIELD_NAME, Type\StringType::create())
                 ->required()
                 ->pattern(SchemaId::VALID_PATTERN)
                 ->withDefault($this->id->toString())

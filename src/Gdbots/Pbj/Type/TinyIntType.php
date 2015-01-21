@@ -5,14 +5,14 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class MediumInt extends AbstractInt
+final class TinyIntType extends AbstractIntType
 {
     /**
      * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
-        Assertion::integer($value, null, $field->getName());
-        Assertion::range($value, 0, 16777215, null, $field->getName());
+        parent::guard($value, $field);
+        Assertion::range($value, 0, 255, null, $field->getName());
     }
 }

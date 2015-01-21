@@ -5,7 +5,8 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class Decimal extends AbstractType
+// todo: review precision/scale handling.  this seems putrid
+final class DecimalType extends AbstractType
 {
     /**
      * {@inheritdoc}
@@ -20,7 +21,7 @@ final class Decimal extends AbstractType
      */
     public function encode($value, Field $field)
     {
-        return (float) $value;
+        return (float) bcadd((float) $value, '0', $field->getScale());
     }
 
     /**
@@ -28,9 +29,7 @@ final class Decimal extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        // http://stackoverflow.com/questions/9079158/php-dropping-decimals-without-rounding-up
-        // http://stackoverflow.com/questions/10643273/no-truncate-function-in-php-options
-        return (float) $value;
+        return (float) bcadd((float) $value, '0', $field->getScale());
     }
 
     /**

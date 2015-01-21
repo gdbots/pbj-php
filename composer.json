@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=5.4",
+    "ext-bcmath": "*",
     "beberlei/assert": "~2.1",
     "gdbots/common-php": "dev-master"
   },

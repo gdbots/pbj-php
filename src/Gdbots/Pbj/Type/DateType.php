@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-final class Date extends AbstractType
+final class DateType extends AbstractType
 {
     /**
      * {@inheritdoc}

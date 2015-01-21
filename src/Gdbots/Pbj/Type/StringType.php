@@ -7,7 +7,7 @@ use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
 
-final class String extends AbstractType
+final class StringType extends AbstractType
 {
     /**
      * {@inheritdoc}
