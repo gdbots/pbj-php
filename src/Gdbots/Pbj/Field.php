@@ -7,8 +7,8 @@ use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
-use Gdbots\Pbj\Type\IntEnum;
-use Gdbots\Pbj\Type\StringEnum;
+use Gdbots\Pbj\Type\IntEnumType;
+use Gdbots\Pbj\Type\StringEnumType;
 use Gdbots\Pbj\Type\Type;
 
 final class Field implements ToArray, \JsonSerializable
@@ -133,7 +133,7 @@ final class Field implements ToArray, \JsonSerializable
         $this->className = $className;
         $this->assertion = $assertion;
 
-        if ($this->type instanceof IntEnum || $this->type instanceof StringEnum) {
+        if ($this->type instanceof IntEnumType || $this->type instanceof StringEnumType) {
             Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name));
         }
 

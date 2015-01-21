@@ -35,7 +35,6 @@ final class StringType extends AbstractType
             default:
                 break;
         }
-
     }
 
     /**
@@ -55,8 +54,6 @@ final class StringType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        // todo: do we auto truncate string or let the exception get thrown?
-        // we cast ints and bools, so do we autofix this shit or not
         $value = trim((string) $value);
         if ($value === '') {
             return null;
@@ -70,19 +67,5 @@ final class StringType extends AbstractType
     public function isString()
     {
         return true;
-    }
-
-    /**
-     * @param string $str
-     * @param int $length
-     * @return string
-     */
-    private function truncate($str, $length = 255)
-    {
-        $strLength = mb_strlen($str);
-        if ($strLength <= $length) {
-            return $str;
-        }
-        return mb_substr($str, 0, $length);
     }
 }
