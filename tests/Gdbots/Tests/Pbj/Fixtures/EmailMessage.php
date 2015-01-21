@@ -3,7 +3,6 @@
 namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Pbj\AbstractMessage;
-use Gdbots\Pbj\Field;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
@@ -28,12 +27,11 @@ class EmailMessage extends AbstractMessage
     protected static function defineSchema()
     {
         return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0.0', [
-            Fb::create(self::FROM_NAME, T\String::create())->build(),
+            Fb::create(self::FROM_NAME, T\String::create())
+                ->build(),
             Fb::create(self::FROM_EMAIL, T\String::create())
                 ->required()
-                ->assertion(function ($value, Field $field) {
-                    \Assert\that($value)->email(null, $field->getName());
-                })
+                ->format('email')
                 ->build(),
             Fb::create(self::SUBJECT, T\String::create())
                 ->withDefault(function (EmailMessage $message = null) {

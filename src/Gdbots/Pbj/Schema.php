@@ -35,7 +35,8 @@ final class Schema implements ToArray, \JsonSerializable
         $this->addField(
             FieldBuilder::create(self::FIELD_NAME, Type\String::create())
                 ->required()
-                //->withDefault($this->id->toString())
+                ->pattern(SchemaId::VALID_PATTERN)
+                ->withDefault($this->id->toString())
                 ->build()
         );
     }

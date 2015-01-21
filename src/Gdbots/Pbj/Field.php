@@ -111,10 +111,14 @@ final class Field implements ToArray, \JsonSerializable
         $this->required = $required;
 
         // string constraints
-        $this->minLength = abs((int) $minLength);
-        $this->maxLength = abs((int) $maxLength);
+        $this->minLength = (int) $minLength;
+        $this->maxLength = (int) $maxLength;
         $this->pattern = $pattern;
-        $this->format = empty($format) ? null : Format::create($format);
+        if (null !== $format && in_array($format, Format::values())) {
+            $this->format = Format::create($format);
+        } else {
+            $this->format = Format::UNKNOWN();
+        }
 
         // numeric constraints (wip)
 
@@ -220,7 +224,7 @@ final class Field implements ToArray, \JsonSerializable
     }
 
     /**
-     * @return string
+     * @return Format
      */
     public function getFormat()
     {
@@ -389,12 +393,20 @@ final class Field implements ToArray, \JsonSerializable
     public function toArray()
     {
         return [
-            'name' => $this->name,
-            'type' => $this->type->getTypeName()->getValue(),
-            'rule' => $this->rule->getName(),
-            'required' => $this->required,
-            'default' => $this->getDefault(),
-            'class_name' => $this->className,
+            'name'          => $this->name,
+            'type'          => $this->type->getTypeName()->getValue(),
+            'rule'          => $this->rule->getName(),
+            'required'      => $this->required,
+            'min_length'    => $this->minLength,
+            'max_length'    => $this->maxLength,
+            'pattern'       => $this->pattern,
+            'format'        => $this->format->getValue(),
+            'min'           => $this->min,
+            'max'           => $this->max,
+            'precision'     => $this->precision,
+            'scale'         => $this->scale,
+            'default'       => $this->getDefault(),
+            'class_name'    => $this->className,
             'has_assertion' => null !== $this->assertion
         ];
     }
