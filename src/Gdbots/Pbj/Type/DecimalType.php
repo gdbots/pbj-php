@@ -47,4 +47,20 @@ final class DecimalType extends AbstractType
     {
         return true;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMin()
+    {
+        return -1;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMax()
+    {
+        return INF;
+    }
 }

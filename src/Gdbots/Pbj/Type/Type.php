@@ -75,13 +75,13 @@ interface Type
     public function isString();
 
     /**
-     * Returns the minimum value supported by a numeric type.
+     * Returns the minimum value supported by an integer type.
      * @return int
      */
     public function getMin();
 
     /**
-     * Returns the maximum value supported by a numeric type.
+     * Returns the maximum value supported by an integer type.
      * @return int
      */
     public function getMax();
