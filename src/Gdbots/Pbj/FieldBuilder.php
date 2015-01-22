@@ -20,10 +20,10 @@ final class FieldBuilder
     private $required = false;
 
     /** @var int */
-    private $minLength = 0;
+    private $minLength;
 
     /** @var int */
-    private $maxLength = 0;
+    private $maxLength;
 
     /** @var string */
     private $pattern;
@@ -32,16 +32,16 @@ final class FieldBuilder
     private $format;
 
     /** @var int */
-    private $min = 0;
+    private $min;
 
     /** @var int */
-    private $max = 0;
+    private $max;
 
     /** @var int */
     private $precision = 10;
 
     /** @var int */
-    private $scale = 0;
+    private $scale = 2;
 
     /** @var mixed */
     private $default;
@@ -138,13 +138,21 @@ final class FieldBuilder
 
     /**
      * @param int $minLength
+     * @return self
+     */
+    public function minLength($minLength)
+    {
+        $this->minLength = (int) $minLength;
+        return $this;
+    }
+
+    /**
      * @param int $maxLength
      * @return self
      */
-    public function betweenLength($minLength = 0, $maxLength = 0)
+    public function maxLength($maxLength)
     {
-        $this->minLength = $minLength;
-        $this->maxLength = $maxLength;
+        $this->maxLength = (int) $maxLength;
         return $this;
     }
 
@@ -170,25 +178,41 @@ final class FieldBuilder
 
     /**
      * @param int $min
+     * @return self
+     */
+    public function min($min)
+    {
+        $this->min = (int) $min;
+        return $this;
+    }
+
+    /**
      * @param int $max
      * @return self
      */
-    public function range($min = 0, $max = 0)
+    public function max($max)
     {
-        $this->min = $min;
-        $this->max = $max;
+        $this->max = (int) $max;
         return $this;
     }
 
     /**
      * @param int $precision
+     * @return self
+     */
+    public function precision($precision)
+    {
+        $this->precision = (int) $precision;
+        return $this;
+    }
+
+    /**
      * @param int $scale
      * @return self
      */
-    public function precision($precision = 10, $scale = 0)
+    public function scale($scale)
     {
-        $this->precision = $precision;
-        $this->scale = $scale;
+        $this->scale = (int) $scale;
         return $this;
     }
 

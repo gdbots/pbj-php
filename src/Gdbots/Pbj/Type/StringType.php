@@ -2,22 +2,18 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
 
-final class StringType extends AbstractType
+final class StringType extends AbstractStringType
 {
     /**
      * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
-        $maxLength = $field->getMaxLength() ?: 255;
-        $maxLength = NumberUtils::bound($maxLength, 0, 255);
-        $minLength = NumberUtils::bound($field->getMinLength(), 0, $maxLength);
-        Assertion::betweenLength($value, $minLength, $maxLength, null, $field->getName());
+        parent::guard($value, $field);
 
         if ($pattern = $field->getPattern()) {
             Assertion::regex($value, $pattern, null, $field->getName());
@@ -40,32 +36,8 @@ final class StringType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function getMaxBytes()
     {
-        $value = trim($value);
-        if ($value === '') {
-            return null;
-        }
-        return $value;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field)
-    {
-        $value = trim((string) $value);
-        if ($value === '') {
-            return null;
-        }
-        return $value;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
-    {
-        return true;
+        return 255;
     }
 }

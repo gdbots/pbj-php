@@ -73,4 +73,22 @@ interface Type
      * @return bool
      */
     public function isString();
+
+    /**
+     * Returns the minimum value supported by a numeric type.
+     * @return int
+     */
+    public function getMin();
+
+    /**
+     * Returns the maximum value supported by a numeric type.
+     * @return int
+     */
+    public function getMax();
+
+    /**
+     * Returns the maximum number of bytes supported by the string or binary type.
+     * @return int
+     */
+    public function getMaxBytes();
 }

@@ -26,7 +26,7 @@ class EmailMessage extends AbstractMessage
      */
     protected static function defineSchema()
     {
-        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0.0', [
+        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0', [
             Fb::create(self::FROM_NAME, T\StringType::create())
                 ->build(),
             Fb::create(self::FROM_EMAIL, T\StringType::create())

@@ -15,7 +15,23 @@ final class StringEnumType extends AbstractType
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
-        Assertion::betweenLength($value->getValue(), 1, 100, null, $field->getName());
+        $v = $value->getValue();
+        Assertion::string($v, null, $field->getName());
+
+        // intentionally using strlen to get byte length, not mb_strlen
+        $length = strlen($v);
+        $maxBytes = $this->getMaxBytes();
+        $okay = $length > 0 && $length <= $maxBytes;
+        Assertion::true(
+            $okay,
+            sprintf(
+                'Field [%s] must be between [1] and [%d] bytes, [%d] bytes given.',
+                $field->getName(),
+                $maxBytes,
+                $length
+            ),
+            $field->getName()
+        );
     }
 
     /**
@@ -56,5 +72,13 @@ final class StringEnumType extends AbstractType
     public function isString()
     {
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMaxBytes()
+    {
+        return 100;
     }
 }

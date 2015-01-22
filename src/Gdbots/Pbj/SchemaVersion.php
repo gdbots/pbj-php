@@ -7,7 +7,7 @@ use Gdbots\Pbj\Exception\InvalidSchemaVersionException;
 /**
  * Similar to semantic versioning but with dashes and no "alpha, beta, etc." qualifiers.
  *
- * E.g. 1-0-0.0 (model-revision-addition.patch)
+ * E.g. 1-0-0 (model-revision-addition)
  *
  * MODEL
  * Is incremented when a change is made which breaks the rules of Protobuf/Thrift backward compatibility,
@@ -23,7 +23,7 @@ use Gdbots\Pbj\Exception\InvalidSchemaVersionException;
  * the schema can be used to deserialize records created from the new version of the schema, and
  * vice versa. Example: adding a new optional field.
  *
- * PATCH
+ * PATCH (Intentionally not implemented yet, possibly never)
  * Is incremented for changes which fix mistakes in the definition of the schema, rather than changes
  * to the model of the data.
  *
@@ -38,10 +38,10 @@ final class SchemaVersion implements \JsonSerializable
      * Regular expression pattern for matching a valid SchemaVersion string.
      * @constant string
      */
-    const VALID_PATTERN = '/^([0-9]+)-([0-9]+)-([0-9]+)\.([0-9]+)$/';
+    const VALID_PATTERN = '/^([0-9]+)-([0-9]+)-([0-9]+)$/';
 
     /**
-     * E.g. 1-0-0.0 (model-revision-addition.patch)
+     * E.g. 1-0-0 (model-revision-addition)
      *
      * @var string
      */
@@ -56,30 +56,25 @@ final class SchemaVersion implements \JsonSerializable
     /** @var int */
     private $addition;
 
-    /** @var int */
-    private $patch;
-
     /**
      * @param int $model
      * @param int $revision
      * @param int $addition
-     * @param int $patch
      */
-    private function __construct($model = 1, $revision = 0, $addition = 0, $patch = 0)
+    private function __construct($model = 1, $revision = 0, $addition = 0)
     {
         $this->model = (int) $model;
         $this->revision = (int) $revision;
         $this->addition = (int) $addition;
-        $this->patch = (int) $patch;
-        $this->version = sprintf('%d-%d-%d.%d', $this->model, $this->revision, $this->addition, $this->patch);
+        $this->version = sprintf('%d-%d-%d', $this->model, $this->revision, $this->addition);
     }
 
     /**
-     * @param string $version   SchemaVersion string, e.g. 1-0-0.0
+     * @param string $version   SchemaVersion string, e.g. 1-0-0
      * @return SchemaVersion
      * @throws InvalidSchemaVersionException
      */
-    public static function fromString($version = '1-0-0.0')
+    public static function fromString($version = '1-0-0')
     {
         if (!preg_match(self::VALID_PATTERN, $version, $matches)) {
             throw new InvalidSchemaVersionException(
@@ -91,7 +86,7 @@ final class SchemaVersion implements \JsonSerializable
             );
         }
 
-        return new self($matches[1], $matches[2], $matches[3], $matches[4]);
+        return new self($matches[1], $matches[2], $matches[3]);
     }
 
     /**
@@ -140,13 +135,5 @@ final class SchemaVersion implements \JsonSerializable
     public function getAddition()
     {
         return $this->addition;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPatch()
-    {
-        return $this->patch;
     }
 }

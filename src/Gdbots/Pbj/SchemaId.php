@@ -27,9 +27,9 @@ use Gdbots\Pbj\Exception\InvalidSchemaIdException;
  *  VERSION:  @see SchemaVersion::VALID_PATTERN
  *
  * Examples of fully qualified schema ids:
- *  acme:videos:event:video-uploaded:1-0-0.0
- *  acme:users:command:register-user:1-1-0.2
- *  acme:api.videos:request:get-video:1-0-0.0
+ *  acme:videos:event:video-uploaded:1-0-0
+ *  acme:users:command:register-user:1-1-0
+ *  acme:api.videos:request:get-video:1-0-0
  *
  * The fully qualified schema identifier corresponds to a json schema implementing
  * the Gdbots PBJ Json Schema.
@@ -49,7 +49,7 @@ final class SchemaId implements \JsonSerializable
      * Regular expression pattern for matching a valid SchemaId string.
      * @constant string
      */
-    const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+\.[0-9]+)$/';
+    const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$/';
 
     private static $instances = [];
 
@@ -106,7 +106,8 @@ final class SchemaId implements \JsonSerializable
             return self::$instances[$schemaId];
         }
 
-        Assertion::maxLength($schemaId, 255, 'Schema id cannot be greater than 255 chars.', 'schemaId');
+        $okay = strlen($schemaId) < 151;
+        Assertion::true($okay, 'Schema id cannot be greater than 150 chars.', 'schemaId');
         if (!preg_match(self::VALID_PATTERN, $schemaId, $matches)) {
             throw new InvalidSchemaIdException(
                 sprintf(

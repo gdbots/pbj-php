@@ -16,7 +16,7 @@ final class IntEnumType extends AbstractType
         /** @var Enum $value */
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         Assertion::integer($value->getValue(), null, $field->getName());
-        Assertion::range($value->getValue(), 0, 65535, null, $field->getName());
+        Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $field->getName());
     }
 
     /**
@@ -57,5 +57,21 @@ final class IntEnumType extends AbstractType
     public function isNumeric()
     {
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMin()
+    {
+        return 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMax()
+    {
+        return 65535;
     }
 }

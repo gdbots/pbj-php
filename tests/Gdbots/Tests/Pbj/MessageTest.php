@@ -14,6 +14,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     {
         $json = <<<JSON
 {
+    "_pbj": "gdbots:tests.pbj:fixtures:email-message:1-0-0",
     "from_name": "homer  ",
     "from_email": "homer@thesimpsons.com",
     "priority": 2,

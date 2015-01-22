@@ -20,7 +20,7 @@ final class MapsMessage extends AbstractMessage
         /** @var \SplFileInfo $file */
         foreach ($files as $file) {
             $type = $file->getBasename('Type.php');
-            if (!$file->isFile() || in_array($type, ['AbstractInt', 'Abstract', 'Type.php', '..', '.'])) {
+            if (!$file->isFile() || in_array($type, ['AbstractInt', 'AbstractString', 'Abstract', 'Type.php', '..', '.'])) {
                 continue;
             }
             $types[$type] = 'Gdbots\Pbj\Type\\' . $type . 'Type';
@@ -53,11 +53,13 @@ final class MapsMessage extends AbstractMessage
                     break;
 
                 default:
-                    $fields[] = Fb::create($type, $class::create())->asAMap()->build();
+                    $fields[] = Fb::create($type, $class::create())
+                        ->asAMap()
+                        ->build();
             }
         }
 
-        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:maps-message:1-0-0.0', $fields);
+        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:maps-message:1-0-0', $fields);
     }
 
     /**

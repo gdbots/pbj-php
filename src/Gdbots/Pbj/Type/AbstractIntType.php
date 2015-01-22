@@ -14,17 +14,10 @@ abstract class AbstractIntType extends AbstractType
     public function guard($value, Field $field)
     {
         Assertion::integer($value, null, $field->getName());
-
-        $min = $field->getMin();
-        $max = $field->getMax();
-
-        if ($min === 0 && $max === 0) {
-            return;
-        }
-
-        $max = $max ?: 2147483647;
-        $max = NumberUtils::bound($max, -2147483648, 2147483647);
-        $min = NumberUtils::bound($min, -2147483648, $max);
+        $intMin = $this->getMin();
+        $intMax = $this->getMax();
+        $min = NumberUtils::bound($field->getMin(), $intMin, $intMax);
+        $max = NumberUtils::bound($field->getMax(), $intMin, $intMax);
         Assertion::range($value, $min, $max, null, $field->getName());
     }
 

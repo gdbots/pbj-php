@@ -91,4 +91,28 @@ abstract class AbstractType implements Type
     {
         return false;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMin()
+    {
+        return -2147483648;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMax()
+    {
+        return 2147483647;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMaxBytes()
+    {
+        return 64000;
+    }
 }

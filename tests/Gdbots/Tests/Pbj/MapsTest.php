@@ -20,5 +20,7 @@ class MapsTest extends \PHPUnit_Framework_TestCase
             ->addToAMap('String', 'test2', '456')
             ->addToAMap('String', 'test3', '789');
         $this->assertSame($message->getAMap('String'), ['test1' => '123', 'test2' => '456', 'test3' => '789']);
+
+        //echo json_encode($message->schema(), JSON_PRETTY_PRINT);
     }
 }

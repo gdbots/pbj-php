@@ -2,17 +2,21 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Pbj\Assertion;
-use Gdbots\Pbj\Field;
-
 final class SmallIntType extends AbstractIntType
 {
     /**
      * {@inheritdoc}
      */
-    public function guard($value, Field $field)
+    public function getMin()
     {
-        parent::guard($value, $field);
-        Assertion::range($value, 0, 65535, null, $field->getName());
+        return 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMax()
+    {
+        return 65535;
     }
 }

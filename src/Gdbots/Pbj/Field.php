@@ -26,10 +26,10 @@ final class Field implements ToArray, \JsonSerializable
     private $required = false;
 
     /** @var int */
-    private $minLength = 0;
+    private $minLength;
 
     /** @var int */
-    private $maxLength = 0;
+    private $maxLength;
 
     /**
      * A regular expression to match against for string types.
@@ -47,16 +47,16 @@ final class Field implements ToArray, \JsonSerializable
     private $format;
 
     /** @var int */
-    private $min = 0;
+    private $min;
 
     /** @var int */
-    private $max = 0;
+    private $max;
 
     /** @var int */
     private $precision = 10;
 
     /** @var int */
-    private $scale = 0;
+    private $scale = 2;
 
     /** @var mixed */
     private $default;
@@ -72,12 +72,12 @@ final class Field implements ToArray, \JsonSerializable
      * @param Type $type
      * @param FieldRule $rule
      * @param bool $required
-     * @param int $minLength
-     * @param int $maxLength
+     * @param null|int $minLength
+     * @param null|int $maxLength
      * @param null|string $pattern
      * @param null|string $format
-     * @param int $min
-     * @param int $max
+     * @param null|int $min
+     * @param null|int $max
      * @param int $precision
      * @param int $scale
      * @param null|mixed $default
@@ -89,14 +89,14 @@ final class Field implements ToArray, \JsonSerializable
         Type $type,
         FieldRule $rule = null,
         $required = false,
-        $minLength = 0,
-        $maxLength = 0,
+        $minLength = null,
+        $maxLength = null,
         $pattern = null,
         $format = null,
-        $min = 0,
-        $max = 0,
+        $min = null,
+        $max = null,
         $precision = 10,
-        $scale = 0,
+        $scale = 2,
         $default = null,
         $className = null,
         \Closure $assertion = null
@@ -111,8 +111,16 @@ final class Field implements ToArray, \JsonSerializable
         $this->required = $required;
 
         // string constraints
-        $this->minLength = (int) $minLength;
-        $this->maxLength = (int) $maxLength;
+        $minLength = (int) $minLength;
+        $maxLength = (int) $maxLength;
+        if ($maxLength > 0) {
+            $this->maxLength = $maxLength;
+            $this->minLength = NumberUtils::bound($minLength, 0, $this->maxLength);
+        } else {
+            // arbitrary string minimum range
+            $this->minLength = NumberUtils::bound($minLength, 0, $this->type->getMaxBytes());
+        }
+
         $this->pattern = $pattern;
         if (null !== $format && in_array($format, Format::values())) {
             $this->format = Format::create($format);
@@ -120,12 +128,20 @@ final class Field implements ToArray, \JsonSerializable
             $this->format = Format::UNKNOWN();
         }
 
-        // numeric constraints
-        $this->min = (int) $min;
-        $this->max = (int) $max;
-        if ($this->min > $this->max) {
-            $this->min = $this->max < 0 ? $this->max : 0;
+        // numeric constraints (allow for negative values and ensure min <= max)
+        if (null !== $max) {
+            $this->max = (int) $max;
         }
+
+        if (null !== $min) {
+            $this->min = (int) $min;
+            if (null !== $this->max) {
+                if ($this->min > $this->max) {
+                    $this->min = $this->max;
+                }
+            }
+        }
+
         $this->precision = NumberUtils::bound((int) $precision, 1, 65);
         $this->scale = NumberUtils::bound((int) $scale, 0, $this->precision);
 
@@ -219,6 +235,9 @@ final class Field implements ToArray, \JsonSerializable
      */
     public function getMaxLength()
     {
+        if (null === $this->maxLength) {
+            return $this->type->getMaxBytes();
+        }
         return $this->maxLength;
     }
 
@@ -243,6 +262,9 @@ final class Field implements ToArray, \JsonSerializable
      */
     public function getMin()
     {
+        if (null === $this->min) {
+            return $this->type->getMin();
+        }
         return $this->min;
     }
 
@@ -251,6 +273,9 @@ final class Field implements ToArray, \JsonSerializable
      */
     public function getMax()
     {
+        if (null === $this->max) {
+            return $this->type->getMax();
+        }
         return $this->max;
     }
 
