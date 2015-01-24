@@ -13,6 +13,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName INT()
  * @method static TypeName INT_ENUM()
  * @method static TypeName MEDIUM_INT()
+ * @method static TypeName MICROTIME()
  * @method static TypeName MESSAGE()
  * @method static TypeName SIGNED_BIG_INT()
  * @method static TypeName SIGNED_INT()
@@ -33,6 +34,7 @@ final class TypeName extends Enum
     const FLOAT = 'float';
     const INT = 'int';
     const INT_ENUM = 'int-enum';
+    const MICROTIME = 'microtime';
     const MEDIUM_INT = 'medium-int';
     const MESSAGE = 'message';
     const SIGNED_BIG_INT = 'signed-big-int';

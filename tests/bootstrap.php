@@ -22,10 +22,16 @@ echo 'microtime(true) => ' . microtime(true) . PHP_EOL;
 while(true) {
     // echo 'id => ' . id() . PHP_EOL;
     $tod = gettimeofday();
+    var_dump($tod);
+    var_dump(microtime());
+
+    echo 'usec => ' . strlen($tod['usec']) . PHP_EOL;
+
     $uuidTime = ($tod['sec'] * 10000000) + ($tod['usec'] * 10) + 0x01b21dd213814000;
     echo 'uuidtime   => ' . $uuidTime . PHP_EOL;
     echo 'microtime  => ' . microtime() . PHP_EOL;
-    echo 'microtime2 => ' . microtime(true) * 10000 . PHP_EOL . PHP_EOL;
+    echo 'microtime2  => ' . microtime(true) . PHP_EOL;
+    echo 'microtime3 => ' . microtime(true) * 10000 . PHP_EOL . PHP_EOL;
     usleep(150000);
 }
 */

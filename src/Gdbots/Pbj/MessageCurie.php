@@ -192,8 +192,8 @@ final class MessageCurie implements \JsonSerializable
             throw new \LogicException(sprintf('Class [%s] does not follow Vendor\\Package[\\SubPackage]\\%s\\Something%s convention.', $class, $type, $type));
         }
 
-        $namespace = StringUtils::toSlugFromCamelCase(array_shift($parts));
-        $message = StringUtils::toSlugFromCamelCase(str_replace($longType, '', array_pop($parts)));
+        $namespace = StringUtils::toSlugFromCamel(array_shift($parts));
+        $message = StringUtils::toSlugFromCamel(str_replace($longType, '', array_pop($parts)));
 
         $service = [];
         foreach ($parts as $part) {
@@ -201,7 +201,7 @@ final class MessageCurie implements \JsonSerializable
                 continue;
             }
 
-            $service[] = StringUtils::toSlugFromCamelCase($part);
+            $service[] = StringUtils::toSlugFromCamel($part);
         }
 
         $curie = new self($namespace, $type, implode('.', $service), $message);
@@ -255,10 +255,10 @@ final class MessageCurie implements \JsonSerializable
 
         list($namespace, $type, $service, $message) = explode(':', $curie);
 
-        $namespace = StringUtils::toCamelCaseFromSlug($namespace);
+        $namespace = StringUtils::toCamelFromSlug($namespace);
         $longType = self::$types[$type];
-        $service = str_replace('.', '\\', StringUtils::toCamelCaseFromSlug($service));
-        $message = StringUtils::toCamelCaseFromSlug($message);
+        $service = str_replace('.', '\\', StringUtils::toCamelFromSlug($service));
+        $message = StringUtils::toCamelFromSlug($message);
 
         $class = sprintf('%s\%s\%s\%s%s', $namespace, $service, $longType, $message, $longType);
         self::$curieToClass[$curie] = $class;

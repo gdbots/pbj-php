@@ -3,6 +3,7 @@
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Common\BigNumber;
+use Gdbots\Common\Microtime;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
@@ -23,6 +24,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => IntEnum::UNKNOWN(),
             'Int'             => [0, 4294967295],
             'MediumInt'       => [0, 16777215],
+            'Microtime'       => Microtime::create(),
             'SignedBigInt'    => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],
             'SignedSmallInt'  => [-32768, 32767],
@@ -45,6 +47,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => Priority::NORMAL(), // not the correct enum
             'Int'             => [-1, 4294967296],
             'MediumInt'       => [-1, 16777216],
+            'Microtime'       => microtime(),
             'SignedBigInt'    => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
             'SignedMediumInt' => [-8388609, 8388608],
             'SignedSmallInt'  => [-32769, 32768],
@@ -135,5 +138,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                 }
             }
         }
+
+        //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
     }
 }

@@ -18,6 +18,7 @@ class EmailMessage extends AbstractMessage
     const PRIORITY   = 'priority';
     const SENT       = 'sent';
     const DATE_SENT  = 'date_sent';
+    const MICROTIME_SENT = 'microtime_sent';
     const PROVIDER   = 'provider';
     const LABELS     = 'labels';
 
@@ -50,6 +51,7 @@ class EmailMessage extends AbstractMessage
                 ->build(),
             Fb::create(self::SENT, T\BooleanType::create())->build(),
             Fb::create(self::DATE_SENT, T\DateType::create())->build(),
+            Fb::create(self::MICROTIME_SENT, T\MicrotimeType::create())->build(),
             Fb::create(self::PROVIDER, T\StringEnumType::create())
                 ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
                 ->withDefault(Provider::GMAIL())
