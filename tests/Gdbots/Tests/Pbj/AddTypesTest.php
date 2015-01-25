@@ -19,6 +19,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'BigInt'          => [new BigNumber(0), new BigNumber('18446744073709551615')],
             'Boolean'         => [false, true],
             'Date'            => new \DateTime(),
+            'DateTime'        => new \DateTime(),
             'Decimal'         => 3.14,
             'Float'           => 13213.032468,
             'IntEnum'         => IntEnum::UNKNOWN(),
@@ -42,6 +43,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'BigInt'          => [new BigNumber(-1), new BigNumber('18446744073709551616')],
             'Boolean'         => 'not_a_bool',
             'Date'            => 'not_a_date',
+            'DateTime'        => 'not_a_date',
             'Decimal'         => 1,
             'Float'           => 1,
             'IntEnum'         => Priority::NORMAL(), // not the correct enum
@@ -120,6 +122,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                     }
 
                     if ('Decimal' == $type && 'Float' == $k || 'Float' == $type && 'Decimal' == $k) {
+                        continue;
+                    } elseif ('Date' == $type && 'DateTime' == $k || 'DateTime' == $type && 'Date' == $k) {
                         continue;
                     } elseif (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
                         continue;

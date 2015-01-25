@@ -36,6 +36,11 @@ final class MicrotimeType extends AbstractType
         if ($value instanceof Microtime) {
             return $value;
         }
+
+        if (empty($value)) {
+            return null;
+        }
+
         return Microtime::fromString((string) $value);
     }
 

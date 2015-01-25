@@ -8,6 +8,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName BIG_INT()
  * @method static TypeName BOOLEAN()
  * @method static TypeName DATE()
+ * @method static TypeName DATE_TIME()
  * @method static TypeName DECIMAL()
  * @method static TypeName FLOAT()
  * @method static TypeName INT()
@@ -30,6 +31,7 @@ final class TypeName extends Enum
     const BIG_INT = 'big-int';
     const BOOLEAN = 'boolean';
     const DATE = 'date';
+    const DATE_TIME = 'date-time';
     const DECIMAL = 'decimal';
     const FLOAT = 'float';
     const INT = 'int';

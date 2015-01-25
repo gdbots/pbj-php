@@ -43,7 +43,7 @@ final class SignedBigIntType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        if ($value instanceof BigNumber) {
+        if (null === $value || $value instanceof BigNumber) {
             return $value;
         }
         return new BigNumber((string) $value);

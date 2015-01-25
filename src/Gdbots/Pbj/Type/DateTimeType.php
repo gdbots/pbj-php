@@ -2,14 +2,17 @@
 
 namespace Gdbots\Pbj\Type;
 
+use Gdbots\Common\Util\DateUtils;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\DecodeValueException;
 use Gdbots\Pbj\Field;
 
 // todo: use DateTimeImmutable?
-final class DateType extends AbstractType
+final class DateTimeType extends AbstractType
 {
+    /** @var \DateTimeZone */
+    private $utc;
 
     /**
      * {@inheritdoc}
@@ -26,7 +29,7 @@ final class DateType extends AbstractType
     public function encode($value, Field $field)
     {
         if ($value instanceof \DateTime) {
-            return $value->format('Y-m-d');
+            return $this->convertToUtc($value)->format(DateUtils::ISO8601);
         }
         return null;
     }
@@ -37,16 +40,16 @@ final class DateType extends AbstractType
     public function decode($value, Field $field)
     {
         if ($value instanceof \DateTime) {
-            return $value;
+            return $this->convertToUtc($value);
         }
 
         if (empty($value)) {
             return null;
         }
 
-        $date = \DateTime::createFromFormat('!Y-m-d', $value);
+        $date = \DateTime::createFromFormat(DateUtils::ISO8601, $value);
         if ($date instanceof \DateTime) {
-            return $date;
+            return $this->convertToUtc($date);
         }
 
         throw new DecodeValueException(
@@ -54,10 +57,11 @@ final class DateType extends AbstractType
             $this,
             $field,
             sprintf(
-                'Failed to decode [%s] for field [%s] to a [%s].  Format must be [Y-m-d].  Errors: [%s]',
+                'Failed to decode [%s] for field [%s] to a [%s].  Format must be [%s].  Errors: [%s]',
                 is_scalar($value) ? $value : StringUtils::varToString($value),
                 $field->getName(),
                 $this->getTypeName()->getValue(),
+                DateUtils::ISO8601,
                 // this is mutant
                 print_r(\DateTime::getLastErrors(), true)
             )
@@ -78,5 +82,22 @@ final class DateType extends AbstractType
     public function isString()
     {
         return true;
+    }
+
+    /**
+     * @param \DateTime $date
+     * @return \DateTime
+     */
+    private function convertToUtc(\DateTime $date)
+    {
+        if (null === $this->utc) {
+            $this->utc = new \DateTimeZone('UTC');
+        }
+
+        if ($date->getOffset() !== 0) {
+            $date->setTimezone($this->utc);
+        }
+
+        return $date;
     }
 }

@@ -50,7 +50,7 @@ class EmailMessage extends AbstractMessage
                 ->withDefault(Priority::NORMAL())
                 ->build(),
             Fb::create(self::SENT, T\BooleanType::create())->build(),
-            Fb::create(self::DATE_SENT, T\DateType::create())->build(),
+            Fb::create(self::DATE_SENT, T\DateTimeType::create())->build(),
             Fb::create(self::MICROTIME_SENT, T\MicrotimeType::create())->build(),
             Fb::create(self::PROVIDER, T\StringEnumType::create())
                 ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')

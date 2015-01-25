@@ -16,4 +16,25 @@ do {
 } while ($i < numTimes());
 
 echo Yaml::dump($message->toArray()) . PHP_EOL;
-echo number_format(microtime(true) - $startTime, 6) . ' seconds' . PHP_EOL;
+
+// speed report
+$benchmark = microtime(true) - $startTime;
+$seconds = number_format($benchmark, 6);
+$totalMessages = numTimes();
+$perSecond = floor($totalMessages / $benchmark);
+$perMinute = $perSecond * 60;
+$report = <<<STRING
+
+Total Time:
+    {$seconds} seconds
+
+Messages Processed:
+    {$totalMessages}
+
+Rate:
+    {$perSecond} messages / second
+    {$perMinute} messages / minute
+
+
+STRING;
+echo $report;

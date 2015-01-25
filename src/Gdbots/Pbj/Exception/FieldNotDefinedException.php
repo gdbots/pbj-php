@@ -18,9 +18,11 @@ class FieldNotDefinedException extends SchemaException
         $this->schema = $schema;
         $this->fieldName = $fieldName;
         parent::__construct(
-            sprintf('Field [%s] is not defined on message [%s].',
-            $this->fieldName,
-            $this->schema->getClassName())
+            sprintf(
+                'Field [%s] is not defined on message [%s].',
+                $this->fieldName,
+                $this->schema->getClassName()
+            )
         );
     }
 

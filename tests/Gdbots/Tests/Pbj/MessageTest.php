@@ -19,7 +19,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     "from_email": "homer@thesimpsons.com",
     "priority": 2,
     "sent": false,
-    "date_sent": "2014-12-25",
+    "date_sent": "2014-12-25T12:12:00.123456+00:00",
     "microtime_sent": "1422122017734617",
     "provider": "gmail",
     "labels": [

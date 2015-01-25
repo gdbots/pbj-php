@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Enum;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Exception\DecodeValueException;
 use Gdbots\Pbj\Field;
 
 final class StringEnumType extends AbstractType
@@ -53,9 +54,24 @@ final class StringEnumType extends AbstractType
         /** @var Enum $className */
         $className = $field->getClassName();
         if (empty($value)) {
-            return $field->getDefault();
+            return null;
         }
-        return $className::create((string) $value);
+
+        try {
+            return $className::create((string) $value);
+        } catch (\Exception $e) {
+            throw new DecodeValueException(
+                $value,
+                $this,
+                $field,
+                sprintf(
+                    'Failed to decode value for field [%s] to a [%s].  %s',
+                    $field->getName(),
+                    $this->getTypeName()->getValue(),
+                    $e->getMessage()
+                )
+            );
+        }
     }
 
     /**

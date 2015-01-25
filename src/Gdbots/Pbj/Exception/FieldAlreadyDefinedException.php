@@ -19,9 +19,11 @@ class FieldAlreadyDefinedException extends SchemaException
         $this->schema = $schema;
         $this->field = $this->schema->getField($fieldName);
         parent::__construct(
-            sprintf('Field [%s] is already defined on message [%s].',
-            $this->field->getName(),
-            $this->schema->getClassName())
+            sprintf(
+                'Field [%s] is already defined on message [%s].',
+                $this->field->getName(),
+                $this->schema->getClassName()
+            )
         );
     }
 

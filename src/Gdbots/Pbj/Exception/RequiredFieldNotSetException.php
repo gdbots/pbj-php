@@ -23,9 +23,11 @@ class RequiredFieldNotSetException extends SchemaException
         $this->schema = $type->schema();
         $this->field = $field;
         parent::__construct(
-            sprintf('Required field [%s] must be set on message [%s].',
-            $this->field->getName(),
-            $this->schema->getClassName())
+            sprintf(
+                'Required field [%s] must be set on message [%s].',
+                $this->field->getName(),
+                $this->schema->getClassName()
+            )
         );
     }
 
