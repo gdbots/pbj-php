@@ -3,8 +3,8 @@
 namespace Gdbots\Pbj;
 
 use Gdbots\Common\ToArray;
-use Gdbots\Pbj\Exception\FieldAlreadyDefinedException;
-use Gdbots\Pbj\Exception\FieldNotDefinedException;
+use Gdbots\Pbj\Exception\FieldAlreadyDefined;
+use Gdbots\Pbj\Exception\FieldNotDefined;
 
 final class Schema implements ToArray, \JsonSerializable
 {
@@ -97,12 +97,12 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param Field $field
-     * @throws FieldAlreadyDefinedException
+     * @throws FieldAlreadyDefined
      */
     private function addField(Field $field)
     {
         if ($this->hasField($field->getName())) {
-            throw new FieldAlreadyDefinedException($this, $field->getName());
+            throw new FieldAlreadyDefined($this, $field->getName());
         }
         $this->fields[$field->getName()] = $field;
         if ($field->isRequired()) {
@@ -154,12 +154,12 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @param string $fieldName
      * @return Field
-     * @throws FieldNotDefinedException
+     * @throws FieldNotDefined
      */
     public function getField($fieldName)
     {
         if (!isset($this->fields[$fieldName])) {
-            throw new FieldNotDefinedException($this, $fieldName);
+            throw new FieldNotDefined($this, $fieldName);
         }
         return $this->fields[$fieldName];
     }

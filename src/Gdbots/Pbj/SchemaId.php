@@ -2,7 +2,7 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\InvalidSchemaIdException;
+use Gdbots\Pbj\Exception\InvalidSchemaId;
 
 /**
  * Schemas have fully qualified names, similar to a "urn".  This is combination of ideas from:
@@ -111,7 +111,7 @@ final class SchemaId implements \JsonSerializable
     /**
      * @param string $schemaId
      * @return SchemaId
-     * @throws InvalidSchemaIdException
+     * @throws InvalidSchemaId
      */
     public static function fromString($schemaId)
     {
@@ -122,7 +122,7 @@ final class SchemaId implements \JsonSerializable
         $okay = strlen($schemaId) < 151;
         Assertion::true($okay, 'Schema id cannot be greater than 150 chars.', 'schemaId');
         if (!preg_match(self::VALID_PATTERN, $schemaId, $matches)) {
-            throw new InvalidSchemaIdException(
+            throw new InvalidSchemaId(
                 sprintf(
                     'Schema id [%s] is invalid.  It must match the pattern [%s].',
                     $schemaId,

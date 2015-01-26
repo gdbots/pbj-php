@@ -3,14 +3,14 @@
 namespace Gdbots\Pbj;
 
 use Gdbots\Pbj\Exception\GdbotsPbjException;
-use Gdbots\Pbj\Exception\SchemaNotDefinedException;
-use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
+use Gdbots\Pbj\Exception\SchemaNotDefined;
+use Gdbots\Pbj\Exception\RequiredFieldNotSet;
 
 interface Message
 {
     /**
      * @return Schema
-     * @throws SchemaNotDefinedException
+     * @throws SchemaNotDefined
      */
     public static function schema();
 
@@ -44,7 +44,7 @@ interface Message
      * @return static
      *
      * @throws GdbotsPbjException
-     * @throws RequiredFieldNotSetException
+     * @throws RequiredFieldNotSet
      */
     public function validate();
 
@@ -107,7 +107,7 @@ interface Message
      * @return static
      *
      * @throws GdbotsPbjException
-     * @throws RequiredFieldNotSetException
+     * @throws RequiredFieldNotSet
      */
     public function clear($fieldName);
 

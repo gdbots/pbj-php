@@ -2,8 +2,8 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\NoMessageForCurieException;
-use Gdbots\Pbj\Exception\NoMessageForSchemaIdException;
+use Gdbots\Pbj\Exception\NoMessageForCurie;
+use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 
 final class MessageResolver
 {
@@ -24,7 +24,7 @@ final class MessageResolver
      *
      * @param SchemaId $schemaId
      * @return string
-     * @throws NoMessageForSchemaIdException
+     * @throws NoMessageForSchemaId
      */
     public static function resolveSchemaId(SchemaId $schemaId)
     {
@@ -47,7 +47,7 @@ final class MessageResolver
             return $className;
         }
 
-        throw new NoMessageForSchemaIdException($schemaId);
+        throw new NoMessageForSchemaId($schemaId);
     }
 
     /**
@@ -55,7 +55,7 @@ final class MessageResolver
      *
      * @param MessageCurie $curie
      * @return string
-     * @throws NoMessageForCurieException
+     * @throws NoMessageForCurie
      */
     public static function resolveMessageCurie(MessageCurie $curie)
     {
@@ -70,7 +70,7 @@ final class MessageResolver
             return $className;
         }
 
-        throw new NoMessageForCurieException($curie);
+        throw new NoMessageForCurie($curie);
     }
 
     /**

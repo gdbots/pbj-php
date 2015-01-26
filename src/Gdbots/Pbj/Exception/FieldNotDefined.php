@@ -2,13 +2,12 @@
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Schema;
 
-class FieldAlreadyDefinedException extends SchemaException
+class FieldNotDefined extends SchemaException
 {
-    /** @var Field */
-    private $field;
+    /** @var string */
+    private $fieldName;
 
     /**
      * @param Schema $schema
@@ -17,22 +16,14 @@ class FieldAlreadyDefinedException extends SchemaException
     public function __construct(Schema $schema, $fieldName)
     {
         $this->schema = $schema;
-        $this->field = $this->schema->getField($fieldName);
+        $this->fieldName = $fieldName;
         parent::__construct(
             sprintf(
-                'Field [%s] is already defined on message [%s].',
-                $this->field->getName(),
+                'Field [%s] is not defined on message [%s].',
+                $this->fieldName,
                 $this->schema->getClassName()
             )
         );
-    }
-
-    /**
-     * @return Field
-     */
-    public function getField()
-    {
-        return $this->field;
     }
 
     /**
@@ -40,6 +31,6 @@ class FieldAlreadyDefinedException extends SchemaException
      */
     public function getFieldName()
     {
-        return $this->field->getName();
+        return $this->fieldName;
     }
 }

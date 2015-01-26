@@ -4,10 +4,10 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
-use Gdbots\Pbj\Exception\FrozenMessageUnwritableException;
-use Gdbots\Pbj\Exception\SchemaNotDefinedException;
+use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
+use Gdbots\Pbj\Exception\SchemaNotDefined;
 use Gdbots\Pbj\Serializer\PhpArraySerializer;
-use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
+use Gdbots\Pbj\Exception\RequiredFieldNotSet;
 
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
 {
@@ -57,13 +57,13 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             $schema = static::defineSchema();
 
             if (!$schema instanceof Schema) {
-                throw new SchemaNotDefinedException(
+                throw new SchemaNotDefined(
                     sprintf('Message [%s] must return a Schema from the defineSchema method.', $type)
                 );
             }
 
             if ($schema->getClassName() !== $type) {
-                throw new SchemaNotDefinedException(
+                throw new SchemaNotDefined(
                     sprintf(
                         'Schema [%s] returned from defineSchema must be for class [%s], not [%s]',
                         $schema->getId()->toString(),
@@ -79,11 +79,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * @return Schema
-     * @throws SchemaNotDefinedException
+     * @throws SchemaNotDefined
      */
     protected static function defineSchema()
     {
-        throw new SchemaNotDefinedException(
+        throw new SchemaNotDefined(
             sprintf('Message [%s] must return a Schema from the defineSchema method.', get_called_class())
         );
     }
@@ -156,7 +156,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         foreach (static::schema()->getRequiredFields() as $field) {
             if (!$this->has($field->getName())) {
-                throw new RequiredFieldNotSetException($this, $field);
+                throw new RequiredFieldNotSet($this, $field);
             }
         }
 
@@ -185,12 +185,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * Ensures a frozen message can't be modified.
-     * @throws FrozenMessageUnwritableException
+     * @throws FrozenMessageIsImmutable
      */
     private function guardFrozenMessage()
     {
         if ($this->isFrozen) {
-            throw new FrozenMessageUnwritableException($this);
+            throw new FrozenMessageIsImmutable($this);
         }
     }
 

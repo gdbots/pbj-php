@@ -2,7 +2,7 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\InvalidSchemaVersionException;
+use Gdbots\Pbj\Exception\InvalidSchemaVersion;
 
 /**
  * Similar to semantic versioning but with dashes and no "alpha, beta, etc." qualifiers.
@@ -68,12 +68,12 @@ final class SchemaVersion implements \JsonSerializable
     /**
      * @param string $version   SchemaVersion string, e.g. 1-0-0
      * @return SchemaVersion
-     * @throws InvalidSchemaVersionException
+     * @throws InvalidSchemaVersion
      */
     public static function fromString($version = '1-0-0')
     {
         if (!preg_match(self::VALID_PATTERN, $version, $matches)) {
-            throw new InvalidSchemaVersionException(
+            throw new InvalidSchemaVersion(
                 sprintf(
                     'Schema version [%s] is invalid.  It must match the pattern [%s].',
                     $version,

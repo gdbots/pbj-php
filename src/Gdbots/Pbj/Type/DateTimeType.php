@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Assertion;
-use Gdbots\Pbj\Exception\DecodeValueFailedException;
+use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
 // todo: use DateTimeImmutable?
@@ -52,7 +52,7 @@ final class DateTimeType extends AbstractType
             return $this->convertToUtc($date);
         }
 
-        throw new DecodeValueFailedException(
+        throw new DecodeValueFailed(
             $value,
             $this,
             $field,

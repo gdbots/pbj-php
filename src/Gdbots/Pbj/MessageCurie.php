@@ -2,7 +2,7 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\InvalidMessageCurieException;
+use Gdbots\Pbj\Exception\InvalidMessageCurie;
 
 /**
  * Messages can be fully qualified by the schema id (which includes the version)
@@ -85,7 +85,7 @@ final class MessageCurie implements \JsonSerializable
     /**
      * @param string $curie
      * @return MessageCurie
-     * @throws InvalidMessageCurieException
+     * @throws InvalidMessageCurie
      */
     public static function fromString($curie)
     {
@@ -96,7 +96,7 @@ final class MessageCurie implements \JsonSerializable
         $okay = strlen($curie) < 146;
         Assertion::true($okay, 'Message curie cannot be greater than 145 chars.', 'curie');
         if (!preg_match(self::VALID_PATTERN, $curie, $matches)) {
-            throw new InvalidMessageCurieException(
+            throw new InvalidMessageCurie(
                 sprintf(
                     'Message curie [%s] is invalid.  It must match the pattern [%s].',
                     $curie,
