@@ -2,125 +2,119 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\Util\StringUtils;
+use Gdbots\Pbj\Exception\InvalidMessageCurieException;
 
+/**
+ * Messages can be fully qualified by the schema id (which includes the version)
+ * or the short form which is called a CURIE or "compact uri".
+ * @link http://en.wikipedia.org/wiki/CURIE
+ *
+ * Message Curie Format:
+ *  vendor:package:category:message
+ *
+ * @see SchemaId
+ *
+ */
 final class MessageCurie implements \JsonSerializable
 {
-    const COMMAND = 'cmd';
-    const EVENT   = 'evt';
-    const REQUEST = 'req';
-
     /**
-     * Regular expression pattern for matching a valid message curie.
-     * Format = namespace:service:type:message:version
-     *
-     *
-     * acme:videos.moderation:event:video-uploaded:1-0-0
-     *
+     * Regular expression pattern for matching a valid MessageCurie string.
      * @constant string
      */
-    const VALID_PATTERN = '^[a-z]+[0-9a-z-]+:[a-z]+[0-9a-z\.-]+:[a-z]+[0-9a-z-]+:[a-z]+[0-9a-z-]+$';
+    const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+)$/';
 
-    /**
-     * Map of message type short names to their package name / class suffix
-     *
-     * @var array
-     */
-    private static $types = array('cmd' => 'Command', 'evt' => 'Event', 'req' => 'Request');
+    private static $instances = [];
 
-    /**
-     * Local cache of all curies generated.
-     *
-     * @var MessageCurie[]
-     */
-    private static $curies = array();
+    /** @var string */
+    private $curie;
 
-    /**
-     * Local cache of all curie to class name lookups.
-     *
-     * @var array
-     */
-    private static $curieToClass = array();
+    /** @var string */
+    private $vendor;
 
-    /**
-     * Local cache of all class name to curie lookups.
-     *
-     * @var array
-     */
-    private static $classToCurie = array();
+    /** @var string */
+    private $package;
 
-    /**
-     * The root namespace for this message which is typically your application
-     * or organization name.  It should translate to the root php namespace
-     * when it is camelized.
-     *
-     * Examples:
-     *      my-app -> MyApp
-     *      mycompany -> Mycompany
-     *
-     * @var string
-     */
-    private $namespace;
+    /** @var string */
+    private $category;
 
-    /**
-     * Type of message (cmd, evt, req)
-     *
-     * @var string
-     */
-    private $type;
-
-    /**
-     * Service the message belongs to.  This will translate to the php namespace
-     * the message exists in.
-     *
-     * Examples:
-     *      some-service -> SomeService
-     *      some-service.sub-thing -> SomeService\SubThing
-     *
-     * @var string
-     */
-    private $service;
-
-    /**
-     * Name of the message.  e.g. create-video, add-image-to-video, video-created
-     *
-     * @var string
-     */
+    /** @var string */
     private $message;
 
     /**
-     * @param string $namespace
-     * @param string $type
-     * @param string $service
+     * @param string $vendor
+     * @param string $package
+     * @param string $category
      * @param string $message
-     *
-     * @throws \InvalidArgumentException
      */
-    private function __construct($namespace, $type, $service, $message)
+    private function __construct($vendor, $package, $category, $message)
     {
-        $this->namespace = $namespace;
-        $this->type = $type;
-        $this->service = $service;
+        $this->vendor = $vendor;
+        $this->package = $package;
+        $this->category = $category ?: null;
         $this->message = $message;
-
-        if (!self::isValid($this->toString())) {
-            throw new \InvalidArgumentException('Invalid MessageCurie: ' . $this);
-        }
-
-        self::$curies[$this->toString()] = $this;
+        $this->curie = sprintf(
+            '%s:%s:%s:%s',
+            $this->vendor,
+            $this->package,
+            $this->category,
+            $this->message
+        );
     }
 
     /**
-     * Converts this object to a string when the object is used in any
-     * string context.  This is the fully qualified message curie.
-     *
-     * @link http://www.php.net/manual/en/language.oop5.magic.php#object.tostring
-     *
+     * @param SchemaId $schemaId
+     * @return MessageCurie
+     */
+    public static function fromSchemaId(SchemaId $schemaId)
+    {
+        $curie = str_replace(':' . $schemaId->getVersion()->toString(), '', $schemaId->toString());
+
+        if (isset(self::$instances[$curie])) {
+            return self::$instances[$curie];
+        }
+
+        self::$instances[$curie] = new self(
+            $schemaId->getVendor(),
+            $schemaId->getPackage(),
+            $schemaId->getCategory(),
+            $schemaId->getMessage()
+        );
+        return self::$instances[$curie];
+    }
+
+    /**
+     * @param string $curie
+     * @return MessageCurie
+     * @throws InvalidMessageCurieException
+     */
+    public static function fromString($curie)
+    {
+        if (isset(self::$instances[$curie])) {
+            return self::$instances[$curie];
+        }
+
+        $okay = strlen($curie) < 146;
+        Assertion::true($okay, 'Message curie cannot be greater than 145 chars.', 'curie');
+        if (!preg_match(self::VALID_PATTERN, $curie, $matches)) {
+            throw new InvalidMessageCurieException(
+                sprintf(
+                    'Message curie [%s] is invalid.  It must match the pattern [%s].',
+                    $curie,
+                    self::VALID_PATTERN
+                )
+            );
+        }
+
+        self::$instances[$curie] = new self($matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
+        return self::$instances[$curie];
+    }
+
+    /**
      * @return string
      */
-    public function __toString()
+    public function toString()
     {
-        return $this->toString();
+        return $this->curie;
     }
 
     /**
@@ -134,159 +128,33 @@ final class MessageCurie implements \JsonSerializable
     /**
      * @return string
      */
-    public function toString()
+    public function __toString()
     {
-        return sprintf('%s:%s:%s:%s', $this->namespace, $this->type, $this->service, $this->message);
-    }
-
-    /**
-     * Check if a string is a valid message curie
-     *
-     * @param string $curie
-     * @return boolean
-     */
-    public static function isValid($curie)
-    {
-        $curie = trim((string) $curie);
-        if (empty($curie)) {
-            return false;
-        }
-
-        return preg_match('/' . self::VALID_PATTERN . '/', $curie);
-    }
-
-    /**
-     * Creates a MessageCurie from the message.
-     *
-     * @param MessageInterface $message
-     * @return MessageCurie
-     *
-     * @throws \LogicException
-     */
-    public static function fromMessage(MessageInterface $message)
-    {
-        $class = get_class($message);
-        if (isset(self::$classToCurie[$class])) {
-            return self::$curies[self::$classToCurie[$class]];
-        }
-
-        $type = null;
-        $longType = null;
-
-        if ($message instanceof CommandBus\CommandInterface) {
-            $longType = 'Command';
-        } elseif ($message instanceof EventBus\DomainEventInterface) {
-            $longType = 'Event';
-        } elseif ($message instanceof RequestBus\RequestInterface) {
-            $longType = 'Request';
-        }
-
-        $type = array_search($longType, self::$types);
-
-        if (null === $type) {
-            throw new \LogicException(sprintf('Class [%s] must be a command, event or request.', $class));
-        }
-
-        $parts = explode('\\', $class);
-        if (count($parts) < 4) {
-            throw new \LogicException(sprintf('Class [%s] does not follow Vendor\\Package[\\SubPackage]\\%s\\Something%s convention.', $class, $type, $type));
-        }
-
-        $namespace = StringUtils::toSlugFromCamel(array_shift($parts));
-        $message = StringUtils::toSlugFromCamel(str_replace($longType, '', array_pop($parts)));
-
-        $service = [];
-        foreach ($parts as $part) {
-            if ($longType === $part) {
-                continue;
-            }
-
-            $service[] = StringUtils::toSlugFromCamel($part);
-        }
-
-        $curie = new self($namespace, $type, implode('.', $service), $message);
-        self::$classToCurie[$class] = $curie->toString();
-
-        return $curie;
-    }
-
-    /**
-     * Creates a MessageCurie from the string representation.
-     *
-     * @param string $curie
-     * @return MessageCurie
-     */
-    public static function fromString($curie)
-    {
-        if (isset(self::$curies[$curie])) {
-            return self::$curies[$curie];
-        }
-
-        list($namespace, $type, $service, $message) = explode(':', $curie);
-        return new self($namespace, $type, $service, $message);
-    }
-
-    /**
-     * Converts the message curie to a php class name.  This ONLY works if the
-     * class name follows the PSR0 convention with classes existing
-     * in the provided type namespace of the service and the message class itself
-     * ending in "Command|DomainEvent|Request".
-     *
-     * Examples:
-     *      - Namespace\Service\Command\DoSomethingCommand
-     *      - Namespace\Service\DomainEvent\DidSomethingDomainEvent
-     *      - Namespace\Service\Request\GetSomethingRequest
-     *
-     * @param string $curie
-     *
-     * @return string
-     *
-     * @throws \InvalidArgumentException
-     */
-    public static function getClassName($curie)
-    {
-        if (isset(self::$curieToClass[$curie])) {
-            return self::$curieToClass[$curie];
-        }
-
-        if (!self::isValid($curie)) {
-            throw new \InvalidArgumentException('Invalid MessageCurie: ' . $curie);
-        }
-
-        list($namespace, $type, $service, $message) = explode(':', $curie);
-
-        $namespace = StringUtils::toCamelFromSlug($namespace);
-        $longType = self::$types[$type];
-        $service = str_replace('.', '\\', StringUtils::toCamelFromSlug($service));
-        $message = StringUtils::toCamelFromSlug($message);
-
-        $class = sprintf('%s\%s\%s\%s%s', $namespace, $service, $longType, $message, $longType);
-        self::$curieToClass[$curie] = $class;
-        return $class;
+        return $this->toString();
     }
 
     /**
      * @return string
      */
-    public function getNamespace()
+    public function getVendor()
     {
-        return $this->namespace;
+        return $this->vendor;
     }
 
     /**
      * @return string
      */
-    public function getType()
+    public function getPackage()
     {
-        return $this->type;
+        return $this->package;
     }
 
     /**
      * @return string
      */
-    public function getService()
+    public function getCategory()
     {
-        return $this->service;
+        return $this->category;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
 
@@ -59,7 +60,9 @@ final class MapsMessage extends AbstractMessage
             }
         }
 
-        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:maps-message:1-0-0', $fields);
+        $schema = Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:maps-message:1-0-0', $fields);
+        MessageResolver::registerSchema($schema);
+        return $schema;
     }
 
     /**

@@ -4,7 +4,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\Message;
 
-class FrozenMessageException extends \LogicException implements GdbotsPbjException
+class FrozenMessageUnwritableException extends \LogicException implements GdbotsPbjException
 {
     /** @var Message */
     private $type;
@@ -26,4 +26,3 @@ class FrozenMessageException extends \LogicException implements GdbotsPbjExcepti
         return $this->type;
     }
 }
-

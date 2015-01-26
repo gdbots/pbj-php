@@ -6,7 +6,7 @@ use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Type\Type;
 
-class DecodeValueException extends \InvalidArgumentException implements GdbotsPbjException
+class DecodeValueFailedException extends \InvalidArgumentException implements GdbotsPbjException
 {
     /** @var mixed */
     private $value;

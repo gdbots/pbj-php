@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\Tests\Pbj;
+namespace Gdbots\Tests\Pbj\Type;
 
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\FieldBuilder;

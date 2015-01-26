@@ -2,11 +2,15 @@
 
 namespace Gdbots\Tests\Pbj;
 
+use Gdbots\Pbj\Serializer\PhpArraySerializer;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
+    /** @var PhpArraySerializer */
+    protected $serializer;
+
     /**
      * @return EmailMessage
      */
@@ -29,7 +33,13 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     ]
 }
 JSON;
-        return EmailMessage::fromArray(json_decode($json, true));
+
+        EmailMessage::schema();
+        if (null === $this->serializer) {
+            $this->serializer = new PhpArraySerializer();
+        }
+        return $this->serializer->deserialize(json_decode($json, true));
+        //return EmailMessage::fromArray(json_decode($json, true));
     }
 
     public function testCreateMessageFromArray()

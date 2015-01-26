@@ -4,6 +4,7 @@ namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
@@ -27,7 +28,7 @@ class EmailMessage extends AbstractMessage
      */
     protected static function defineSchema()
     {
-        return Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0', [
+        $schema = Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0', [
             Fb::create(self::FROM_NAME, T\StringType::create())
                 ->build(),
             Fb::create(self::FROM_EMAIL, T\StringType::create())
@@ -58,6 +59,9 @@ class EmailMessage extends AbstractMessage
                 ->build(),
             Fb::create(self::LABELS, T\StringType::create())->asASet()->build(),
         ]);
+
+        MessageResolver::registerSchema($schema);
+        return $schema;
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 namespace Gdbots\Pbj;
+
 use Gdbots\Pbj\Exception\InvalidSchemaIdException;
 
 /**
@@ -18,6 +19,9 @@ use Gdbots\Pbj\Exception\InvalidSchemaIdException;
  *
  * Schema Id Format:
  *  vendor:package:category:message:version
+ *
+ * Message Curie Format:
+ *  vendor:package:category:message
  *
  * Formats:
  *  VENDOR:   [a-z0-9-]+
@@ -56,6 +60,14 @@ final class SchemaId implements \JsonSerializable
     /** @var string */
     private $id;
 
+    /**
+     * The curie is the short name for the schema (without the version) that can be used
+     * to reference another message without fully qualifying the version.
+     *
+     * @var MessageCurie
+     */
+    private $curie;
+
     /** @var string */
     private $vendor;
 
@@ -93,6 +105,7 @@ final class SchemaId implements \JsonSerializable
             $this->message,
             $this->version->toString()
         );
+        $this->curie = MessageCurie::fromSchemaId($this);
     }
 
     /**
@@ -184,5 +197,24 @@ final class SchemaId implements \JsonSerializable
     public function getVersion()
     {
         return $this->version;
+    }
+
+    /**
+     * @return MessageCurie
+     */
+    public function getCurie()
+    {
+        return $this->curie;
+    }
+
+    /**
+     * Returns the string the MessageResolver should use to find the class name for this schema.
+     * e.g. "vendor:package:category:message:v1"
+     *
+     * @return string
+     */
+    public function getResolverKey()
+    {
+        return $this->curie . ':v' . $this->version->getMajor();
     }
 }

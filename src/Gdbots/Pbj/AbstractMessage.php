@@ -4,11 +4,9 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Pbj\Exception\FrozenMessageException;
+use Gdbots\Pbj\Exception\FrozenMessageUnwritableException;
 use Gdbots\Pbj\Exception\SchemaNotDefinedException;
-use Gdbots\Pbj\Serializer\PhpArray;
-use Gdbots\Pbj\Enum\FieldRule;
+use Gdbots\Pbj\Serializer\PhpArraySerializer;
 use Gdbots\Pbj\Exception\RequiredFieldNotSetException;
 
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
@@ -20,7 +18,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     private static $schemas = [];
 
-    /** @var PhpArray */
+    /** @var PhpArraySerializer */
     private static $serializer;
 
     /**
@@ -44,54 +42,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     private $isFrozen = false;
 
     /**
-     * @param array $data
-     * @throws \Exception
+     * Nothing fancy on new messages... we let the serializers or application
+     * code get fancy.
      */
-    final private function __construct(array $data = array())
-    {
-        $schema = static::schema();
-
-        foreach ($data as $fieldName => $value) {
-            if (!$schema->hasField($fieldName)) {
-                // todo: review, what to do with unknown fields
-                continue;
-            }
-
-            $field = $schema->getField($fieldName);
-
-            switch ($field->getRule()->getValue()) {
-                case FieldRule::A_SINGLE_VALUE:
-                    $this->setSingleValue($fieldName, $field->decodeValue($value));
-                    break;
-
-                case FieldRule::A_SET:
-                    Assertion::isArray($value, sprintf('Field [%s] must be an array.', $fieldName), $fieldName);
-                    foreach ($value as $v) {
-                        $this->addToSet($fieldName, [$field->decodeValue($v)]);
-                    }
-                    break;
-
-                case FieldRule::A_LIST:
-                    Assertion::isArray($value, sprintf('Field [%s] must be an array.', $fieldName), $fieldName);
-                    foreach ($value as $v) {
-                        $this->addToList($fieldName, [$field->decodeValue($v)]);
-                    }
-                    break;
-
-                case FieldRule::A_MAP:
-                    Assertion::true(ArrayUtils::isAssoc($value), sprintf('Field [%s] must be an associative array.', $fieldName), $fieldName);
-                    foreach ($value as $k => $v) {
-                        $this->addToMap($fieldName, $k, $field->decodeValue($v));
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        $this->populateDefaults();
-    }
+    final public function __construct() {}
 
     /**
      * {@inheritdoc}
@@ -137,9 +91,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
-    final public static function create(array $data = [])
+    final public static function create()
     {
-        return new static($data);
+        /** @var Message $message */
+        $message = new static();
+        return $message->populateDefaults();
     }
 
     /**
@@ -147,7 +103,19 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public static function fromArray(array $data = [])
     {
-        return new static($data);
+        if (null === self::$serializer) {
+            self::$serializer = new PhpArraySerializer();
+        }
+
+        /**
+         * This docblock just ensures the IDE properly identifies
+         * the return as the static class name and not just the
+         * Message interface.
+         *
+         * @var static $message
+         */
+        $message = self::$serializer->deserialize($data);
+        return $message;
     }
 
     /**
@@ -156,7 +124,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     final public function toArray()
     {
         if (null === self::$serializer) {
-            self::$serializer = new PhpArray();
+            self::$serializer = new PhpArraySerializer();
         }
         return self::$serializer->serialize($this);
     }
@@ -217,12 +185,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * Ensures a frozen message can't be modified.
-     * @throws FrozenMessageException
+     * @throws FrozenMessageUnwritableException
      */
     private function guardFrozenMessage()
     {
         if ($this->isFrozen) {
-            throw new FrozenMessageException($this);
+            throw new FrozenMessageUnwritableException($this);
         }
     }
 

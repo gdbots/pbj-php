@@ -3,7 +3,7 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Enum\TypeName;
-use Gdbots\Pbj\Exception\DecodeValueException;
+use Gdbots\Pbj\Exception\DecodeValueFailedException;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Field;
 
@@ -38,7 +38,7 @@ interface Type
      * @param Field $field
      * @return mixed
      * @throws GdbotsPbjException
-     * @throws DecodeValueException
+     * @throws DecodeValueFailedException
      */
     public function decode($value, Field $field);
 

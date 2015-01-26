@@ -7,25 +7,21 @@ use Gdbots\Pbj\Exception\InvalidSchemaVersionException;
 /**
  * Similar to semantic versioning but with dashes and no "alpha, beta, etc." qualifiers.
  *
- * E.g. 1-0-0 (model-revision-addition)
+ * E.g. 1-0-0 (major-minor-patch)
  *
- * MODEL
+ * MAJOR
  * Is incremented when a change is made which breaks the rules of Protobuf/Thrift backward compatibility,
  * such as changing the type of a field.
  *
- * REVISION
+ * MINOR
  * Is a change which is backward compatible but not forward compatible. Records created from
  * the old version of the schema can be deserialized using the new schema, but not the other way
  * around.  Example: adding a new field to a union type.
  *
- * ADDITION
+ * PATCH
  * Is a change which is both backward compatible and forward compatible. The previous version of
  * the schema can be used to deserialize records created from the new version of the schema, and
  * vice versa. Example: adding a new optional field.
- *
- * PATCH (Intentionally not implemented yet, possibly never)
- * Is incremented for changes which fix mistakes in the definition of the schema, rather than changes
- * to the model of the data.
  *
  * @link http://semver.org/
  * @link http://snowplowanalytics.com/blog/2014/05/13/introducing-schemaver-for-semantic-versioning-of-schemas/
@@ -41,32 +37,32 @@ final class SchemaVersion implements \JsonSerializable
     const VALID_PATTERN = '/^([0-9]+)-([0-9]+)-([0-9]+)$/';
 
     /**
-     * E.g. 1-0-0 (model-revision-addition)
+     * E.g. 1-0-0 (major-minor-patch)
      *
      * @var string
      */
     private $version;
 
     /** @var int */
-    private $model;
+    private $major;
 
     /** @var int */
-    private $revision;
+    private $minor;
 
     /** @var int */
-    private $addition;
+    private $patch;
 
     /**
-     * @param int $model
-     * @param int $revision
-     * @param int $addition
+     * @param int $major
+     * @param int $minor
+     * @param int $patch
      */
-    private function __construct($model = 1, $revision = 0, $addition = 0)
+    private function __construct($major = 1, $minor = 0, $patch = 0)
     {
-        $this->model = (int) $model;
-        $this->revision = (int) $revision;
-        $this->addition = (int) $addition;
-        $this->version = sprintf('%d-%d-%d', $this->model, $this->revision, $this->addition);
+        $this->major = (int) $major;
+        $this->minor = (int) $minor;
+        $this->patch = (int) $patch;
+        $this->version = sprintf('%d-%d-%d', $this->major, $this->minor, $this->patch);
     }
 
     /**
@@ -116,24 +112,24 @@ final class SchemaVersion implements \JsonSerializable
     /**
      * @return int
      */
-    public function getModel()
+    public function getMajor()
     {
-        return $this->model;
+        return $this->major;
     }
 
     /**
      * @return int
      */
-    public function getRevision()
+    public function getMinor()
     {
-        return $this->revision;
+        return $this->minor;
     }
 
     /**
      * @return int
      */
-    public function getAddition()
+    public function getPatch()
     {
-        return $this->addition;
+        return $this->patch;
     }
 }
