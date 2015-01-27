@@ -2,21 +2,23 @@
 
 require 'speed-bootstrap.php';
 
+use Gdbots\Pbj\Serializer\PhpSerializer;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
+$serializer = new PhpSerializer();
 $array = $message->toArray();
 
 do {
     $i++;
     $message = EmailMessage::fromArray($array);
-    $str = serialize($message);
-    $message = unserialize($str);
+    $str = $serializer->serialize($message);
+    $message = $serializer->deserialize($str);
 } while ($i < numTimes());
 
-echo json_encode($message, JSON_PRETTY_PRINT) . PHP_EOL;
+echo $serializer->serialize($message) . PHP_EOL;
 
 // speed report
 $benchmark = microtime(true) - $startTime;

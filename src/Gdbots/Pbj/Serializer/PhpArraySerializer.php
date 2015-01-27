@@ -16,8 +16,18 @@ class PhpArraySerializer extends AbstractSerializer
      */
     public function serialize(Message $message, array $options = [])
     {
+        return $this->doSerialize($message, $options);
+    }
+
+    /**
+     * @param Message $message
+     * @param array $options
+     * @return array
+     */
+    private function doSerialize(Message $message, array $options)
+    {
         $schema = $message::schema();
-        $message->setSingleValue($schema::FIELD_NAME, $schema->getId()->toString())->validate();
+        $message->setSingleValue(Schema::FIELD_NAME, $schema->getId()->toString())->validate();
 
         $payload = [];
         $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];
@@ -88,7 +98,7 @@ class PhpArraySerializer extends AbstractSerializer
      * @throws \Exception
      * @throws GdbotsPbjException
      */
-    protected function doDeserialize(array $data, array $options)
+    private function doDeserialize(array $data, array $options)
     {
         $message = $this->createMessage((string) $data[Schema::FIELD_NAME]);
         $schema = $message::schema();

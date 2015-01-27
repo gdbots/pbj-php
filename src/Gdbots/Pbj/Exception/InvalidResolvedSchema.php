@@ -8,22 +8,28 @@ use Gdbots\Pbj\SchemaId;
 class InvalidResolvedSchema extends SchemaException
 {
     /** @var SchemaId */
-    private $invalidSchemaId;
+    private $resolvedSchemaId;
+
+    /** @var string */
+    private $resolvedClassName;
 
     /**
      * @param Schema $schema
-     * @param SchemaId $invalidSchemaId
+     * @param SchemaId $resolvedSchemaId
+     * @param string $resolvedClassName
      */
-    public function __construct(Schema $schema, SchemaId $invalidSchemaId)
+    public function __construct(Schema $schema, SchemaId $resolvedSchemaId, $resolvedClassName)
     {
         $this->schema = $schema;
-        $this->invalidSchemaId = $invalidSchemaId;
+        $this->resolvedSchemaId = $resolvedSchemaId;
+        $this->resolvedClassName = $resolvedClassName;
         parent::__construct(
             sprintf(
-                'Schema id [%s] was resolved to [%s] but that message has a schema id of [%s].  They must match.',
-                $this->invalidSchemaId->toString(),
-                $this->schema->getClassName(),
-                $this->schema->getId()->toString()
+                'Schema id [%s] with resolver key [%s] was resolved to [%s] but that message has a resolver key of [%s].  They must match.',
+                $this->resolvedSchemaId->toString(),
+                $this->resolvedSchemaId->getResolverKey(),
+                $resolvedClassName,
+                $this->schema->getId()->getResolverKey()
             )
         );
     }
@@ -31,8 +37,16 @@ class InvalidResolvedSchema extends SchemaException
     /**
      * @return SchemaId
      */
-    public function getInvalidSchemaId()
+    public function getResolvedSchemaId()
     {
-        return $this->invalidSchemaId;
+        return $this->resolvedSchemaId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getResolvedClassName()
+    {
+        return $this->resolvedClassName;
     }
 }

@@ -2,20 +2,20 @@
 
 require 'speed-bootstrap.php';
 
-use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
-use Symfony\Component\Yaml\Yaml;
+use Gdbots\Pbj\Serializer\YamlSerializer;
 
 $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
+$serializer = new YamlSerializer();
 
 do {
     $i++;
-    $str = Yaml::dump($message->toArray());
-    $message = EmailMessage::fromArray(Yaml::parse($str));
+    $yaml = $serializer->serialize($message);
+    $message = $serializer->deserialize($yaml);
 } while ($i < numTimes());
 
-echo Yaml::dump($message->toArray()) . PHP_EOL;
+echo $serializer->serialize($message) . PHP_EOL;
 
 // speed report
 $benchmark = microtime(true) - $startTime;

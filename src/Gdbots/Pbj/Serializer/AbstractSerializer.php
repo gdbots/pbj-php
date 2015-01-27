@@ -3,6 +3,8 @@
 namespace Gdbots\Pbj\Serializer;
 
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Exception\GdbotsPbjException;
+use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaId;
@@ -12,6 +14,9 @@ abstract class AbstractSerializer implements Serializer
     /**
      * @param string $schemaId
      * @return Message
+     *
+     * @throws GdbotsPbjException
+     * @throws InvalidResolvedSchema
      */
     protected function createMessage($schemaId)
     {
@@ -22,10 +27,9 @@ abstract class AbstractSerializer implements Serializer
         $message = new $className();
         Assertion::implementsInterface($message, 'Gdbots\Pbj\Message');
 
-        if ($message::schema()->getId() !== $schemaId) {
+        if ($message::schema()->getId()->getResolverKey() !== $schemaId->getResolverKey()) {
+            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
         }
-
-        // todo: assert message schema matches schemaid
 
         return $message;
     }

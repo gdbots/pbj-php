@@ -2,56 +2,50 @@
 
 namespace Gdbots\Tests\Pbj;
 
-use Gdbots\Pbj\Serializer\PhpArraySerializer;
+use Gdbots\Pbj\Serializer\JsonSerializer;
+use Gdbots\Pbj\Serializer\Serializer;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var PhpArraySerializer */
+    /** @var Serializer */
     protected $serializer;
+
+    /**
+     * @return Serializer
+     */
+    protected function getSerializer()
+    {
+        if (null === $this->serializer) {
+            $this->serializer = new JsonSerializer();
+        }
+        return $this->serializer;
+    }
 
     /**
      * @return EmailMessage
      */
     private function createEmailMessage()
     {
-        $json = <<<JSON
-{
-    "_pbj": "gdbots:tests.pbj:fixtures:email-message:1-0-0",
-    "from_name": "homer  ",
-    "from_email": "homer@thesimpsons.com",
-    "priority": 2,
-    "sent": false,
-    "date_sent": "2014-12-25T12:12:00.123456+00:00",
-    "microtime_sent": "1422122017734617",
-    "provider": "gmail",
-    "labels": [
-        "donuts",
-        "mmmm",
-        "chicken"
-    ]
-}
-JSON;
-
+        $json = file_get_contents(__DIR__ . '/Fixtures/email-message.json');
+        // auto registers the schema with the MessageResolver
+        // only done for tests or dynamic messages.
         EmailMessage::schema();
-        if (null === $this->serializer) {
-            $this->serializer = new PhpArraySerializer();
-        }
-        return $this->serializer->deserialize(json_decode($json, true));
-        //return EmailMessage::fromArray(json_decode($json, true));
+        return $this->getSerializer()->deserialize($json);
     }
 
     public function testCreateMessageFromArray()
     {
+        /** @var EmailMessage $message */
         $message = $this->createEmailMessage();
         $message->setPriority(Priority::HIGH());
 
         $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
         $this->assertTrue(Priority::HIGH() === $message->getPriority());
 
-        $json = json_encode($message);
-        $message = EmailMessage::fromArray(json_decode($json, true));
+        $json = $this->getSerializer()->serialize($message);
+        $message = $this->getSerializer()->deserialize($json);
 
         $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
         $this->assertTrue(Priority::HIGH() === $message->getPriority());
@@ -62,13 +56,16 @@ JSON;
 
     public function testUniqueItemsInSet()
     {
-        $message = $this->createEmailMessage();
-        $message
+        $message = EmailMessage::create()
             ->addLabel('CHICKEN')
-            ->addLabel('DoNUTS')
-            ->addLabel('chicKen');
+            ->addLabel('Chicken')
+            ->addLabel('chicken')
+            ->addLabel('DONUTS')
+            ->addLabel('Donuts')
+            ->addLabel('donuts')
+        ;
 
-        $this->assertCount(3, $message->getLabels());
-        $this->assertSame($message->getLabels(), ['DoNUTS', 'mmmm', 'chicKen']);
+        $this->assertCount(2, $message->getLabels());
+        $this->assertSame($message->getLabels(), ['chicken', 'donuts']);
     }
 }
