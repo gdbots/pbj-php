@@ -113,6 +113,6 @@ abstract class AbstractType implements Type
      */
     public function getMaxBytes()
     {
-        return 64000;
+        return 65535;
     }
 }

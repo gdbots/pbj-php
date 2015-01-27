@@ -22,7 +22,7 @@ class PhpSerializer implements Serializer
     {
         /** @var Message $message */
         $message = unserialize($data);
-        Assertion::implementsInterface($message, 'Gdbots\Pbj\Message');
+        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
         return $message;
     }
 }

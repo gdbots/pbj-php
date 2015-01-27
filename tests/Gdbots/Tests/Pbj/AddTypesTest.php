@@ -125,6 +125,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                         continue;
                     } elseif ('Date' == $type && 'DateTime' == $k || 'DateTime' == $type && 'Date' == $k) {
                         continue;
+                    } elseif ('Binary' == $type && 'String' == $k || 'String' == $type && 'Binary' == $k) {
+                        continue;
                     } elseif (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
                         continue;
                      }

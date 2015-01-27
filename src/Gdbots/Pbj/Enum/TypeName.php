@@ -4,8 +4,10 @@ namespace Gdbots\Pbj\Enum;
 
 use Gdbots\Common\Enum;
 
+// todo: implement BinaryType, TextType, BlobType, MediumTextType, MessageType, UuidType?
 /**
  * @method static TypeName BIG_INT()
+ * @method static TypeName BINARY()
  * @method static TypeName BOOLEAN()
  * @method static TypeName DATE()
  * @method static TypeName DATE_TIME()
@@ -29,6 +31,7 @@ use Gdbots\Common\Enum;
 final class TypeName extends Enum
 {
     const BIG_INT = 'big-int';
+    const BINARY = 'binary';
     const BOOLEAN = 'boolean';
     const DATE = 'date';
     const DATE_TIME = 'date-time';
