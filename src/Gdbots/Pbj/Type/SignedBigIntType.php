@@ -52,7 +52,7 @@ final class SignedBigIntType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

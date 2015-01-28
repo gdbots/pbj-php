@@ -10,7 +10,6 @@ use Gdbots\Pbj\Field;
 // todo: use DateTimeImmutable?
 final class DateType extends AbstractType
 {
-
     /**
      * {@inheritdoc}
      */
@@ -51,23 +50,15 @@ final class DateType extends AbstractType
 
         throw new DecodeValueFailed(
             $value,
-            $this,
             $field,
-            sprintf(
-                'Failed to decode [%s] for field [%s] to a [%s].  Format must be [Y-m-d].  Errors: [%s]',
-                is_scalar($value) ? $value : StringUtils::varToString($value),
-                $field->getName(),
-                $this->getTypeName()->getValue(),
-                // this is mutant
-                print_r(\DateTime::getLastErrors(), true)
-            )
+            sprintf('Format must be [Y-m-d].  Errors: [%s]', print_r(\DateTime::getLastErrors(), true))
         );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

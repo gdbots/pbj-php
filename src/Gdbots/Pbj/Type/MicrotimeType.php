@@ -47,7 +47,7 @@ final class MicrotimeType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

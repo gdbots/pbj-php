@@ -60,24 +60,14 @@ final class StringEnumType extends AbstractType
         try {
             return $className::create((string) $value);
         } catch (\Exception $e) {
-            throw new DecodeValueFailed(
-                $value,
-                $this,
-                $field,
-                sprintf(
-                    'Failed to decode value for field [%s] to a [%s].  %s',
-                    $field->getName(),
-                    $this->getTypeName()->getValue(),
-                    $e->getMessage()
-                )
-            );
+            throw new DecodeValueFailed($value, $field, $e->getMessage());
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

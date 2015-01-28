@@ -5,7 +5,9 @@ namespace Gdbots\Pbj\Serializer;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\FieldRule;
+use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
+use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\Schema;
 
@@ -46,20 +48,21 @@ class PhpArraySerializer extends AbstractSerializer
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $payload[$fieldName] = $field->encodeValue($value);
+                    $payload[$fieldName] = $this->encodeValue($value, $field, $options);
                     break;
 
                 case FieldRule::A_SET:
                 case FieldRule::A_LIST:
-                    $payload[$fieldName] = array_map(function($value) use ($field) {
-                            return $field->encodeValue($value);
-                        }, $value);
+                    $payload[$fieldName] = [];
+                    foreach ($value as $v) {
+                        $payload[$fieldName][] = $this->encodeValue($v, $field, $options);
+                    }
                     break;
 
                 case FieldRule::A_MAP:
                     $payload[$fieldName] = [];
                     foreach ($value as $k => $v) {
-                        $payload[$fieldName][$k] = $field->encodeValue($v);
+                        $payload[$fieldName][$k] = $this->encodeValue($v, $field, $options);
                     }
                     break;
 
@@ -113,20 +116,21 @@ class PhpArraySerializer extends AbstractSerializer
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->setSingleValue($fieldName, $field->decodeValue($value));
+                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field, $options));
                     break;
 
                 case FieldRule::A_SET:
-                    Assertion::isArray($value, sprintf('Field [%s] must be an array.', $fieldName), $fieldName);
-                    foreach ($value as $v) {
-                        $message->addToSet($fieldName, [$field->decodeValue($v)]);
-                    }
-                    break;
-
                 case FieldRule::A_LIST:
                     Assertion::isArray($value, sprintf('Field [%s] must be an array.', $fieldName), $fieldName);
+                    $values = [];
                     foreach ($value as $v) {
-                        $message->addToList($fieldName, [$field->decodeValue($v)]);
+                        $values[] = $this->decodeValue($v, $field, $options);
+                    }
+
+                    if ($field->isASet()) {
+                        $message->addToSet($fieldName, $values);
+                    } else {
+                        $message->addToList($fieldName, $values);
                     }
                     break;
 
@@ -137,7 +141,7 @@ class PhpArraySerializer extends AbstractSerializer
                         $fieldName
                     );
                     foreach ($value as $k => $v) {
-                        $message->addToMap($fieldName, $k, $field->decodeValue($v));
+                        $message->addToMap($fieldName, $k, $this->decodeValue($v, $field, $options));
                     }
                     break;
 
@@ -147,5 +151,44 @@ class PhpArraySerializer extends AbstractSerializer
         }
 
         return $message->populateDefaults();
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     * @param array $options
+     * @return mixed
+     *
+     * @throws EncodeValueFailed
+     */
+    private function encodeValue($value, Field $field, array $options)
+    {
+        $type = $field->getType();
+        if ($type->encodesToScalar()) {
+            return $type->encode($value, $field);
+        }
+
+        if ($value instanceof Message) {
+            return $this->doSerialize($value, $options);
+        }
+
+        throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     * @param array $options
+     * @return mixed
+     */
+    private function decodeValue($value, Field $field, array $options)
+    {
+        $type = $field->getType();
+        if ($type->encodesToScalar()) {
+            return $type->decode($value, $field);
+        }
+
+        // assuming for now that everything else is a nested message
+        return $this->deserialize($value, $options);
     }
 }

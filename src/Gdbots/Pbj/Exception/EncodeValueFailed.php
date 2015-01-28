@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Field;
 
-class DecodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
+class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
 {
     /** @var mixed */
     private $value;
@@ -23,10 +23,9 @@ class DecodeValueFailed extends \InvalidArgumentException implements GdbotsPbjEx
         $this->value = $value;
         $this->field = $field;
         $message = sprintf(
-            'Failed to decode [%s] for field [%s] to a [%s].  Detail: %s',
+            'Failed to encode [%s] for field [%s].  Detail: %s',
             is_scalar($this->value) ? $this->value : StringUtils::varToString($this->value),
             $this->field->getName(),
-            $this->field->getType()->getTypeName()->getValue(),
             $message
         );
         parent::__construct($message);

@@ -10,7 +10,7 @@ use Gdbots\Pbj\Type as T;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 
-class EmailMessage extends AbstractMessage
+final class EmailMessage extends AbstractMessage
 {
     const FROM_NAME  = 'from_name';
     const FROM_EMAIL = 'from_email';
@@ -22,6 +22,7 @@ class EmailMessage extends AbstractMessage
     const MICROTIME_SENT = 'microtime_sent';
     const PROVIDER   = 'provider';
     const LABELS     = 'labels';
+    const NESTED     = 'nested';
 
     /**
      * @return Schema
@@ -58,6 +59,9 @@ class EmailMessage extends AbstractMessage
                 ->withDefault(Provider::GMAIL())
                 ->build(),
             Fb::create(self::LABELS, T\StringType::create())->asASet()->build(),
+            Fb::create(self::NESTED, T\MessageType::create())
+                ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                ->build(),
         ]);
 
         MessageResolver::registerSchema($schema);
@@ -214,5 +218,22 @@ class EmailMessage extends AbstractMessage
     public function removeLabel($label)
     {
         return $this->removeFromSet(self::LABELS, [$label]);
+    }
+
+    /**
+     * @return NestedMessage
+     */
+    public function getNested()
+    {
+        return $this->get(self::NESTED);
+    }
+
+    /**
+     * @param NestedMessage $nested
+     * @return self
+     */
+    public function setNested(NestedMessage $nested)
+    {
+        return $this->setSingleValue(self::NESTED, $nested);
     }
 }

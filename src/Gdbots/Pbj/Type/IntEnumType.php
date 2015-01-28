@@ -45,24 +45,14 @@ final class IntEnumType extends AbstractType
         try {
             return $className::create((int) $value);
         } catch (\Exception $e) {
-            throw new DecodeValueFailed(
-                $value,
-                $this,
-                $field,
-                sprintf(
-                    'Failed to decode value for field [%s] to an [%s].  %s',
-                    $field->getName(),
-                    $this->getTypeName()->getValue(),
-                    $e->getMessage()
-                )
-            );
+            throw new DecodeValueFailed($value, $field, $e->getMessage());
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

@@ -5,11 +5,13 @@ namespace Gdbots\Tests\Pbj;
 use Gdbots\Common\BigNumber;
 use Gdbots\Common\Microtime;
 use Gdbots\Common\Util\StringUtils;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
+use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class AddTypesTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,6 +27,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => IntEnum::UNKNOWN(),
             'Int'             => [0, 4294967295],
             'MediumInt'       => [0, 16777215],
+            'Message'         => NestedMessage::create(),
             'Microtime'       => Microtime::create(),
             'SignedBigInt'    => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],
@@ -49,6 +52,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => Priority::NORMAL(), // not the correct enum
             'Int'             => [-1, 4294967296],
             'MediumInt'       => [-1, 16777216],
+            'Message'         => EmailMessage::create(),
             'Microtime'       => microtime(),
             'SignedBigInt'    => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
             'SignedMediumInt' => [-8388609, 8388608],

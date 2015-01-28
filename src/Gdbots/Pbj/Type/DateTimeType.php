@@ -54,13 +54,9 @@ final class DateTimeType extends AbstractType
 
         throw new DecodeValueFailed(
             $value,
-            $this,
             $field,
             sprintf(
-                'Failed to decode [%s] for field [%s] to a [%s].  Format must be [%s].  Errors: [%s]',
-                is_scalar($value) ? $value : StringUtils::varToString($value),
-                $field->getName(),
-                $this->getTypeName()->getValue(),
+                'Format must be [%s].  Errors: [%s]',
                 DateUtils::ISO8601,
                 // this is mutant
                 print_r(\DateTime::getLastErrors(), true)
@@ -71,7 +67,7 @@ final class DateTimeType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

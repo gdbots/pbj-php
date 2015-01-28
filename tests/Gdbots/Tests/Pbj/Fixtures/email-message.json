@@ -11,5 +11,13 @@
     "donuts",
     "mmmm",
     "chicken"
-  ]
+  ],
+  "nested": {
+    "_pbj": "gdbots:tests.pbj:fixtures:nested-message:1-0-0",
+    "test1": "val1",
+    "test2": [
+      1,
+      2
+    ]
+  }
 }

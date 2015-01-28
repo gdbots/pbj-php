@@ -53,7 +53,7 @@ final class BigIntType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return false;
     }

@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
+use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Field;
 
@@ -30,6 +31,9 @@ interface Type
      * @param mixed $value
      * @param Field $field
      * @return mixed
+     *
+     * @throws GdbotsPbjException
+     * @throws EncodeValueFailed
      */
     public function encode($value, Field $field);
 
@@ -37,6 +41,7 @@ interface Type
      * @param mixed $value
      * @param Field $field
      * @return mixed
+     *
      * @throws GdbotsPbjException
      * @throws DecodeValueFailed
      */
@@ -47,12 +52,12 @@ interface Type
      *
      * @return bool
      */
-    public function decodesToScalar();
+    public function isScalar();
 
     /**
      * Returns true if the value gets encoded to a scalar value.  This is important to
      * know because a big int, date, enum, etc. is stored as an object on the message
-     * but when the message is encoded to an array, json, etc. it's scalar value.
+     * but when the message is encoded to an array, json, etc. it's a scalar value.
      *
      * @return bool
      */

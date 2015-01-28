@@ -47,7 +47,7 @@ abstract class AbstractType implements Type
     /**
      * {@inheritdoc}
      */
-    public function decodesToScalar()
+    public function isScalar()
     {
         return true;
     }

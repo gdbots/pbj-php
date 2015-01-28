@@ -8,6 +8,7 @@ use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Type\IntEnumType;
+use Gdbots\Pbj\Type\MessageType;
 use Gdbots\Pbj\Type\StringEnumType;
 use Gdbots\Pbj\Type\Type;
 
@@ -149,7 +150,10 @@ final class Field implements ToArray, \JsonSerializable
         $this->className = $className;
         $this->assertion = $assertion;
 
-        if ($this->type instanceof IntEnumType || $this->type instanceof StringEnumType) {
+        if ($this->type instanceof IntEnumType
+            || $this->type instanceof StringEnumType
+            || $this->type instanceof MessageType)
+        {
             Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name));
         }
 
@@ -337,7 +341,7 @@ final class Field implements ToArray, \JsonSerializable
                 }
             } else {
                 Assertion::true(
-                    $this->type->decodesToScalar(),
+                    $this->type->isScalar(),
                     sprintf('Field [%s] must decode as a scalar to be used in a set or list.', $this->name)
                 );
             }
@@ -399,24 +403,6 @@ final class Field implements ToArray, \JsonSerializable
         if (null !== $this->assertion) {
             call_user_func($this->assertion, $value, $this);
         }
-    }
-
-    /**
-     * @param mixed $value
-     * @return mixed
-     */
-    public function encodeValue($value)
-    {
-        return $this->type->encode($value, $this);
-    }
-
-    /**
-     * @param mixed $value
-     * @return mixed
-     */
-    public function decodeValue($value)
-    {
-        return $this->type->decode($value, $this);
     }
 
     /**

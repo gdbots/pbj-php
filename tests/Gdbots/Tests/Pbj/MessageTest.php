@@ -6,6 +6,7 @@ use Gdbots\Pbj\Serializer\JsonSerializer;
 use Gdbots\Pbj\Serializer\Serializer;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
@@ -67,5 +68,19 @@ class MessageTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(2, $message->getLabels());
         $this->assertSame($message->getLabels(), ['chicken', 'donuts']);
+    }
+
+    public function testNestedMessage()
+    {
+        $message = $this->createEmailMessage();
+        $nestedMessage = NestedMessage::create()
+            ->setTest1('val1')
+            ->addTest2(1)
+            ->addTest2(2)
+        ;
+
+        $message->setNested($nestedMessage);
+        $this->assertSame($nestedMessage->getTest2(), [1, 2]);
+        $this->assertSame($message->getNested(), $nestedMessage);
     }
 }

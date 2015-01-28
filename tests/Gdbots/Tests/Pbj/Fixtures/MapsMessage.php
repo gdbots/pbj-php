@@ -53,6 +53,13 @@ final class MapsMessage extends AbstractMessage
                         ->build();
                     break;
 
+                case 'Message':
+                    $fields[] = Fb::create($type, $class::create())
+                        ->asAMap()
+                        ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                        ->build();
+                    break;
+
                 default:
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
