@@ -6,7 +6,8 @@ use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Field;
 
-// todo: implement BinaryType
+// todo: implement BinaryType (what about encoding that other libraries do?  DynamoDb, parse, etc.
+// that would lead to double encoding, bad mojo
 final class BinaryType extends AbstractType
 {
     /**

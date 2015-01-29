@@ -178,6 +178,14 @@ final class EmailMessage extends AbstractMessage
     }
 
     /**
+     * @return \Gdbots\Common\Microtime
+     */
+    public function getMicrotimeSent()
+    {
+        return $this->get(self::MICROTIME_SENT);
+    }
+
+    /**
      * @return Provider
      */
     public function getProvider()

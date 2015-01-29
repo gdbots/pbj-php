@@ -4,6 +4,7 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
+use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\SchemaNotDefined;
 use Gdbots\Pbj\Serializer\PhpArraySerializer;
@@ -142,11 +143,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     public function __clone()
     {
-        /** @var self $message */
-        $message = unserialize(serialize($this));
-        $message->isFrozen = false;
+        $this->data = unserialize(serialize($this->data));
+        $this->unFreeze();
         // todo: reset replay or transient fields?
-        return $message;
     }
 
     /**
@@ -169,10 +168,59 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     final public function freeze()
     {
         $this->isFrozen = true;
+        $messageType = TypeName::MESSAGE();
 
-        // todo: freeze all nested messages
+        foreach (static::schema()->getFields() as $field) {
+            if ($field->getType()->getTypeName() === $messageType) {
+                /** @var self $value */
+                $value = $this->get($field->getName());
+                if (empty($value)) {
+                    continue;
+                }
+
+                if ($value instanceof Message) {
+                    $value->freeze();
+                    continue;
+                }
+
+                /** @var self $v */
+                foreach ($value as $v) {
+                    $v->freeze();
+                }
+            }
+        }
 
         return $this;
+    }
+
+    /**
+     * Recursively unfreezes this object and any of its children.
+     * Used internally during the clone process.
+     */
+    private function unFreeze()
+    {
+        $this->isFrozen = false;
+        $messageType = TypeName::MESSAGE();
+
+        foreach (static::schema()->getFields() as $field) {
+            if ($field->getType()->getTypeName() === $messageType) {
+                /** @var self $value */
+                $value = $this->get($field->getName());
+                if (empty($value)) {
+                    continue;
+                }
+
+                if ($value instanceof Message) {
+                    $value->unFreeze();
+                    continue;
+                }
+
+                /** @var self $v */
+                foreach ($value as $v) {
+                    $v->unFreeze();
+                }
+            }
+        }
     }
 
     /**
