@@ -18,6 +18,10 @@
     "test2": [
       1,
       2
-    ]
+    ],
+    "location": {
+      "type": "Point",
+      "coordinates": [102.0, 0.5]
+    }
   }
 }

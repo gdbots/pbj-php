@@ -4,7 +4,7 @@ namespace Gdbots\Pbj\Enum;
 
 use Gdbots\Common\Enum;
 
-// todo: implement BinaryType, TextType, BlobType, MediumTextType, MessageType, UuidType?
+// todo: implement BinaryType, BlobType, UuidType?
 /**
  * @method static TypeName BIG_INT()
  * @method static TypeName BINARY()
@@ -17,6 +17,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName INT()
  * @method static TypeName INT_ENUM()
  * @method static TypeName MEDIUM_INT()
+ * @method static TypeName MEDIUM_TEXT()
  * @method static TypeName MICROTIME()
  * @method static TypeName MESSAGE()
  * @method static TypeName SIGNED_BIG_INT()
@@ -27,6 +28,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName SMALL_INT()
  * @method static TypeName STRING()
  * @method static TypeName STRING_ENUM()
+ * @method static TypeName TEXT()
  * @method static TypeName TINY_INT()
  */
 final class TypeName extends Enum
@@ -43,6 +45,7 @@ final class TypeName extends Enum
     const INT_ENUM = 'int-enum';
     const MICROTIME = 'microtime';
     const MEDIUM_INT = 'medium-int';
+    const MEDIUM_TEXT = 'medium-text';
     const MESSAGE = 'message';
     const SIGNED_BIG_INT = 'signed-big-int';
     const SIGNED_INT = 'signed-int';
@@ -52,5 +55,6 @@ final class TypeName extends Enum
     const SMALL_INT = 'small-int';
     const STRING = 'string';
     const STRING_ENUM = 'string-enum';
+    const TEXT = 'text';
     const TINY_INT = 'tiny-int';
 }
