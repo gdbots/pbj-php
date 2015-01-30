@@ -203,6 +203,6 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             }
         }
 
-        echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+        //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
     }
 }

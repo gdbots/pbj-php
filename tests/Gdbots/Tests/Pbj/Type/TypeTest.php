@@ -4,8 +4,10 @@ namespace Gdbots\Tests\Pbj\Type;
 
 use Gdbots\Common\GeoPoint;
 use Gdbots\Common\Util\DateUtils;
+use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\FieldBuilder;
 use Gdbots\Pbj\Type\DateTimeType;
+use Gdbots\Pbj\Type\Type;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class TypeTest extends \PHPUnit_Framework_TestCase
@@ -55,5 +57,32 @@ class TypeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($message->getLocation()->getLongitude(), 102.0);
         $this->assertSame($message->getLocation()->getLatitude(), 0.5);
         $this->assertSame($message->toArray()[NestedMessage::LOCATION], $point->toArray());
+    }
+
+    public function testGuardMaxBytes()
+    {
+        foreach (['BinaryType', 'MediumTextType', 'StringType', 'TextType'] as $typeName) {
+            /** @var Type $type */
+            $type = 'Gdbots\Pbj\Type\\' . $typeName;
+            $field = FieldBuilder::create($typeName, $type::create())->build();
+            $text = str_repeat('a', $field->getType()->getMaxBytes() + 1);
+            $thrown = false;
+
+            try {
+                $field->getType()->guard($text, $field);
+            } catch (AssertionFailed $e) {
+                $thrown = true;
+            }
+
+            if (!$thrown) {
+                $this->fail(
+                    sprintf(
+                        '[%s] accepted more than [%d] bytes.',
+                        $typeName,
+                        $field->getType()->getMaxBytes()
+                    )
+                );
+            }
+        }
     }
 }
