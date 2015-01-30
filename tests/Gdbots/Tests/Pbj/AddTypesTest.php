@@ -29,6 +29,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => IntEnum::UNKNOWN(),
             'Int'             => [0, 4294967295],
             'MediumInt'       => [0, 16777215],
+            'MediumText'      => 'medium text',
             'Message'         => NestedMessage::create(),
             'Microtime'       => Microtime::create(),
             'SignedBigInt'    => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
@@ -38,6 +39,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'SmallInt'        => [0, 65535],
             'StringEnum'      => StringEnum::UNKNOWN(),
             'String'          => 'string',
+            'Text'            => 'text',
             'TinyInt'         => [0, 255],
         ];
     }
@@ -51,10 +53,11 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'DateTime'        => 'not_a_date',
             'Decimal'         => 1,
             'Float'           => 1,
-            'GeoPoint'        => '{"type": "Point", "coordinates": [102.0, 0.5]}',
+            'GeoPoint'        => 'not_a_geo_point',
             'IntEnum'         => Priority::NORMAL(), // not the correct enum
             'Int'             => [-1, 4294967296],
             'MediumInt'       => [-1, 16777216],
+            'MediumText'      => false,
             'Message'         => EmailMessage::create(),
             'Microtime'       => microtime(),
             'SignedBigInt'    => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
@@ -64,6 +67,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'SmallInt'        => [-1, 65536],
             'StringEnum'      => Provider::AOL(), // not the correct enum
             'String'          => false,
+            'Text'            => false,
             'TinyInt'         => [-1, 256],
         ];
     }
@@ -98,6 +102,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
 
     public function testAddInvalidTypeToMap()
     {
+        // todo: refactor, this test is weird and confusing
         $shouldWork = MapsMessage::create();
         $shouldFail = clone $shouldWork;
 
@@ -128,13 +133,59 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                         $shouldFail->addToAMap($type, 'test1', $v);
                     }
 
-                    if ('Decimal' == $type && 'Float' == $k || 'Float' == $type && 'Decimal' == $k) {
-                        continue;
-                    } elseif ('Date' == $type && 'DateTime' == $k || 'DateTime' == $type && 'Date' == $k) {
-                        continue;
-                    } elseif ('Binary' == $type && 'String' == $k || 'String' == $type && 'Binary' == $k) {
-                        continue;
-                    } elseif (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
+                    switch ($type) {
+                        case 'Binary':
+                            if (in_array($k, ['String', 'MediumText', 'Text'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'Decimal':
+                            if (in_array($k, ['Float'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'Date':
+                            if (in_array($k, ['DateTime'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'DateTime':
+                            if (in_array($k, ['Date'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'Float':
+                            if (in_array($k, ['Decimal'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'MediumText':
+                            if (in_array($k, ['Binary', 'String', 'Text'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'String':
+                            if (in_array($k, ['Binary', 'MediumText', 'Text'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'Text':
+                            if (in_array($k, ['Binary', 'MediumText', 'String'])) {
+                                continue 2;
+                            }
+                            break;
+
+                        default:
+                    }
+
+                    if (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
                         continue;
                      }
                 } catch (\Exception $e) {
@@ -152,6 +203,6 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             }
         }
 
-        //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+        echo json_encode($shouldWork, JSON_PRETTY_PRINT);
     }
 }
