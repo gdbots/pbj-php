@@ -2,9 +2,12 @@
 
 namespace Gdbots\Pbj\Serializer;
 
+use Gdbots\Common\GeoPoint;
+use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\FieldRule;
+use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Field;
@@ -172,6 +175,10 @@ class PhpArraySerializer extends AbstractSerializer
             return $this->doSerialize($value, $options);
         }
 
+        if ($value instanceof ToArray) {
+            return $value->toArray();
+        }
+
         throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
     }
 
@@ -186,6 +193,10 @@ class PhpArraySerializer extends AbstractSerializer
         $type = $field->getType();
         if ($type->encodesToScalar()) {
             return $type->decode($value, $field);
+        }
+
+        if ($type->getTypeName() === TypeName::GEO_POINT()) {
+            return GeoPoint::fromArray($value);
         }
 
         // assuming for now that everything else is a nested message

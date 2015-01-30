@@ -2,9 +2,11 @@
 
 namespace Gdbots\Tests\Pbj\Type;
 
+use Gdbots\Common\GeoPoint;
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\FieldBuilder;
 use Gdbots\Pbj\Type\DateTimeType;
+use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class TypeTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,5 +43,17 @@ class TypeTest extends \PHPUnit_Framework_TestCase
             $dateTime->format(DateUtils::ISO8601),
             $decoded->format(DateUtils::ISO8601)
         );
+    }
+
+    public function testGeoPointType()
+    {
+        $message = NestedMessage::create();
+        $geoJson = '{"type":"Point","coordinates":[102.0,0.5]}';
+        $point = GeoPoint::fromArray(json_decode($geoJson, true));
+        $message->setLocation($point);
+
+        $this->assertSame($message->getLocation()->getLongitude(), 102.0);
+        $this->assertSame($message->getLocation()->getLatitude(), 0.5);
+        $this->assertSame($message->toArray()[NestedMessage::LOCATION], $point->toArray());
     }
 }

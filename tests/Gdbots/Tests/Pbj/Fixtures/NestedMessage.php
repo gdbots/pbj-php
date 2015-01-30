@@ -2,6 +2,7 @@
 
 namespace Gdbots\Tests\Pbj\Fixtures;
 
+use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\MessageResolver;
@@ -12,6 +13,7 @@ final class NestedMessage extends AbstractMessage
 {
     const TEST1 = 'test1';
     const TEST2 = 'test2';
+    const LOCATION = 'location';
 
     /**
      * @return Schema
@@ -21,6 +23,7 @@ final class NestedMessage extends AbstractMessage
         $schema = Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:nested-message:1-0-0', [
             Fb::create(self::TEST1, T\StringType::create())->build(),
             Fb::create(self::TEST2, T\IntType::create())->asASet()->build(),
+            Fb::create(self::LOCATION, T\GeoPointType::create())->build(),
         ]);
 
         MessageResolver::registerSchema($schema);
@@ -68,5 +71,22 @@ final class NestedMessage extends AbstractMessage
     public function removeTest2($test2)
     {
         return $this->removeFromSet(self::TEST2, [$test2]);
+    }
+
+    /**
+     * @return GeoPoint
+     */
+    public function getLocation()
+    {
+        return $this->get(self::LOCATION);
+    }
+
+    /**
+     * @param GeoPoint $location
+     * @return self
+     */
+    public function setLocation(GeoPoint $location)
+    {
+        return $this->setSingleValue(self::LOCATION, $location);
     }
 }

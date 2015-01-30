@@ -13,6 +13,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName DATE_TIME()
  * @method static TypeName DECIMAL()
  * @method static TypeName FLOAT()
+ * @method static TypeName GEO_POINT()
  * @method static TypeName INT()
  * @method static TypeName INT_ENUM()
  * @method static TypeName MEDIUM_INT()
@@ -37,6 +38,7 @@ final class TypeName extends Enum
     const DATE_TIME = 'date-time';
     const DECIMAL = 'decimal';
     const FLOAT = 'float';
+    const GEO_POINT = 'geo-point';
     const INT = 'int';
     const INT_ENUM = 'int-enum';
     const MICROTIME = 'microtime';

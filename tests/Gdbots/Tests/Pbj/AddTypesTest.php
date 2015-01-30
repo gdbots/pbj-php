@@ -3,6 +3,7 @@
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Common\BigNumber;
+use Gdbots\Common\GeoPoint;
 use Gdbots\Common\Microtime;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
@@ -24,6 +25,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'DateTime'        => new \DateTime(),
             'Decimal'         => 3.14,
             'Float'           => 13213.032468,
+            'GeoPoint'        => new GeoPoint(102.0, 0.5),
             'IntEnum'         => IntEnum::UNKNOWN(),
             'Int'             => [0, 4294967295],
             'MediumInt'       => [0, 16777215],
@@ -49,6 +51,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'DateTime'        => 'not_a_date',
             'Decimal'         => 1,
             'Float'           => 1,
+            'GeoPoint'        => '{"type": "Point", "coordinates": [102.0, 0.5]}',
             'IntEnum'         => Priority::NORMAL(), // not the correct enum
             'Int'             => [-1, 4294967296],
             'MediumInt'       => [-1, 16777216],
