@@ -20,6 +20,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
     {
         return [
             'BigInt'          => [new BigNumber(0), new BigNumber('18446744073709551615')],
+            'Binary'          => 'aG9tZXIgc2ltcHNvbg==',
+            'Blob'            => 'aG9tZXIgc2ltcHNvbg==',
             'Boolean'         => [false, true],
             'Date'            => new \DateTime(),
             'DateTime'        => new \DateTime(),
@@ -29,6 +31,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => IntEnum::UNKNOWN(),
             'Int'             => [0, 4294967295],
             'MediumInt'       => [0, 16777215],
+            'MediumBlob'      => 'aG9tZXIgc2ltcHNvbg==',
             'MediumText'      => 'medium text',
             'Message'         => NestedMessage::create(),
             'Microtime'       => Microtime::create(),
@@ -48,6 +51,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
     {
         return [
             'BigInt'          => [new BigNumber(-1), new BigNumber('18446744073709551616')],
+            'Binary'          => false,
+            'Blob'            => false,
             'Boolean'         => 'not_a_bool',
             'Date'            => 'not_a_date',
             'DateTime'        => 'not_a_date',
@@ -57,6 +62,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'IntEnum'         => Priority::NORMAL(), // not the correct enum
             'Int'             => [-1, 4294967296],
             'MediumInt'       => [-1, 16777216],
+            'MediumBlob'      => false,
             'MediumText'      => false,
             'Message'         => EmailMessage::create(),
             'Microtime'       => microtime(),
@@ -111,6 +117,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
          * e.g. an Int is also all other unsigned ints (except BigInt but that's a class so we're fine)
          */
         $allInts = ['TinyInt', 'SmallInt', 'MediumInt', 'Int', 'SignedTinyInt', 'SignedSmallInt', 'SignedMediumInt', 'SignedInt'];
+        $allStrings = ['Binary', 'Blob', 'MediumBlob', 'MediumText', 'String', 'Text'];
 
         foreach ($shouldWork::getAllTypes() as $type => $class) {
             foreach ($this->getTypeValues() as $k => $v) {
@@ -135,7 +142,13 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
 
                     switch ($type) {
                         case 'Binary':
-                            if (in_array($k, ['String', 'MediumText', 'Text'])) {
+                            if (in_array($k, $allStrings)) {
+                                continue 2;
+                            }
+                            break;
+
+                        case 'Blob':
+                            if (in_array($k, $allStrings)) {
                                 continue 2;
                             }
                             break;
@@ -164,20 +177,26 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                             }
                             break;
 
+                        case 'MediumBlob':
+                            if (in_array($k, $allStrings)) {
+                                continue 2;
+                            }
+                            break;
+
                         case 'MediumText':
-                            if (in_array($k, ['Binary', 'String', 'Text'])) {
+                            if (in_array($k, $allStrings)) {
                                 continue 2;
                             }
                             break;
 
                         case 'String':
-                            if (in_array($k, ['Binary', 'MediumText', 'Text'])) {
+                            if (in_array($k, $allStrings)) {
                                 continue 2;
                             }
                             break;
 
                         case 'Text':
-                            if (in_array($k, ['Binary', 'MediumText', 'String'])) {
+                            if (in_array($k, $allStrings)) {
                                 continue 2;
                             }
                             break;

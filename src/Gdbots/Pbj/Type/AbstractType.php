@@ -79,6 +79,14 @@ abstract class AbstractType implements Type
     /**
      * {@inheritdoc}
      */
+    public function isBinary()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function isNumeric()
     {
         return false;

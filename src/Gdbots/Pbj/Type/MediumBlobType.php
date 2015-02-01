@@ -2,13 +2,13 @@
 
 namespace Gdbots\Pbj\Type;
 
-final class BinaryType extends AbstractBinaryType
+final class MediumBlobType extends AbstractBinaryType
 {
     /**
      * {@inheritdoc}
      */
     public function getMaxBytes()
     {
-        return 255;
+        return 16777215;
     }
 }

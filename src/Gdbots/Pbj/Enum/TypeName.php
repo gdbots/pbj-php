@@ -4,10 +4,11 @@ namespace Gdbots\Pbj\Enum;
 
 use Gdbots\Common\Enum;
 
-// todo: implement BinaryType, BlobType, UuidType?
+// todo: implement UuidType?
 /**
  * @method static TypeName BIG_INT()
  * @method static TypeName BINARY()
+ * @method static TypeName BLOB()
  * @method static TypeName BOOLEAN()
  * @method static TypeName DATE()
  * @method static TypeName DATE_TIME()
@@ -16,6 +17,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName GEO_POINT()
  * @method static TypeName INT()
  * @method static TypeName INT_ENUM()
+ * @method static TypeName MEDIUM_BLOB()
  * @method static TypeName MEDIUM_INT()
  * @method static TypeName MEDIUM_TEXT()
  * @method static TypeName MICROTIME()
@@ -35,6 +37,7 @@ final class TypeName extends Enum
 {
     const BIG_INT = 'big-int';
     const BINARY = 'binary';
+    const BLOB = 'blob';
     const BOOLEAN = 'boolean';
     const DATE = 'date';
     const DATE_TIME = 'date-time';
@@ -44,6 +47,7 @@ final class TypeName extends Enum
     const INT = 'int';
     const INT_ENUM = 'int-enum';
     const MICROTIME = 'microtime';
+    const MEDIUM_BLOB = 'medium-blob';
     const MEDIUM_INT = 'medium-int';
     const MEDIUM_TEXT = 'medium-text';
     const MESSAGE = 'message';

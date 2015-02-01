@@ -21,7 +21,12 @@ final class MapsMessage extends AbstractMessage
         /** @var \SplFileInfo $file */
         foreach ($files as $file) {
             $type = $file->getBasename('Type.php');
-            if (!$file->isFile() || in_array($type, ['AbstractInt', 'AbstractString', 'Abstract', 'Type.php', '..', '.'])) {
+            if (!$file->isFile()
+                || in_array(
+                    $type,
+                    ['AbstractInt', 'AbstractBinary', 'AbstractString', 'Abstract', 'Type.php', '..', '.']
+                )
+            ) {
                 continue;
             }
             $types[$type] = 'Gdbots\Pbj\Type\\' . $type . 'Type';

@@ -6,6 +6,7 @@ use Gdbots\Common\GeoPoint;
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\FieldBuilder;
+use Gdbots\Pbj\Type\BinaryType;
 use Gdbots\Pbj\Type\DateTimeType;
 use Gdbots\Pbj\Type\Type;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
@@ -59,9 +60,39 @@ class TypeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($message->toArray()[NestedMessage::LOCATION], $point->toArray());
     }
 
+    public function testBinaryType()
+    {
+        $type = BinaryType::create();
+        $field = FieldBuilder::create('binary', $type)->build();
+
+        $string = 'homer simpson';
+        $expected = base64_encode($string);
+
+        $encoded = $field->getType()->encode($string, $field);
+        $this->assertSame($expected, $encoded);
+
+        $decoded = $field->getType()->decode($encoded, $field);
+        $this->assertSame($decoded, $string);
+
+        /*
+         * now test without the type handling the base64_encode/decode
+         */
+        $type->encodeToBase64(false);
+        $type->decodeFromBase64(false);
+
+        $encoded = $field->getType()->encode($expected, $field);
+        $this->assertSame($expected, $encoded);
+
+        $decoded = $field->getType()->decode($encoded, $field);
+        $this->assertSame($decoded, $expected);
+
+        $type->encodeToBase64(true);
+        $type->decodeFromBase64(true);
+    }
+
     public function testGuardMaxBytes()
     {
-        foreach (['BinaryType', 'MediumTextType', 'StringType', 'TextType'] as $typeName) {
+        foreach (['BinaryType', 'BlobType', 'MediumBlobType', 'MediumTextType', 'StringType', 'TextType'] as $typeName) {
             /** @var Type $type */
             $type = 'Gdbots\Pbj\Type\\' . $typeName;
             $field = FieldBuilder::create($typeName, $type::create())->build();

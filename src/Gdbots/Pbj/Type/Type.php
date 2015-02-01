@@ -76,6 +76,11 @@ interface Type
     /**
      * @return bool
      */
+    public function isBinary();
+
+    /**
+     * @return bool
+     */
     public function isNumeric();
 
     /**
