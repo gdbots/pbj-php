@@ -6,9 +6,9 @@ use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
 
-final class Schema implements ToArray, \JsonSerializable
+class Schema implements ToArray, \JsonSerializable
 {
-    const FIELD_NAME = '_pbj';
+    const PBJ_FIELD_NAME = '_pbj';
 
     /** @var string */
     private $className;
@@ -26,17 +26,37 @@ final class Schema implements ToArray, \JsonSerializable
      * @param string $className
      * @param SchemaId $id
      */
-    private function __construct($className, SchemaId $id)
+    final private function __construct($className, SchemaId $id)
     {
         $this->className = $className;
         $this->id = $id;
         $this->addField(
-            FieldBuilder::create(self::FIELD_NAME, Type\StringType::create())
+            FieldBuilder::create(self::PBJ_FIELD_NAME, Type\StringType::create())
                 ->required()
                 ->pattern(SchemaId::VALID_PATTERN)
                 ->withDefault($this->id->toString())
                 ->build()
         );
+
+        foreach ($this->defineSchema() as $field) {
+            $this->addField($field);
+        }
+    }
+
+    /**
+     * When custom schemas are used you can override this method to inject
+     * a set of fixed fields that all messages defined with this schema
+     * must have.  By default the only fixed/required field is the "_pbj" field.
+     *
+     * It may be beneficial to have a set of fields that each "category" of
+     * messages should have.  An event, command, request, etc.  Those having
+     * an "id" or "microtime" would definitely make sense.
+     *
+     * @return Field[]
+     */
+    protected function defineSchema()
+    {
+        return [];
     }
 
     /**
@@ -45,13 +65,14 @@ final class Schema implements ToArray, \JsonSerializable
      * @param Field[] $fields
      * @return Schema
      */
-    public static function create($className, $schemaId, array $fields = [])
+    final public static function create($className, $schemaId, array $fields = [])
     {
         $id = $schemaId instanceof SchemaId ? $schemaId : SchemaId::fromString($schemaId);
         Assertion::classExists($className, null, 'className');
         Assertion::allIsInstanceOf($fields, 'Gdbots\Pbj\Field', null, 'fields');
 
-        $schema = new self($className, $id);
+        /** @var Schema $schema */
+        $schema = new static($className, $id);
         foreach ($fields as $field) {
             $schema->addField($field);
         }
@@ -62,7 +83,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return string
      */
-    public function toString()
+    final public function toString()
     {
         return $this->id->toString();
     }
@@ -70,7 +91,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    final public function toArray()
     {
         return [
             'id' => $this->id->toString(),
@@ -82,7 +103,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return array
      */
-    public function jsonSerialize()
+    final public function jsonSerialize()
     {
         return $this->toArray();
     }
@@ -90,7 +111,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return string
      */
-    public function __toString()
+    final public function __toString()
     {
         return $this->id->toString();
     }
@@ -113,7 +134,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return SchemaId
      */
-    public function getId()
+    final public function getId()
     {
         return $this->id;
     }
@@ -121,7 +142,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return string
      */
-    public function getClassName()
+    final public function getClassName()
     {
         return $this->className;
     }
@@ -129,7 +150,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return Field[]
      */
-    public function getFields()
+    final public function getFields()
     {
         return $this->fields;
     }
@@ -137,7 +158,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return Field[]
      */
-    public function getRequiredFields()
+    final public function getRequiredFields()
     {
         return $this->requiredFields;
     }
@@ -146,7 +167,7 @@ final class Schema implements ToArray, \JsonSerializable
      * @param string $fieldName
      * @return bool
      */
-    public function hasField($fieldName)
+    final public function hasField($fieldName)
     {
         return isset($this->fields[$fieldName]);
     }
@@ -156,7 +177,7 @@ final class Schema implements ToArray, \JsonSerializable
      * @return Field
      * @throws FieldNotDefined
      */
-    public function getField($fieldName)
+    final public function getField($fieldName)
     {
         if (!isset($this->fields[$fieldName])) {
             throw new FieldNotDefined($this, $fieldName);

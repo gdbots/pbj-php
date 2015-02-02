@@ -2,6 +2,7 @@
 
 namespace Gdbots\Tests\Pbj\Fixtures;
 
+use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\MessageResolver;
@@ -12,6 +13,7 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 
 final class EmailMessage extends AbstractMessage
 {
+    const MESSAGE_ID = 'id';
     const FROM_NAME  = 'from_name';
     const FROM_EMAIL = 'from_email';
     const SUBJECT    = 'subject';
@@ -30,8 +32,8 @@ final class EmailMessage extends AbstractMessage
     protected static function defineSchema()
     {
         $schema = Schema::create(__CLASS__, 'gdbots:tests.pbj:fixtures:email-message:1-0-0', [
-            Fb::create(self::FROM_NAME, T\StringType::create())
-                ->build(),
+            Fb::create(self::MESSAGE_ID, T\TimeUuidType::create())->required()->build(),
+            Fb::create(self::FROM_NAME, T\StringType::create())->build(),
             Fb::create(self::FROM_EMAIL, T\StringType::create())
                 ->required()
                 ->format('email')
@@ -66,6 +68,23 @@ final class EmailMessage extends AbstractMessage
 
         MessageResolver::registerSchema($schema);
         return $schema;
+    }
+
+    /**
+     * @return UuidIdentifier
+     */
+    public function getMessageId()
+    {
+        return $this->get(self::MESSAGE_ID);
+    }
+
+    /**
+     * @param UuidIdentifier $id
+     * @return self
+     */
+    public function setMessageId(UuidIdentifier $id)
+    {
+        return $this->setSingleValue(self::MESSAGE_ID, $id);
     }
 
     /**

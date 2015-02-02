@@ -32,7 +32,7 @@ class PhpArraySerializer extends AbstractSerializer
     private function doSerialize(Message $message, array $options)
     {
         $schema = $message::schema();
-        $message->setSingleValue(Schema::FIELD_NAME, $schema->getId()->toString())->validate();
+        $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->validate();
 
         $payload = [];
         $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];
@@ -84,12 +84,12 @@ class PhpArraySerializer extends AbstractSerializer
     {
         Assertion::keyIsset(
             $data,
-            Schema::FIELD_NAME,
+            Schema::PBJ_FIELD_NAME,
             sprintf(
                 '[%s::%s] Array provided must contain the [%s] key.',
                 get_called_class(),
                 __FUNCTION__,
-                Schema::FIELD_NAME
+                Schema::PBJ_FIELD_NAME
             )
         );
 
@@ -106,7 +106,7 @@ class PhpArraySerializer extends AbstractSerializer
      */
     private function doDeserialize(array $data, array $options)
     {
-        $message = $this->createMessage((string) $data[Schema::FIELD_NAME]);
+        $message = $this->createMessage((string) $data[Schema::PBJ_FIELD_NAME]);
         $schema = $message::schema();
 
         foreach ($data as $fieldName => $value) {

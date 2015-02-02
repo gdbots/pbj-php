@@ -4,7 +4,6 @@ namespace Gdbots\Pbj\Enum;
 
 use Gdbots\Common\Enum;
 
-// todo: implement UuidType?
 /**
  * @method static TypeName BIG_INT()
  * @method static TypeName BINARY()
@@ -31,7 +30,10 @@ use Gdbots\Common\Enum;
  * @method static TypeName STRING()
  * @method static TypeName STRING_ENUM()
  * @method static TypeName TEXT()
+ * @method static TypeName TIME_UUID()
+ * @method static TypeName TIMESTAMP()
  * @method static TypeName TINY_INT()
+ * @method static TypeName UUID()
  */
 final class TypeName extends Enum
 {
@@ -60,5 +62,8 @@ final class TypeName extends Enum
     const STRING = 'string';
     const STRING_ENUM = 'string-enum';
     const TEXT = 'text';
+    const TIME_UUID = 'time-uuid';
+    const TIMESTAMP = 'timestamp';
     const TINY_INT = 'tiny-int';
+    const UUID = 'uuid';
 }

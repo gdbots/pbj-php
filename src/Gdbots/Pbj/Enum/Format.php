@@ -11,6 +11,12 @@ use Gdbots\Common\Enum;
  * @method static Format DATE()
  * @method static Format DATE_TIME()
  * @method static Format EMAIL()
+ * @method static Format HOSTNAME()
+ * @method static Format IPV4()
+ * @method static Format IPV6()
+ * @method static Format URI()
+ * @method static Format URL()
+ * @method static Format UUID()
  */
 final class Format extends Enum
 {
@@ -18,4 +24,10 @@ final class Format extends Enum
     const DATE = 'date';
     const DATE_TIME = 'date-time';
     const EMAIL = 'email';
+    const HOSTNAME = 'hostname';
+    const IPV4 = 'ipv4';
+    const IPV6 = 'ipv6';
+    const URI = 'uri';
+    const URL = 'url';
+    const UUID = 'uuid';
 }
