@@ -95,6 +95,7 @@ class Schema implements ToArray, \JsonSerializable
     {
         return [
             'id' => $this->id->toString(),
+            'curie' => $this->id->getCurie(),
             'class_name' => $this->className,
             'fields' => $this->fields
         ];

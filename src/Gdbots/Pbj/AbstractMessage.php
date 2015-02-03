@@ -8,6 +8,7 @@ use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\SchemaNotDefined;
 use Gdbots\Pbj\Serializer\PhpArraySerializer;
+use Gdbots\Pbj\Serializer\YamlSerializer;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
 
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
@@ -21,6 +22,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /** @var PhpArraySerializer */
     private static $serializer;
+
+    /** @var YamlSerializer */
+    private static $yamlSerializer;
 
     /**
      * @var array
@@ -128,6 +132,20 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             self::$serializer = new PhpArraySerializer();
         }
         return self::$serializer->serialize($this);
+    }
+
+    /**
+     * Returns a Yaml string version of the message.
+     * Useful for debugging or logging.
+     *
+     * @return string
+     */
+    final public function __toString()
+    {
+        if (null === self::$yamlSerializer) {
+            self::$yamlSerializer = new YamlSerializer();
+        }
+        return self::$yamlSerializer->serialize($this);
     }
 
     /**

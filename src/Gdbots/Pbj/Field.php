@@ -2,18 +2,26 @@
 
 namespace Gdbots\Pbj;
 
+use Gdbots\Common\Enum;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
-use Gdbots\Pbj\Type\IntEnumType;
-use Gdbots\Pbj\Type\MessageType;
-use Gdbots\Pbj\Type\StringEnumType;
+use Gdbots\Pbj\Enum\TypeName;
+use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\Type\Type;
 
 final class Field implements ToArray, \JsonSerializable
 {
+    /**
+     * Regular expression pattern for matching a valid field name.  The pattern allows
+     * for camelCase fields name but snake_case is recommend.
+     *
+     * @constant string
+     */
+    const VALID_NAME_PATTERN = '/^[a-zA-Z_]{1}[a-zA-Z0-9_]+$/';
+
     /** @var string */
     private $name;
 
@@ -62,6 +70,9 @@ final class Field implements ToArray, \JsonSerializable
     /** @var mixed */
     private $default;
 
+    /** @var bool */
+    private $useTypeDefault = true;
+
     /** @var string */
     private $className;
 
@@ -82,6 +93,7 @@ final class Field implements ToArray, \JsonSerializable
      * @param int $precision
      * @param int $scale
      * @param null|mixed $default
+     * @param bool $useTypeDefault
      * @param null|string $className
      * @param callable|null $assertion
      */
@@ -99,19 +111,54 @@ final class Field implements ToArray, \JsonSerializable
         $precision = 10,
         $scale = 2,
         $default = null,
+        $useTypeDefault = true,
         $className = null,
         \Closure $assertion = null
     ) {
-        Assertion::string($name);
+        Assertion::betweenLength($name, 1, 127);
+        Assertion::regex($name, self::VALID_NAME_PATTERN,
+            sprintf('Field [%s] must match pattern [%s].', $name, self::VALID_NAME_PATTERN)
+        );
         Assertion::boolean($required);
-        Assertion::nullOrString($className);
+        Assertion::boolean($useTypeDefault);
+        Assertion::nullOrClassExists($className);
 
         $this->name = $name;
         $this->type = $type;
-        $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         $this->required = $required;
+        $this->useTypeDefault = $useTypeDefault;
+        $this->className = $className;
+        $this->assertion = $assertion;
 
-        // string constraints
+        $this->applyFieldRule($rule);
+        $this->applyStringOptions($minLength, $maxLength, $pattern, $format);
+        $this->applyNumericOptions($min, $max, $precision, $scale);
+        $this->applyDefault($default);
+    }
+
+    /**
+     * @param FieldRule $rule
+     * @throws AssertionFailed
+     */
+    private function applyFieldRule(FieldRule $rule = null)
+    {
+        $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
+        if ($this->isASet() || $this->isAList()) {
+            Assertion::true(
+                $this->type->isScalar(),
+                sprintf('Field [%s] must decode as a scalar to be used in a set of list.', $this->name)
+            );
+        }
+    }
+
+    /**
+     * @param null|int $minLength
+     * @param null|int $maxLength
+     * @param null|string $pattern
+     * @param null|string $format
+     */
+    private function applyStringOptions($minLength = null, $maxLength = null, $pattern = null, $format = null)
+    {
         $minLength = (int) $minLength;
         $maxLength = (int) $maxLength;
         if ($maxLength > 0) {
@@ -128,8 +175,16 @@ final class Field implements ToArray, \JsonSerializable
         } else {
             $this->format = Format::UNKNOWN();
         }
+    }
 
-        // numeric constraints (allow for negative values and ensure min <= max)
+    /**
+     * @param null|int $min
+     * @param null|int $max
+     * @param int $precision
+     * @param int $scale
+     */
+    private function applyNumericOptions($min = null, $max = null, $precision = 10, $scale = 2)
+    {
         if (null !== $max) {
             $this->max = (int) $max;
         }
@@ -145,16 +200,36 @@ final class Field implements ToArray, \JsonSerializable
 
         $this->precision = NumberUtils::bound((int) $precision, 1, 65);
         $this->scale = NumberUtils::bound((int) $scale, 0, $this->precision);
+    }
 
+    /**
+     * @param mixed $default
+     * @throws AssertionFailed
+     * @throws \Exception
+     */
+    private function applyDefault($default = null)
+    {
         $this->default = $default;
-        $this->className = $className;
-        $this->assertion = $assertion;
 
-        if ($this->type instanceof IntEnumType
-            || $this->type instanceof StringEnumType
-            || $this->type instanceof MessageType)
-        {
-            Assertion::notNull($className, sprintf('Field [%s] requires a className.', $this->name));
+        if ($this->type->isScalar()) {
+            $this->useTypeDefault = true;
+        } else {
+            switch ($this->type->getTypeName()->getValue()) {
+                case TypeName::INT_ENUM:
+                case TypeName::STRING_ENUM:
+                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    if (!$this->default instanceof Enum) {
+                        $this->default = $this->type->decode($this->default, $this);
+                    }
+                    break;
+
+                case TypeName::MESSAGE:
+                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         if (null !== $this->default && !$this->default instanceof \Closure) {
@@ -306,14 +381,20 @@ final class Field implements ToArray, \JsonSerializable
     public function getDefault(Message $message = null)
     {
         if (null === $this->default) {
-            return $this->isASingleValue() ? $this->type->getDefault() : [];
+            if ($this->useTypeDefault) {
+                return $this->isASingleValue() ? $this->type->getDefault() : [];
+            }
+            return $this->isASingleValue() ? null : [];
         }
 
         if ($this->default instanceof \Closure) {
             $default = call_user_func($this->default, $message);
             $this->guardDefault($default);
             if (null === $default) {
-                return $this->isASingleValue() ? $this->type->getDefault() : [];
+                if ($this->useTypeDefault) {
+                    return $this->isASingleValue() ? $this->type->getDefault() : [];
+                }
+                return $this->isASingleValue() ? null : [];
             }
             return $default;
         }
@@ -323,50 +404,32 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * @param mixed $default
+     * @throws AssertionFailed
      * @throws \Exception
      */
     private function guardDefault($default)
     {
         if ($this->isASingleValue()) {
             $this->guardValue($default);
-        } else {
-            Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name));
-            if ($this->isAMap()) {
-                // todo: review, must a map be scalar too?
-                if (null !== $default) {
-                    Assertion::true(
-                        ArrayUtils::isAssoc($default),
-                        sprintf('Field [%s] default must be an associative array.', $this->name)
-                    );
-                }
-            } else {
-                Assertion::true(
-                    $this->type->isScalar(),
-                    sprintf('Field [%s] must decode as a scalar to be used in a set or list.', $this->name)
-                );
-            }
+            return;
+        }
 
-            if (null !== $default) {
-                Assertion::true(
-                    !empty($default),
-                    sprintf('Field [%s] default cannot be an empty array.', $this->name)
-                );
+        Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name));
+        if (null === $default) {
+            return;
+        }
 
-                foreach ($default as $k => $v) {
-                    Assertion::notNull(
-                        $v,
-                        sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k)
-                    );
+        if ($this->isAMap()) {
+            // todo: review, must a map be scalar too?
+            Assertion::true(
+                ArrayUtils::isAssoc($default),
+                sprintf('Field [%s] default must be an associative array.', $this->name)
+            );
+        }
 
-                    if ($this->isAMap()) {
-                        Assertion::string(
-                            $k,
-                            sprintf('Field [%s] default key [%s] must be a string.', $this->name, $k)
-                        );
-                    }
-                    $this->guardValue($v);
-                }
-            }
+        foreach ($default as $k => $v) {
+            Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k));
+            $this->guardValue($v);
         }
     }
 
@@ -388,6 +451,7 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * @param mixed $value
+     * @throws AssertionFailed
      * @throws \Exception
      */
     public function guardValue($value)
@@ -424,6 +488,7 @@ final class Field implements ToArray, \JsonSerializable
             'precision'     => $this->precision,
             'scale'         => $this->scale,
             'default'       => $this->getDefault(),
+            'use_type_default' => $this->useTypeDefault,
             'class_name'    => $this->className,
             'has_assertion' => null !== $this->assertion
         ];

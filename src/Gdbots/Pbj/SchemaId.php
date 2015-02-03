@@ -18,7 +18,7 @@ use Gdbots\Pbj\Exception\InvalidSchemaId;
  * And of course the various package managers like composer, npm, etc.
  *
  * Schema Id Format:
- *  vendor:package:category:message:version
+ *  pbj:vendor:package:category:message:version
  *
  * Message Curie Format:
  *  vendor:package:category:message
@@ -31,16 +31,16 @@ use Gdbots\Pbj\Exception\InvalidSchemaId;
  *  VERSION:  @see SchemaVersion::VALID_PATTERN
  *
  * Examples of fully qualified schema ids:
- *  acme:videos:event:video-uploaded:1-0-0
- *  acme:users:command:register-user:1-1-0
- *  acme:api.videos:request:get-video:1-0-0
+ *  pbj:acme:videos:event:video-uploaded:1-0-0
+ *  pbj:acme:users:command:register-user:1-1-0
+ *  pbj:acme:api.videos:request:get-video:1-0-0
  *
  * The fully qualified schema identifier corresponds to a json schema implementing
  * the Gdbots PBJ Json Schema.
  *
  * The schema id must be resolveable to a php class that should be able to read and write
  * messages with payloads that validate using the json schema.  The target class is ideally
- * model revision specific.  As in GetVideoV1, GetVideoV2, etc.  Only "model" revisions
+ * major revision specific.  As in GetVideoV1, GetVideoV2, etc.  Only "major" revisions
  * should require a unique class since all other schema changes should not break anything.
  *
  * @see SchemaVersion
@@ -53,7 +53,7 @@ final class SchemaId implements \JsonSerializable
      * Regular expression pattern for matching a valid SchemaId string.
      * @constant string
      */
-    const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$/';
+    const VALID_PATTERN = '/^pbj:([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$/';
 
     private static $instances = [];
 
@@ -98,7 +98,7 @@ final class SchemaId implements \JsonSerializable
         $this->message = $message;
         $this->version = SchemaVersion::fromString($version);
         $this->id = sprintf(
-            '%s:%s:%s:%s:%s',
+            'pbj:%s:%s:%s:%s:%s',
             $this->vendor,
             $this->package,
             $this->category,

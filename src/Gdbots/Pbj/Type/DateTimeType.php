@@ -3,7 +3,6 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Util\DateUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;

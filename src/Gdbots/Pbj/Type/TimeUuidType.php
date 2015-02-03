@@ -13,8 +13,10 @@ final class TimeUuidType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var TimeUuidIdentifier $value */
         Assertion::isInstanceOf($value, 'Gdbots\Identifiers\TimeUuidIdentifier', null, $field->getName());
+        if ($field->hasClassName()) {
+            Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+        }
     }
 
     /**
@@ -33,7 +35,9 @@ final class TimeUuidType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        if ($value instanceof TimeUuidIdentifier) {
+        /** @var TimeUuidIdentifier $className */
+        $className = $field->getClassName() ?: 'Gdbots\Identifiers\TimeUuidIdentifier';
+        if ($value instanceof $className) {
             return $value;
         }
 
@@ -41,7 +45,7 @@ final class TimeUuidType extends AbstractType
             return null;
         }
 
-        return TimeUuidIdentifier::fromString((string) $value);
+        return $className::fromString((string) $value);
     }
 
     /**
@@ -57,7 +61,7 @@ final class TimeUuidType extends AbstractType
      */
     public function getDefault()
     {
-        //return TimeUuidIdentifier::generate();
+        return TimeUuidIdentifier::generate();
     }
 
     /**

@@ -15,6 +15,7 @@ final class StringEnumType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var Enum $value */
+        Assertion::isInstanceOf($value, 'Gdbots\Common\Enum', null, $field->getName());
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         $v = $value->getValue();
         Assertion::string($v, null, $field->getName());

@@ -13,7 +13,7 @@ $array = $message->toArray();
 
 do {
     $i++;
-    $message = EmailMessage::fromArray($array);
+    //$message = EmailMessage::fromArray($array);
     $str = $serializer->serialize($message);
     $message = $serializer->deserialize($str);
 } while ($i < numTimes());

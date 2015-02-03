@@ -67,7 +67,7 @@ final class MessageCurie implements \JsonSerializable
      */
     public static function fromSchemaId(SchemaId $schemaId)
     {
-        $curie = str_replace(':' . $schemaId->getVersion()->toString(), '', $schemaId->toString());
+        $curie = substr(str_replace(':' . $schemaId->getVersion()->toString(), '', $schemaId->toString()), 4);
 
         if (isset(self::$instances[$curie])) {
             return self::$instances[$curie];

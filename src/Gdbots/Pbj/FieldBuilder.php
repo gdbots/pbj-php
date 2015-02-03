@@ -46,6 +46,9 @@ final class FieldBuilder
     /** @var mixed */
     private $default;
 
+    /** @var bool */
+    private $useTypeDefault = true;
+
     /** @var string */
     private $className;
 
@@ -58,7 +61,6 @@ final class FieldBuilder
      */
     final private function __construct($name, Type $type)
     {
-        Assertion::string($name);
         $this->name = $name;
         $this->type = $type;
     }
@@ -106,10 +108,6 @@ final class FieldBuilder
      */
     public function asASet()
     {
-        Assertion::true(
-            $this->type->isScalar(),
-            sprintf('Field [%s] must decode as a scalar to be used in a set.', $this->name)
-        );
         $this->rule = FieldRule::A_SET();
         return $this;
     }
@@ -119,10 +117,6 @@ final class FieldBuilder
      */
     public function asAList()
     {
-        Assertion::true(
-            $this->type->isScalar(),
-            sprintf('Field [%s] must decode as a scalar to be used in a list.', $this->name)
-        );
         $this->rule = FieldRule::A_LIST();
         return $this;
     }
@@ -227,6 +221,16 @@ final class FieldBuilder
     }
 
     /**
+     * @param bool $useTypeDefault
+     * @return self
+     */
+    public function useTypeDefault($useTypeDefault)
+    {
+        $this->useTypeDefault = (bool) $useTypeDefault;
+        return $this;
+    }
+
+    /**
      * @param string $className
      * @return self
      */
@@ -269,6 +273,7 @@ final class FieldBuilder
             $this->precision,
             $this->scale,
             $this->default,
+            $this->useTypeDefault,
             $this->className,
             $this->assertion
         );

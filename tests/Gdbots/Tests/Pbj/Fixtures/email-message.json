@@ -1,5 +1,5 @@
 {
-  "_pbj": "gdbots:tests.pbj:fixtures:email-message:1-0-0",
+  "_pbj": "pbj:gdbots:tests.pbj:fixtures:email-message:1-0-0",
   "id": "0dcee564-aa71-11e4-a811-3c15c2c60168",
   "from_name": "homer  ",
   "from_email": "homer@thesimpsons.com",
@@ -14,7 +14,7 @@
     "chicken"
   ],
   "nested": {
-    "_pbj": "gdbots:tests.pbj:fixtures:nested-message:1-0-0",
+    "_pbj": "pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0",
     "test1": "val1",
     "test2": [
       1,
