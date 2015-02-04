@@ -57,7 +57,7 @@ class TypeTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($message->getLocation()->getLatitude(), 0.5);
         $this->assertSame($message->getLocation()->getLongitude(), 102.0);
-        $this->assertSame($message->toArray()[NestedMessage::LOCATION], $point->toArray());
+        $this->assertSame($message->toArray()[NestedMessage::LOCATION_FIELD_NAME], $point->toArray());
     }
 
     public function testBinaryType()
