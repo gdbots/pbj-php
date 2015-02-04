@@ -29,7 +29,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                 'DateTime' => new \DateTime(),
                 'Decimal' => 3.14,
                 'Float' => 13213.032468,
-                'GeoPoint' => new GeoPoint(102.0, 0.5),
+                'GeoPoint' => new GeoPoint(0.5, 102.0),
                 'IntEnum' => IntEnum::UNKNOWN(),
                 'Int' => [0, 4294967295],
                 'MediumInt' => [0, 16777215],

@@ -55,8 +55,8 @@ class TypeTest extends \PHPUnit_Framework_TestCase
         $point = GeoPoint::fromArray(json_decode($geoJson, true));
         $message->setLocation($point);
 
-        $this->assertSame($message->getLocation()->getLongitude(), 102.0);
         $this->assertSame($message->getLocation()->getLatitude(), 0.5);
+        $this->assertSame($message->getLocation()->getLongitude(), 102.0);
         $this->assertSame($message->toArray()[NestedMessage::LOCATION], $point->toArray());
     }
 

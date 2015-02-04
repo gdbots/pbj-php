@@ -54,7 +54,7 @@ final class EmailMessage extends AbstractMessage
             Fb::create(self::PRIORITY, T\IntEnumType::create())
                 ->required()
                 ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
-                ->withDefault(Priority::NORMAL())
+                ->withDefault(Priority::NORMAL)
                 ->build(),
             Fb::create(self::SENT, T\BooleanType::create())->build(),
             Fb::create(self::DATE_SENT, T\DateTimeType::create())->build(),

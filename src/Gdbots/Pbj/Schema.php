@@ -8,7 +8,7 @@ use Gdbots\Pbj\Exception\FieldNotDefined;
 
 class Schema implements ToArray, \JsonSerializable
 {
-    const PBJ_FIELD_NAME = '_pbj';
+    const PBJ_FIELD_NAME = '_schema';
 
     /** @var string */
     private $className;
