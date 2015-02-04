@@ -20,7 +20,6 @@ final class StringType extends AbstractStringType
             Assertion::regex($value, $pattern, null, $field->getName());
         }
 
-        // todo: add all semantic format handlers
         switch ($field->getFormat()->getValue()) {
             case Format::UNKNOWN:
                 break;

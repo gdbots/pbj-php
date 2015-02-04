@@ -46,7 +46,7 @@ class Schema implements ToArray, \JsonSerializable
     /**
      * When custom schemas are used you can override this method to inject
      * a set of fixed fields that all messages defined with this schema
-     * must have.  By default the only fixed/required field is the "_pbj" field.
+     * must have.  By default the only fixed/required field is the "_schema" field.
      *
      * It may be beneficial to have a set of fields that each "category" of
      * messages should have.  An event, command, request, etc.  Those having

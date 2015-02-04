@@ -7,7 +7,6 @@ use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
-// todo: review, should we let app code handle the encoding?
 abstract class AbstractBinaryType extends AbstractType
 {
     private $decodeFromBase64 = true;
