@@ -6,6 +6,7 @@ use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
+use Gdbots\Pbj\Exception\LogicException;
 use Gdbots\Pbj\Exception\SchemaNotDefined;
 use Gdbots\Pbj\Serializer\PhpArraySerializer;
 use Gdbots\Pbj\Serializer\YamlSerializer;
@@ -45,6 +46,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @var bool
      */
     private $isFrozen = false;
+
+    /**
+     * @see Message::isReplay
+     * @var bool
+     */
+    private $isReplay;
 
     /**
      * Nothing fancy on new messages... we let the serializers or application
@@ -163,7 +170,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $this->data = unserialize(serialize($this->data));
         $this->unFreeze();
-        // todo: reset replay or transient fields?
     }
 
     /**
@@ -185,6 +191,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function freeze()
     {
+        if ($this->isFrozen()) {
+            return $this;
+        }
+
         $this->isFrozen = true;
         $messageType = TypeName::MESSAGE();
 
@@ -218,6 +228,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     private function unFreeze()
     {
         $this->isFrozen = false;
+        $this->isReplay = null;
         $messageType = TypeName::MESSAGE();
 
         foreach (static::schema()->getFields() as $field) {
@@ -258,6 +269,29 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         if ($this->isFrozen) {
             throw new FrozenMessageIsImmutable($this);
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function isReplay($replay = null)
+    {
+        if (null === $replay) {
+            if (null === $this->isReplay) {
+                $this->isReplay = false;
+            }
+            return $this->isReplay;
+        }
+
+        if (null === $this->isReplay) {
+            $this->isReplay = (bool) $replay;
+            if ($this->isReplay) {
+                $this->freeze();
+            }
+            return $this->isReplay;
+        }
+
+        throw new LogicException('You can only set the replay mode on one time.');
     }
 
     /**

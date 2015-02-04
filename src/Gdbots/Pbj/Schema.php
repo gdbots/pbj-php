@@ -38,7 +38,7 @@ class Schema implements ToArray, \JsonSerializable
                 ->build()
         );
 
-        foreach ($this->defineSchema() as $field) {
+        foreach ($this->getExtendedSchemaFields() as $field) {
             $this->addField($field);
         }
     }
@@ -50,11 +50,11 @@ class Schema implements ToArray, \JsonSerializable
      *
      * It may be beneficial to have a set of fields that each "category" of
      * messages should have.  An event, command, request, etc.  Those having
-     * an "id" or "microtime" would definitely make sense.
+     * an "event_id" or "microtime" would definitely make sense.
      *
      * @return Field[]
      */
-    protected function defineSchema()
+    protected function getExtendedSchemaFields()
     {
         return [];
     }

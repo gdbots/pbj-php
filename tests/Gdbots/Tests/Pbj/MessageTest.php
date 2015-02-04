@@ -53,7 +53,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Priority::HIGH() === $message->getPriority());
         $this->assertSame($message->getNested()->getLocation()->getLatitude(), 0.5);
 
-        //echo json_encode($message, JSON_PRETTY_PRINT);
+        echo json_encode($message, JSON_PRETTY_PRINT);
         //echo json_encode($message->schema(), JSON_PRETTY_PRINT);
     }
 

@@ -2,11 +2,11 @@
 
 namespace Gdbots\Pbj;
 
-class EventSchema extends Schema
+class ResponseSchema extends Schema
 {
-    const EVENT_ID_FIELD_NAME = 'event_id';
+    const RESPONSE_ID_FIELD_NAME = 'response_id';
     const MICROTIME_FIELD_NAME = 'microtime';
-    const CORREL_ID_FIELD_NAME = 'correl_id';
+    const REQUEST_ID_FIELD_NAME = 'request_id';
 
     /**
      * {@inheritdoc}
@@ -14,13 +14,14 @@ class EventSchema extends Schema
     protected function getExtendedSchemaFields()
     {
         return [
-            FieldBuilder::create(self::EVENT_ID_FIELD_NAME, Type\TimeUuidType::create())
+            FieldBuilder::create(self::RESPONSE_ID_FIELD_NAME, Type\UuidType::create())
                 ->required()
                 ->build(),
             FieldBuilder::create(self::MICROTIME_FIELD_NAME, Type\MicrotimeType::create())
                 ->required()
                 ->build(),
-            FieldBuilder::create(self::CORREL_ID_FIELD_NAME, Type\UuidType::create())
+            FieldBuilder::create(self::REQUEST_ID_FIELD_NAME, Type\UuidType::create())
+                ->required()
                 ->useTypeDefault(false)
                 ->build(),
         ];

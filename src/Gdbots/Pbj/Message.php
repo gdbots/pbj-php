@@ -3,6 +3,7 @@
 namespace Gdbots\Pbj;
 
 use Gdbots\Pbj\Exception\GdbotsPbjException;
+use Gdbots\Pbj\Exception\LogicException;
 use Gdbots\Pbj\Exception\SchemaNotDefined;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
 
@@ -62,6 +63,18 @@ interface Message
      * @return bool
      */
     public function isFrozen();
+
+    /**
+     * Returns true if this message is being replayed.  Providing a value
+     * will set the flag but this can only be done once.  Note that
+     * setting a message as being "replayed" will also freeze the message.
+     *
+     * @param bool|null $replay
+     * @return bool
+     *
+     * @throws LogicException
+     */
+    public function isReplay($replay = null);
 
     /**
      * Populates the defaults on all fields or just the fieldName provided.

@@ -4,8 +4,9 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
+use Gdbots\Identifiers\UuidIdentifier;
 
-abstract class AbstractDomainEvent extends AbstractMessage implements DomainEvent
+abstract class AbstractEvent extends AbstractMessage implements DomainEvent
 {
     /**
      * {@inheritdoc}
@@ -37,5 +38,29 @@ abstract class AbstractDomainEvent extends AbstractMessage implements DomainEven
     final public function setMicrotime(Microtime $microtime)
     {
         return $this->setSingleValue(EventSchema::MICROTIME_FIELD_NAME, $microtime);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function hasCorrelId()
+    {
+        return $this->has(EventSchema::CORREL_ID_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getCorrelId()
+    {
+        return $this->get(EventSchema::CORREL_ID_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function setCorrelId(UuidIdentifier $id)
+    {
+        return $this->setSingleValue(EventSchema::CORREL_ID_FIELD_NAME, $id);
     }
 }

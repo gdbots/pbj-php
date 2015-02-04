@@ -12,6 +12,7 @@ use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\Type\Type;
 
+// todo: implement isCompatible(Field $other)
 final class Field implements ToArray, \JsonSerializable
 {
     /**
@@ -497,8 +498,20 @@ final class Field implements ToArray, \JsonSerializable
     /**
      * @return array
      */
-    final public function jsonSerialize()
+    public function jsonSerialize()
     {
         return $this->toArray();
+    }
+
+    /**
+     * Returns true if this field is likely compatible with the
+     * provided field.  Can be used by merging operations.
+     *
+     * @param Field $other
+     * @return bool
+     */
+    public function isCompatible(Field $other)
+    {
+
     }
 }
