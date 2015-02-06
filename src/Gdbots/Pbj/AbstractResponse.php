@@ -25,6 +25,7 @@ abstract class AbstractResponse extends AbstractMessage implements Response
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setResponseId(UuidIdentifier $id)
     {
@@ -49,6 +50,7 @@ abstract class AbstractResponse extends AbstractMessage implements Response
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setMicrotime(Microtime $microtime)
     {
@@ -73,6 +75,7 @@ abstract class AbstractResponse extends AbstractMessage implements Response
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setRequestId(UuidIdentifier $id)
     {

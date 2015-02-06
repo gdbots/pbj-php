@@ -26,6 +26,7 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setEventId(TimeUuidIdentifier $id)
     {
@@ -50,6 +51,7 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setMicrotime(Microtime $microtime)
     {
@@ -74,6 +76,7 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setCorrelId(UuidIdentifier $id)
     {

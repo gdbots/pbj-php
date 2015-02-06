@@ -35,6 +35,7 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     public function setEntityId(UuidIdentifier $id)
     {
@@ -59,6 +60,7 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setEtag($etag)
     {
@@ -83,6 +85,7 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setCreatedAt(Microtime $microtime)
     {
@@ -107,6 +110,7 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setUpdatedAt(Microtime $microtime)
     {

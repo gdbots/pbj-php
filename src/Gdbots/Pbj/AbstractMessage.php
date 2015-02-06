@@ -102,6 +102,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public static function create()
     {
@@ -112,20 +113,13 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public static function fromArray(array $data = [])
     {
         if (null === self::$serializer) {
             self::$serializer = new PhpArraySerializer();
         }
-
-        /**
-         * This docblock just ensures the IDE properly identifies
-         * the return as the static class name and not just the
-         * Message interface.
-         *
-         * @var static $message
-         */
         $message = self::$serializer->deserialize($data);
         return $message;
     }
@@ -174,6 +168,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function validate()
     {
@@ -188,6 +183,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function freeze()
     {
@@ -296,6 +292,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function populateDefaults($fieldName = null)
     {
@@ -385,6 +382,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function clear($fieldName)
     {
@@ -414,6 +412,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setSingleValue($fieldName, $value)
     {
@@ -433,6 +432,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function addToSet($fieldName, array $values)
     {
@@ -457,6 +457,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function removeFromSet($fieldName, array $values)
     {
@@ -483,6 +484,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function addToList($fieldName, array $values)
     {
@@ -506,6 +508,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function removeFromList($fieldName, array $values)
     {
@@ -530,6 +533,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function addToMap($fieldName, $key, $value)
     {
@@ -551,6 +555,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function removeFromMap($fieldName, $key)
     {

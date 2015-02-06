@@ -25,6 +25,7 @@ abstract class AbstractRequest extends AbstractMessage implements Request
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setRequestId(UuidIdentifier $id)
     {
@@ -49,6 +50,7 @@ abstract class AbstractRequest extends AbstractMessage implements Request
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setMicrotime(Microtime $microtime)
     {

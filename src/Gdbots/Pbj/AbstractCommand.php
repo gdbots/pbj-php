@@ -25,6 +25,7 @@ abstract class AbstractCommand extends AbstractMessage implements Command
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setCommandId(TimeUuidIdentifier $id)
     {
@@ -49,6 +50,7 @@ abstract class AbstractCommand extends AbstractMessage implements Command
 
     /**
      * {@inheritdoc}
+     * @return static
      */
     final public function setMicrotime(Microtime $microtime)
     {

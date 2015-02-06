@@ -79,6 +79,7 @@ class PhpArraySerializer extends AbstractSerializer
 
     /**
      * {@inheritdoc}
+     * @return Message
      */
     public function deserialize($data, array $options = [])
     {

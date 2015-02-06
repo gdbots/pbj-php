@@ -18,6 +18,7 @@ class YamlSerializer extends PhpArraySerializer
 
     /**
      * {@inheritdoc}
+     * @return Message
      */
     public function deserialize($data, array $options = [])
     {
