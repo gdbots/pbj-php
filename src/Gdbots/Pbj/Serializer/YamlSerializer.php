@@ -13,7 +13,19 @@ class YamlSerializer extends PhpArraySerializer
      */
     public function serialize(Message $message, array $options = [])
     {
-        return Yaml::dump(parent::serialize($message, $options));
+        if (!isset($options['yaml_inline'])) {
+            $options['yaml_inline'] = 3;
+        }
+
+        if (!isset($options['yaml_indent'])) {
+            $options['yaml_indent'] = 2;
+        }
+
+        return Yaml::dump(
+            parent::serialize($message, $options),
+            (int) $options['yaml_inline'],
+            (int) $options['yaml_indent']
+        );
     }
 
     /**
