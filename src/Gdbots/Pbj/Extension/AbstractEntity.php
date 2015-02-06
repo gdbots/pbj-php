@@ -5,6 +5,9 @@ namespace Gdbots\Pbj\Extension;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
+use Gdbots\Pbj\Field;
+use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\Type as T;
 
 abstract class AbstractEntity extends AbstractMessage implements Entity
 {
@@ -13,7 +16,7 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
      */
     public static function defineEntityIdField()
     {
-        return FieldBuilder::create(EntitySchema::ENTITY_ID_FIELD_NAME, Type\UuidType::create())
+        return Fb::create(EntitySchema::ENTITY_ID_FIELD_NAME, T\UuidType::create())
             ->required()
             ->build();
     }
