@@ -50,9 +50,14 @@ interface Message
     public function validate();
 
     /**
-     * Freezes the message, making it immutable.
+     * Freezes the message, making it immutable.  The message must be valid
+     * before it can be frozen so this may throw an exception is some required
+     * fields have not been populated.
      *
      * @return static
+     *
+     * @throws GdbotsPbjException
+     * @throws RequiredFieldNotSet
      */
     public function freeze();
 

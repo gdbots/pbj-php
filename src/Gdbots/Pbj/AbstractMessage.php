@@ -143,10 +143,18 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      */
     final public function __toString()
     {
-        if (null === self::$yamlSerializer) {
-            self::$yamlSerializer = new YamlSerializer();
+        try {
+            if (null === self::$yamlSerializer) {
+                self::$yamlSerializer = new YamlSerializer();
+            }
+            return self::$yamlSerializer->serialize($this);
+        } catch (\Exception $e) {
+            return sprintf(
+                'Failed to render [%s] as a string with error: %s',
+                self::schema()->toString(),
+                $e->getMessage()
+            );
         }
-        return self::$yamlSerializer->serialize($this);
     }
 
     /**
@@ -191,6 +199,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             return $this;
         }
 
+        $this->validate();
         $this->isFrozen = true;
         $messageType = TypeName::MESSAGE();
 
