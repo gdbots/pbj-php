@@ -32,7 +32,7 @@ class PhpArraySerializer extends AbstractSerializer
     private function doSerialize(Message $message, array $options)
     {
         $schema = $message::schema();
-        $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->validate();
+        $message->validate();
 
         $payload = [];
         $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];
@@ -154,7 +154,10 @@ class PhpArraySerializer extends AbstractSerializer
             }
         }
 
-        return $message->populateDefaults();
+        // todo: review, should we set the schema id on deserialize or serialize?
+        // the message may be frozen when going to serialize.
+        // deserializing a message is "upgrading" it potentially.  or downgrading.
+        return $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
     /**
