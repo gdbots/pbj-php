@@ -1,6 +1,10 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
+
+use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\Schema;
+use Gdbots\Pbj\Type as T;
 
 class EventSchema extends Schema
 {
@@ -14,13 +18,13 @@ class EventSchema extends Schema
     protected function getExtendedSchemaFields()
     {
         return [
-            FieldBuilder::create(self::EVENT_ID_FIELD_NAME, Type\TimeUuidType::create())
+            Fb::create(self::EVENT_ID_FIELD_NAME, T\TimeUuidType::create())
                 ->required()
                 ->build(),
-            FieldBuilder::create(self::MICROTIME_FIELD_NAME, Type\MicrotimeType::create())
+            Fb::create(self::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            FieldBuilder::create(self::CORREL_ID_FIELD_NAME, Type\UuidType::create())
+            Fb::create(self::CORREL_ID_FIELD_NAME, T\UuidType::create())
                 ->useTypeDefault(false)
                 ->build(),
         ];

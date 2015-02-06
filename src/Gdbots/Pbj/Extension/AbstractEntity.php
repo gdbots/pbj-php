@@ -1,9 +1,10 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\AbstractMessage;
 
 abstract class AbstractEntity extends AbstractMessage implements Entity
 {

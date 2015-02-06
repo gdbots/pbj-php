@@ -1,9 +1,10 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
+use Gdbots\Pbj\AbstractMessage;
 
 abstract class AbstractCommand extends AbstractMessage implements Command
 {

@@ -1,9 +1,13 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
 
+use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\LogicException;
+use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\Schema;
+use Gdbots\Pbj\Type as T;
 
 class EntitySchema extends Schema
 {
@@ -49,14 +53,14 @@ class EntitySchema extends Schema
 
         return [
             $idField,
-            FieldBuilder::create(self::ETAG_FIELD_NAME, Type\StringType::create())
+            Fb::create(self::ETAG_FIELD_NAME, T\StringType::create())
                 ->pattern('/^[A-Za-z0-9_\-]+$/')
                 ->maxLength(100)
                 ->build(),
-            FieldBuilder::create(self::CREATED_AT_FIELD_NAME, Type\MicrotimeType::create())
+            Fb::create(self::CREATED_AT_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            FieldBuilder::create(self::UPDATED_AT_FIELD_NAME, Type\MicrotimeType::create())
+            Fb::create(self::UPDATED_AT_FIELD_NAME, T\MicrotimeType::create())
                 ->useTypeDefault(false)
                 ->build(),
         ];

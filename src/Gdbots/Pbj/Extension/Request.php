@@ -1,27 +1,28 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\TimeUuidIdentifier;
+use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\Message;
 
-interface Command extends Message
+interface Request extends Message
 {
     /**
      * @return bool
      */
-    public function hasCommandId();
+    public function hasRequestId();
 
     /**
-     * @return TimeUuidIdentifier
+     * @return UuidIdentifier
      */
-    public function getCommandId();
+    public function getRequestId();
 
     /**
-     * @param TimeUuidIdentifier $id
+     * @param UuidIdentifier $id
      * @return static
      */
-    public function setCommandId(TimeUuidIdentifier $id);
+    public function setRequestId(UuidIdentifier $id);
 
     /**
      * @return bool

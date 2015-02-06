@@ -1,6 +1,8 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
+
+use Gdbots\Pbj\Message;
 
 interface ValueObject extends Message
 {

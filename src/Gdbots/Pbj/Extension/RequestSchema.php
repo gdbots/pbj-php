@@ -1,6 +1,10 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
+
+use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\Schema;
+use Gdbots\Pbj\Type as T;
 
 class RequestSchema extends Schema
 {
@@ -13,10 +17,10 @@ class RequestSchema extends Schema
     protected function getExtendedSchemaFields()
     {
         return [
-            FieldBuilder::create(self::REQUEST_ID_FIELD_NAME, Type\UuidType::create())
+            Fb::create(self::REQUEST_ID_FIELD_NAME, T\UuidType::create())
                 ->required()
                 ->build(),
-            FieldBuilder::create(self::MICROTIME_FIELD_NAME, Type\MicrotimeType::create())
+            Fb::create(self::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
                 ->build(),
         ];

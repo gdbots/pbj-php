@@ -1,27 +1,29 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
+use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\Message;
 
-interface Response extends Message
+interface Event extends Message
 {
     /**
      * @return bool
      */
-    public function hasResponseId();
+    public function hasEventId();
 
     /**
-     * @return UuidIdentifier
+     * @return TimeUuidIdentifier
      */
-    public function getResponseId();
+    public function getEventId();
 
     /**
-     * @param UuidIdentifier $id
+     * @param TimeUuidIdentifier $id
      * @return static
      */
-    public function setResponseId(UuidIdentifier $id);
+    public function setEventId(TimeUuidIdentifier $id);
 
     /**
      * @return bool
@@ -42,16 +44,16 @@ interface Response extends Message
     /**
      * @return bool
      */
-    public function hasRequestId();
+    public function hasCorrelId();
 
     /**
      * @return UuidIdentifier
      */
-    public function getRequestId();
+    public function getCorrelId();
 
     /**
      * @param UuidIdentifier $id
      * @return static
      */
-    public function setRequestId(UuidIdentifier $id);
+    public function setCorrelId(UuidIdentifier $id);
 }

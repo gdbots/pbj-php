@@ -1,9 +1,11 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Message;
 
 interface Entity extends Message
 {

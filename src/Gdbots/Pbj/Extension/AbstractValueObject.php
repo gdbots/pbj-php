@@ -1,6 +1,8 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Extension;
+
+use Gdbots\Pbj\AbstractMessage;
 
 abstract class AbstractValueObject extends AbstractMessage implements ValueObject
 {
