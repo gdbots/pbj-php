@@ -105,4 +105,9 @@ interface Type
      * @return int
      */
     public function getMaxBytes();
+
+    /**
+     * @return bool
+     */
+    public function allowedInSetOrList();
 }

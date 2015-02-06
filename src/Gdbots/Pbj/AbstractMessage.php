@@ -440,6 +440,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
+        $values = array_filter($values, 'strlen');
+        if (empty($values)) {
+            return $this;
+        }
+
         foreach ($values as $value) {
             $field->guardValue($value);
             $key = strtolower(trim((string) $value));
@@ -458,6 +463,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
+
+        $values = array_filter($values, 'strlen');
+        if (empty($values)) {
+            return $this;
+        }
 
         foreach ($values as $value) {
             $key = strtolower(trim((string) $value));
@@ -480,6 +490,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
 
+        $values = array_filter($values, 'strlen');
+        if (empty($values)) {
+            return $this;
+        }
+
         foreach ($values as $value) {
             $field->guardValue($value);
             $this->data[$fieldName][] = $value;
@@ -497,6 +512,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
+
+        $values = array_filter($values, 'strlen');
+        if (empty($values)) {
+            return $this;
+        }
 
         $values = array_diff((array)$this->data[$fieldName], $values);
         $this->data[$fieldName] = $values;
@@ -517,6 +537,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
         Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);
+
+        if (null === $value) {
+            return $this->removeFromMap($fieldName, $key);
+        }
 
         $field->guardValue($value);
         $this->data[$fieldName][$key] = $value;

@@ -62,4 +62,12 @@ final class FloatType extends AbstractType
     {
         return INF;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSetOrList()
+    {
+        return true;
+    }
 }

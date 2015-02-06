@@ -101,4 +101,12 @@ final class StringType extends AbstractStringType
     {
         return 255;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSetOrList()
+    {
+        return true;
+    }
 }

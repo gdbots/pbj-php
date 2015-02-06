@@ -123,4 +123,12 @@ abstract class AbstractType implements Type
     {
         return 65535;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSetOrList()
+    {
+        return false;
+    }
 }

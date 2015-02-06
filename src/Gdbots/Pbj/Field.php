@@ -145,8 +145,12 @@ final class Field implements ToArray, \JsonSerializable
         $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         if ($this->isASet() || $this->isAList()) {
             Assertion::true(
-                $this->type->isScalar(),
-                sprintf('Field [%s] must decode as a scalar to be used in a set of list.', $this->name)
+                $this->type->allowedInSetOrList(),
+                sprintf(
+                    'Field [%s] with type [%s] cannot be used as a set or list.',
+                    $this->name,
+                    $this->type->getTypeName()->getValue()
+                )
             );
         }
     }

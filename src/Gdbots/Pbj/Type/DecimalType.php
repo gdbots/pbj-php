@@ -63,4 +63,12 @@ final class DecimalType extends AbstractType
     {
         return INF;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSetOrList()
+    {
+        return true;
+    }
 }
