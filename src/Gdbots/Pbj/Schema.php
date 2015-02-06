@@ -3,15 +3,22 @@
 namespace Gdbots\Pbj;
 
 use Gdbots\Common\ToArray;
+use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
 
+/*
+ * todo: refactor custom schemas as extensions?
+ */
 class Schema implements ToArray, \JsonSerializable
 {
     const PBJ_FIELD_NAME = '_schema';
 
     /** @var string */
     private $className;
+
+    /** @var string */
+    private $classShortName;
 
     /** @var SchemaId */
     private $id;
@@ -29,6 +36,7 @@ class Schema implements ToArray, \JsonSerializable
     final private function __construct($className, SchemaId $id)
     {
         $this->className = $className;
+        $this->classShortName = ClassUtils::getShortName($this->className);
         $this->id = $id;
         $this->addField(
             FieldBuilder::create(self::PBJ_FIELD_NAME, Type\StringType::create())
@@ -53,6 +61,7 @@ class Schema implements ToArray, \JsonSerializable
      * an "event_id" or "microtime" would definitely make sense.
      *
      * @return Field[]
+     * @throws \Exception
      */
     protected function getExtendedSchemaFields()
     {
@@ -146,6 +155,28 @@ class Schema implements ToArray, \JsonSerializable
     final public function getClassName()
     {
         return $this->className;
+    }
+
+    /**
+     * @return string
+     */
+    final public function getClassShortName()
+    {
+        return $this->classShortName;
+    }
+
+    /**
+     * Convenience method to return the name of the method that should
+     * exist on a handler for this messages with this schema.
+     *
+     * For example, an ImportUserV1 message would be handled by:
+     * SomeHandler::importUserV1(ImportUserV1 $command)
+     *
+     * @return string
+     */
+    final public function getHandlerMethodName()
+    {
+        return lcfirst($this->classShortName);
     }
 
     /**

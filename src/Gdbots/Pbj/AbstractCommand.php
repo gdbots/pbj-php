@@ -10,6 +10,14 @@ abstract class AbstractCommand extends AbstractMessage implements Command
     /**
      * {@inheritdoc}
      */
+    final public function hasCommandId()
+    {
+        return $this->has(CommandSchema::COMMAND_ID_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function getCommandId()
     {
         return $this->get(CommandSchema::COMMAND_ID_FIELD_NAME);
@@ -21,6 +29,14 @@ abstract class AbstractCommand extends AbstractMessage implements Command
     final public function setCommandId(TimeUuidIdentifier $id)
     {
         return $this->setSingleValue(CommandSchema::COMMAND_ID_FIELD_NAME, $id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function hasMicrotime()
+    {
+        return $this->has(CommandSchema::MICROTIME_FIELD_NAME);
     }
 
     /**

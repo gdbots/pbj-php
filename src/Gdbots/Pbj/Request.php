@@ -8,6 +8,11 @@ use Gdbots\Identifiers\UuidIdentifier;
 interface Request extends Message
 {
     /**
+     * @return bool
+     */
+    public function hasRequestId();
+
+    /**
      * @return UuidIdentifier
      */
     public function getRequestId();
@@ -17,6 +22,11 @@ interface Request extends Message
      * @return static
      */
     public function setRequestId(UuidIdentifier $id);
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime();
 
     /**
      * @return Microtime

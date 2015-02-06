@@ -10,6 +10,14 @@ abstract class AbstractResponse extends AbstractMessage implements Response
     /**
      * {@inheritdoc}
      */
+    final public function hasResponseId()
+    {
+        return $this->has(ResponseSchema::RESPONSE_ID_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function getResponseId()
     {
         return $this->get(ResponseSchema::RESPONSE_ID_FIELD_NAME);
@@ -26,6 +34,14 @@ abstract class AbstractResponse extends AbstractMessage implements Response
     /**
      * {@inheritdoc}
      */
+    final public function hasMicrotime()
+    {
+        return $this->has(ResponseSchema::MICROTIME_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function getMicrotime()
     {
         return $this->get(ResponseSchema::MICROTIME_FIELD_NAME);
@@ -37,6 +53,14 @@ abstract class AbstractResponse extends AbstractMessage implements Response
     final public function setMicrotime(Microtime $microtime)
     {
         return $this->setSingleValue(ResponseSchema::MICROTIME_FIELD_NAME, $microtime);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function hasRequestId()
+    {
+        return $this->has(ResponseSchema::REQUEST_ID_FIELD_NAME);
     }
 
     /**

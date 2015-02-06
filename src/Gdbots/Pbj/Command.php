@@ -8,6 +8,11 @@ use Gdbots\Identifiers\TimeUuidIdentifier;
 interface Command extends Message
 {
     /**
+     * @return bool
+     */
+    public function hasCommandId();
+
+    /**
      * @return TimeUuidIdentifier
      */
     public function getCommandId();
@@ -17,6 +22,11 @@ interface Command extends Message
      * @return static
      */
     public function setCommandId(TimeUuidIdentifier $id);
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime();
 
     /**
      * @return Microtime

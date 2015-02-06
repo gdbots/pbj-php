@@ -11,6 +11,14 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
     /**
      * {@inheritdoc}
      */
+    final public function hasEventId()
+    {
+        return $this->has(EventSchema::EVENT_ID_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function getEventId()
     {
         return $this->get(EventSchema::EVENT_ID_FIELD_NAME);
@@ -22,6 +30,14 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
     final public function setEventId(TimeUuidIdentifier $id)
     {
         return $this->setSingleValue(EventSchema::EVENT_ID_FIELD_NAME, $id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function hasMicrotime()
+    {
+        return $this->has(EventSchema::MICROTIME_FIELD_NAME);
     }
 
     /**

@@ -9,6 +9,11 @@ use Gdbots\Identifiers\UuidIdentifier;
 interface Event extends Message
 {
     /**
+     * @return bool
+     */
+    public function hasEventId();
+
+    /**
      * @return TimeUuidIdentifier
      */
     public function getEventId();
@@ -18,6 +23,11 @@ interface Event extends Message
      * @return static
      */
     public function setEventId(TimeUuidIdentifier $id);
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime();
 
     /**
      * @return Microtime

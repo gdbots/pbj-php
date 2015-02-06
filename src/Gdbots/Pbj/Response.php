@@ -8,6 +8,11 @@ use Gdbots\Identifiers\UuidIdentifier;
 interface Response extends Message
 {
     /**
+     * @return bool
+     */
+    public function hasResponseId();
+
+    /**
      * @return UuidIdentifier
      */
     public function getResponseId();
@@ -19,6 +24,11 @@ interface Response extends Message
     public function setResponseId(UuidIdentifier $id);
 
     /**
+     * @return bool
+     */
+    public function hasMicrotime();
+
+    /**
      * @return Microtime
      */
     public function getMicrotime();
@@ -28,6 +38,11 @@ interface Response extends Message
      * @return static
      */
     public function setMicrotime(Microtime $microtime);
+
+    /**
+     * @return bool
+     */
+    public function hasRequestId();
 
     /**
      * @return UuidIdentifier

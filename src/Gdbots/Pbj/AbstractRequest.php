@@ -10,6 +10,14 @@ abstract class AbstractRequest extends AbstractMessage implements Request
     /**
      * {@inheritdoc}
      */
+    final public function hasRequestId()
+    {
+        return $this->has(RequestSchema::REQUEST_ID_FIELD_NAME);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function getRequestId()
     {
         return $this->get(RequestSchema::REQUEST_ID_FIELD_NAME);
@@ -21,6 +29,14 @@ abstract class AbstractRequest extends AbstractMessage implements Request
     final public function setRequestId(UuidIdentifier $id)
     {
         return $this->setSingleValue(RequestSchema::REQUEST_ID_FIELD_NAME, $id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function hasMicrotime()
+    {
+        return $this->has(RequestSchema::MICROTIME_FIELD_NAME);
     }
 
     /**

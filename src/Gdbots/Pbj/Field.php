@@ -12,7 +12,6 @@ use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\Type\Type;
 
-// todo: implement isCompatible(Field $other)
 final class Field implements ToArray, \JsonSerializable
 {
     /**
@@ -389,7 +388,7 @@ final class Field implements ToArray, \JsonSerializable
         }
 
         if ($this->default instanceof \Closure) {
-            $default = call_user_func($this->default, $message);
+            $default = call_user_func($this->default, $message, $this);
             $this->guardDefault($default);
             if (null === $default) {
                 if ($this->useTypeDefault) {
@@ -507,11 +506,29 @@ final class Field implements ToArray, \JsonSerializable
      * Returns true if this field is likely compatible with the
      * provided field.  Can be used by merging operations.
      *
+     * todo: implement/test isCompatible
+     *
      * @param Field $other
      * @return bool
      */
     public function isCompatible(Field $other)
     {
+        if ($this->name !== $other->name) {
+            return false;
+        }
 
+        if ($this->type !== $other->type) {
+            return false;
+        }
+
+        if ($this->rule !== $other->rule) {
+            return false;
+        }
+
+        if ($this->className !== $other->className) {
+            return false;
+        }
+
+        return true;
     }
 }
