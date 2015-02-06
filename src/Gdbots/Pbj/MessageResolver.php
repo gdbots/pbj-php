@@ -8,7 +8,9 @@ use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 final class MessageResolver
 {
     /**
-     * An array of all the available class names keyed by the schema resolver key.
+     * An array of all the available class names keyed by the schema resolver key
+     * and curies for resolution that is not version specific.
+     *
      * @var array
      */
     private static $messages = [];
@@ -74,8 +76,8 @@ final class MessageResolver
     }
 
     /**
-     * Adds a single schema to the resolver.  This is used in tests
-     * or dynamic message schema creation (not a typical use case).
+     * Adds a single schema to the resolver.  This is used in tests or dynamic
+     * message schema creation (not a typical use case).
      *
      * @param Schema $schema
      */

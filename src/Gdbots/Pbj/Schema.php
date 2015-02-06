@@ -9,6 +9,7 @@ use Gdbots\Pbj\Exception\FieldNotDefined;
 
 /*
  * todo: refactor custom schemas as extensions?
+ * how could a consumer know a message has an extension?
  */
 class Schema implements ToArray, \JsonSerializable
 {
