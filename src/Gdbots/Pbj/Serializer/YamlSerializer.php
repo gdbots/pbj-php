@@ -10,6 +10,10 @@ class YamlSerializer extends PhpArraySerializer
 {
     /**
      * {@inheritdoc}
+     *
+     * Note that the greater the yaml_inline option the slower it is.
+     * 3 provides really good human readability but if you need
+     * speed use 0 or 1.
      */
     public function serialize(Message $message, array $options = [])
     {
