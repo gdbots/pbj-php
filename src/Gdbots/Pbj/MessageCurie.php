@@ -105,7 +105,7 @@ final class MessageCurie implements \JsonSerializable
             );
         }
 
-        self::$instances[$curie] = new self($matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
+        self::$instances[$curie] = new self($matches[1], $matches[2], $matches[3], $matches[4]);
         return self::$instances[$curie];
     }
 

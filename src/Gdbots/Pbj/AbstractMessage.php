@@ -61,6 +61,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * @return Schema
      */
     final public static function schema()
     {
@@ -168,7 +169,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * @return static
      */
-    public function __clone()
+    final public function __clone()
     {
         $this->data = unserialize(serialize($this->data));
         $this->unFreeze();
