@@ -151,6 +151,14 @@ class Schema implements ToArray, \JsonSerializable
     }
 
     /**
+     * @return MessageCurie
+     */
+    final public function getCurie()
+    {
+        return $this->id->getCurie();
+    }
+
+    /**
      * @return string
      */
     final public function getClassName()

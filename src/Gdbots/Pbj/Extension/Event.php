@@ -7,6 +7,7 @@ use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Message;
 
+// todo: do we need correl_id here and causation_id?
 interface Event extends Message
 {
     /**
