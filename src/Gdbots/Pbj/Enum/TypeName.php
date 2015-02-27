@@ -5,6 +5,7 @@ namespace Gdbots\Pbj\Enum;
 use Gdbots\Common\Enum;
 
 /**
+ * @method static TypeName ANY_MESSAGE()
  * @method static TypeName BIG_INT()
  * @method static TypeName BINARY()
  * @method static TypeName BLOB()
@@ -37,6 +38,7 @@ use Gdbots\Common\Enum;
  */
 final class TypeName extends Enum
 {
+    const ANY_MESSAGE = 'any-message';
     const BIG_INT = 'big-int';
     const BINARY = 'binary';
     const BLOB = 'blob';

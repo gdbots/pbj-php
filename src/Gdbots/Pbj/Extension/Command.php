@@ -6,6 +6,7 @@ use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\Message;
 
+// todo: do we need correl_id here?
 interface Command extends Message
 {
     /**

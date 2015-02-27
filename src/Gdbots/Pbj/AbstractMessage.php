@@ -203,9 +203,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->validate();
         $this->isFrozen = true;
         $messageType = TypeName::MESSAGE();
+        $anyMessageType = TypeName::ANY_MESSAGE();
 
         foreach (static::schema()->getFields() as $field) {
-            if ($field->getType()->getTypeName() === $messageType) {
+            $type = $field->getType()->getTypeName();
+            if ($type === $messageType || $type === $anyMessageType) {
                 /** @var self $value */
                 $value = $this->get($field->getName());
                 if (empty($value)) {
@@ -236,9 +238,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->isFrozen = false;
         $this->isReplay = null;
         $messageType = TypeName::MESSAGE();
+        $anyMessageType = TypeName::ANY_MESSAGE();
 
         foreach (static::schema()->getFields() as $field) {
-            if ($field->getType()->getTypeName() === $messageType) {
+            $type = $field->getType()->getTypeName();
+            if ($type === $messageType || $type === $anyMessageType) {
                 /** @var self $value */
                 $value = $this->get($field->getName());
                 if (empty($value)) {

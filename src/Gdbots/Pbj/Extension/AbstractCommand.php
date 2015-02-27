@@ -6,6 +6,7 @@ use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
 
+// todo: attempts/retries transient fields?  or transparent fields bag?
 abstract class AbstractCommand extends AbstractMessage implements Command
 {
     /**

@@ -21,68 +21,70 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
     protected function getTypeValues()
     {
         return [
-                'BigInt' => [new BigNumber(0), new BigNumber('18446744073709551615')],
-                'Binary' => 'aG9tZXIgc2ltcHNvbg==',
-                'Blob' => 'aG9tZXIgc2ltcHNvbg==',
-                'Boolean' => [false, true],
-                'Date' => new \DateTime(),
-                'DateTime' => new \DateTime(),
-                'Decimal' => 3.14,
-                'Float' => 13213.032468,
-                'GeoPoint' => new GeoPoint(0.5, 102.0),
-                'IntEnum' => IntEnum::UNKNOWN(),
-                'Int' => [0, 4294967295],
-                'MediumInt' => [0, 16777215],
-                'MediumBlob' => 'aG9tZXIgc2ltcHNvbg==',
-                'MediumText' => 'medium text',
-                'Message' => NestedMessage::create(),
-                'Microtime' => Microtime::create(),
-                'SignedBigInt' => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
-                'SignedMediumInt' => [-8388608, 8388607],
-                'SignedSmallInt' => [-32768, 32767],
-                'SignedTinyInt' => [-128, 127],
-                'SmallInt' => [0, 65535],
-                'StringEnum' => StringEnum::UNKNOWN(),
-                'String' => 'string',
-                'Text' => 'text',
-                'TimeUuid' => TimeUuidIdentifier::generate(),
-                'Timestamp' => time(),
-                'TinyInt' => [0, 255],
-                'Uuid' => UuidIdentifier::generate(),
+            'AnyMessage' => EmailMessage::create(),
+            'BigInt' => [new BigNumber(0), new BigNumber('18446744073709551615')],
+            'Binary' => 'aG9tZXIgc2ltcHNvbg==',
+            'Blob' => 'aG9tZXIgc2ltcHNvbg==',
+            'Boolean' => [false, true],
+            'Date' => new \DateTime(),
+            'DateTime' => new \DateTime(),
+            'Decimal' => 3.14,
+            'Float' => 13213.032468,
+            'GeoPoint' => new GeoPoint(0.5, 102.0),
+            'IntEnum' => IntEnum::UNKNOWN(),
+            'Int' => [0, 4294967295],
+            'MediumInt' => [0, 16777215],
+            'MediumBlob' => 'aG9tZXIgc2ltcHNvbg==',
+            'MediumText' => 'medium text',
+            'Message' => NestedMessage::create(),
+            'Microtime' => Microtime::create(),
+            'SignedBigInt' => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
+            'SignedMediumInt' => [-8388608, 8388607],
+            'SignedSmallInt' => [-32768, 32767],
+            'SignedTinyInt' => [-128, 127],
+            'SmallInt' => [0, 65535],
+            'StringEnum' => StringEnum::UNKNOWN(),
+            'String' => 'string',
+            'Text' => 'text',
+            'TimeUuid' => TimeUuidIdentifier::generate(),
+            'Timestamp' => time(),
+            'TinyInt' => [0, 255],
+            'Uuid' => UuidIdentifier::generate(),
         ];
     }
 
     protected function getInvalidTypeValues()
     {
         return [
-                'BigInt' => [new BigNumber(-1), new BigNumber('18446744073709551616')],
-                'Binary' => false,
-                'Blob' => false,
-                'Boolean' => 'not_a_bool',
-                'Date' => 'not_a_date',
-                'DateTime' => 'not_a_date',
-                'Decimal' => 1,
-                'Float' => 1,
-                'GeoPoint' => 'not_a_geo_point',
-                'IntEnum' => Priority::NORMAL(), // not the correct enum
-                'Int' => [-1, 4294967296],
-                'MediumInt' => [-1, 16777216],
-                'MediumBlob' => false,
-                'MediumText' => false,
-                'Message' => EmailMessage::create(),
-                'Microtime' => microtime(),
-                'SignedBigInt' => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
-                'SignedMediumInt' => [-8388609, 8388608],
-                'SignedSmallInt' => [-32769, 32768],
-                'SignedTinyInt' => [-129, 128],
-                'SmallInt' => [-1, 65536],
-                'StringEnum' => Provider::AOL(), // not the correct enum
-                'String' => false,
-                'Text' => false,
-                'TimeUuid' => 'not_a_time_uuid',
-                'Timestamp' => 'not_a_timestamp',
-                'TinyInt' => [-1, 256],
-                'Uuid' => 'not_a_uuid',
+            'AnyMessage' => 'not_a_message',
+            'BigInt' => [new BigNumber(-1), new BigNumber('18446744073709551616')],
+            'Binary' => false,
+            'Blob' => false,
+            'Boolean' => 'not_a_bool',
+            'Date' => 'not_a_date',
+            'DateTime' => 'not_a_date',
+            'Decimal' => 1,
+            'Float' => 1,
+            'GeoPoint' => 'not_a_geo_point',
+            'IntEnum' => Priority::NORMAL(), // not the correct enum
+            'Int' => [-1, 4294967296],
+            'MediumInt' => [-1, 16777216],
+            'MediumBlob' => false,
+            'MediumText' => false,
+            'Message' => EmailMessage::create(),
+            'Microtime' => microtime(),
+            'SignedBigInt' => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
+            'SignedMediumInt' => [-8388609, 8388608],
+            'SignedSmallInt' => [-32769, 32768],
+            'SignedTinyInt' => [-129, 128],
+            'SmallInt' => [-1, 65536],
+            'StringEnum' => Provider::AOL(), // not the correct enum
+            'String' => false,
+            'Text' => false,
+            'TimeUuid' => 'not_a_time_uuid',
+            'Timestamp' => 'not_a_timestamp',
+            'TinyInt' => [-1, 256],
+            'Uuid' => 'not_a_uuid',
         ];
     }
 
@@ -235,6 +237,10 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                     }
 
                     if (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
+                        continue;
+                    }
+
+                    if ('AnyMessage' === $type && 'Message' === $k) {
                         continue;
                     }
                 } catch (\Exception $e) {
