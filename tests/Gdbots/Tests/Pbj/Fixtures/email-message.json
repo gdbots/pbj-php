@@ -24,5 +24,27 @@
       "type": "Point",
       "coordinates": [102.0,0.5]
     }
-  }
+  },
+  "enum_in_set": [
+    "aol",
+    "gmail"
+  ],
+  "enum_in_list": [
+    "aol",
+    "aol",
+    "gmail",
+    "gmail"
+  ],
+  "any_of_message": [
+    {
+      "_schema": "pbj:gdbots:tests.pbj:fixtures:maps-message:1-0-0",
+      "String": {
+        "test:field:name": "value1"
+      }
+    },
+    {
+      "_schema": "pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0",
+      "test1": "value1"
+    }
+  ]
 }

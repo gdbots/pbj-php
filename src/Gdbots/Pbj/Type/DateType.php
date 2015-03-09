@@ -69,4 +69,12 @@ final class DateType extends AbstractType
     {
         return true;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSet()
+    {
+        return false;
+    }
 }

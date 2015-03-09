@@ -7,10 +7,26 @@ use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\HasMessageRef;
+use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\Type as T;
 
-abstract class AbstractEntity extends AbstractMessage implements Entity
+abstract class AbstractEntity extends AbstractMessage implements Entity, HasMessageRef
 {
+    /** @var MessageRef */
+    private $messageRef;
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getMessageRef()
+    {
+        if (null === $this->messageRef) {
+            $this->messageRef = new MessageRef($this::schema()->getCurie(), $this->getEntityId());
+        }
+        return $this->messageRef;
+    }
+
     /**
      * @return Field
      */
@@ -43,6 +59,7 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
      */
     public function setEntityId(UuidIdentifier $id)
     {
+        $this->messageRef = null;
         return $this->setSingleValue(EntitySchema::ENTITY_ID_FIELD_NAME, $id);
     }
 

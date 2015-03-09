@@ -5,8 +5,8 @@ namespace Gdbots\Pbj\Extension;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
-// todo: do we need correl_id here?
 interface Command extends Message
 {
     /**
@@ -40,4 +40,20 @@ interface Command extends Message
      * @return static
      */
     public function setMicrotime(Microtime $microtime);
+
+    /**
+     * @return bool
+     */
+    public function hasCorrelator();
+
+    /**
+     * @return MessageRef
+     */
+    public function getCorrelator();
+
+    /**
+     * @param MessageRef $correlator
+     * @return static
+     */
+    public function setCorrelator(MessageRef $correlator);
 }

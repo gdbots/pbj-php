@@ -10,7 +10,7 @@ class EventSchema extends Schema
 {
     const EVENT_ID_FIELD_NAME = 'event_id';
     const MICROTIME_FIELD_NAME = 'microtime';
-    const CORREL_ID_FIELD_NAME = 'correl_id';
+    const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
      * {@inheritdoc}
@@ -24,8 +24,7 @@ class EventSchema extends Schema
             Fb::create(self::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(self::CORREL_ID_FIELD_NAME, T\UuidType::create())
-                ->useTypeDefault(false)
+            Fb::create(self::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
                 ->build(),
         ];
     }

@@ -10,6 +10,7 @@ class RequestSchema extends Schema
 {
     const REQUEST_ID_FIELD_NAME = 'request_id';
     const MICROTIME_FIELD_NAME = 'microtime';
+    const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
      * {@inheritdoc}
@@ -22,6 +23,8 @@ class RequestSchema extends Schema
                 ->build(),
             Fb::create(self::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
+                ->build(),
+            Fb::create(self::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
                 ->build(),
         ];
     }

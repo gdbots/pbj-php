@@ -4,10 +4,10 @@ namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
-// todo: do we need correl_id here and causation_id?
+// todo: do we need causation_id?
 interface Event extends Message
 {
     /**
@@ -45,16 +45,16 @@ interface Event extends Message
     /**
      * @return bool
      */
-    public function hasCorrelId();
+    public function hasCorrelator();
 
     /**
-     * @return UuidIdentifier
+     * @return MessageRef
      */
-    public function getCorrelId();
+    public function getCorrelator();
 
     /**
-     * @param UuidIdentifier $id
+     * @param MessageRef $correlator
      * @return static
      */
-    public function setCorrelId(UuidIdentifier $id);
+    public function setCorrelator(MessageRef $correlator);
 }

@@ -6,17 +6,17 @@ use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Field;
-use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
-final class AnyMessageType extends AbstractType
+final class MessageRefType extends AbstractType
 {
     /**
      * {@inheritdoc}
      */
     public function guard($value, Field $field)
     {
-        /** @var Message $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\Message', null, $field->getName());
+        /** @var MessageRef $value */
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\MessageRef', null, $field->getName());
     }
 
     /**
@@ -24,7 +24,7 @@ final class AnyMessageType extends AbstractType
      */
     public function encode($value, Field $field)
     {
-        throw new EncodeValueFailed($value, $field, 'Messages must be encoded with a Serializer.');
+        throw new EncodeValueFailed($value, $field, 'MessageRef must be encoded with a Serializer.');
     }
 
     /**
@@ -32,7 +32,7 @@ final class AnyMessageType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        throw new DecodeValueFailed($value, $field, 'Messages must be decoded with a Serializer.');
+        throw new DecodeValueFailed($value, $field, 'MessageRef must be decoded with a Serializer.');
     }
 
     /**

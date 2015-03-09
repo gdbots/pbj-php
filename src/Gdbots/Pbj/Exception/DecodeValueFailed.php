@@ -26,7 +26,7 @@ class DecodeValueFailed extends \InvalidArgumentException implements GdbotsPbjEx
             'Failed to decode [%s] for field [%s] to a [%s].  Detail: %s',
             is_scalar($this->value) ? $this->value : StringUtils::varToString($this->value),
             $this->field->getName(),
-            $this->field->getType()->getTypeName()->getValue(),
+            $this->field->getType()->getTypeValue(),
             $message
         );
         parent::__construct($message);

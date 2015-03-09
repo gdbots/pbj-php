@@ -8,6 +8,7 @@ use Gdbots\Common\Microtime;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\MessageRef;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
@@ -21,7 +22,6 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
     protected function getTypeValues()
     {
         return [
-            'AnyMessage' => EmailMessage::create(),
             'BigInt' => [new BigNumber(0), new BigNumber('18446744073709551615')],
             'Binary' => 'aG9tZXIgc2ltcHNvbg==',
             'Blob' => 'aG9tZXIgc2ltcHNvbg==',
@@ -37,6 +37,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'MediumBlob' => 'aG9tZXIgc2ltcHNvbg==',
             'MediumText' => 'medium text',
             'Message' => NestedMessage::create(),
+            'MessageRef' => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()),
             'Microtime' => Microtime::create(),
             'SignedBigInt' => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],
@@ -56,7 +57,6 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
     protected function getInvalidTypeValues()
     {
         return [
-            'AnyMessage' => 'not_a_message',
             'BigInt' => [new BigNumber(-1), new BigNumber('18446744073709551616')],
             'Binary' => false,
             'Blob' => false,
@@ -71,7 +71,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'MediumInt' => [-1, 16777216],
             'MediumBlob' => false,
             'MediumText' => false,
-            'Message' => EmailMessage::create(),
+            'Message' => EmailMessage::create(), // not the correct message
+            'MessageRef' => 'not_a_message_ref',
             'Microtime' => microtime(),
             'SignedBigInt' => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
             'SignedMediumInt' => [-8388609, 8388608],
@@ -237,10 +238,6 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                     }
 
                     if (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
-                        continue;
-                    }
-
-                    if ('AnyMessage' === $type && 'Message' === $k) {
                         continue;
                     }
                 } catch (\Exception $e) {

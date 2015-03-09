@@ -11,6 +11,7 @@ class ResponseSchema extends Schema
     const RESPONSE_ID_FIELD_NAME = 'response_id';
     const MICROTIME_FIELD_NAME = 'microtime';
     const REQUEST_ID_FIELD_NAME = 'request_id';
+    const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
      * {@inheritdoc}
@@ -27,6 +28,8 @@ class ResponseSchema extends Schema
             Fb::create(self::REQUEST_ID_FIELD_NAME, T\UuidType::create())
                 ->required()
                 ->useTypeDefault(false)
+                ->build(),
+            Fb::create(self::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
                 ->build(),
         ];
     }

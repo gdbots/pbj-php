@@ -52,6 +52,9 @@ final class FieldBuilder
     /** @var string */
     private $className;
 
+    /** @var array */
+    private $anyOfClassNames;
+
     /** @var \Closure */
     private $assertion;
 
@@ -237,6 +240,18 @@ final class FieldBuilder
     public function className($className)
     {
         $this->className = $className;
+        $this->anyOfClassNames = null;
+        return $this;
+    }
+
+    /**
+     * @param array $anyOfClassNames
+     * @return self
+     */
+    public function anyOfClassNames(array $anyOfClassNames)
+    {
+        $this->anyOfClassNames = $anyOfClassNames;
+        $this->className = null;
         return $this;
     }
 
@@ -275,6 +290,7 @@ final class FieldBuilder
             $this->default,
             $this->useTypeDefault,
             $this->className,
+            $this->anyOfClassNames,
             $this->assertion
         );
     }

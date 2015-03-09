@@ -47,6 +47,14 @@ abstract class AbstractType implements Type
     /**
      * {@inheritdoc}
      */
+    final public function getTypeValue()
+    {
+        return $this->typeName->getValue();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function isScalar()
     {
         return true;
@@ -103,6 +111,14 @@ abstract class AbstractType implements Type
     /**
      * {@inheritdoc}
      */
+    public function isMessage()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getMin()
     {
         return -2147483648;
@@ -127,8 +143,8 @@ abstract class AbstractType implements Type
     /**
      * {@inheritdoc}
      */
-    public function allowedInSetOrList()
+    public function allowedInSet()
     {
-        return false;
+        return true;
     }
 }

@@ -80,6 +80,14 @@ final class DateTimeType extends AbstractType
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function allowedInSet()
+    {
+        return false;
+    }
+
+    /**
      * @param \DateTime $date
      * @return \DateTime
      */

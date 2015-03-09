@@ -5,6 +5,7 @@ namespace Gdbots\Pbj\Extension;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
 interface Response extends Message
 {
@@ -55,4 +56,20 @@ interface Response extends Message
      * @return static
      */
     public function setRequestId(UuidIdentifier $id);
+
+    /**
+     * @return bool
+     */
+    public function hasCorrelator();
+
+    /**
+     * @return MessageRef
+     */
+    public function getCorrelator();
+
+    /**
+     * @param MessageRef $correlator
+     * @return static
+     */
+    public function setCorrelator(MessageRef $correlator);
 }

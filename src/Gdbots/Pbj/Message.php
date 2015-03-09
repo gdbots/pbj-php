@@ -189,15 +189,15 @@ interface Message
     public function addToList($fieldName, array $values);
 
     /**
-     * Removes an array of values from a list.
+     * Removes the element from the array at the index.
      *
      * @param string $fieldName
-     * @param array $values
+     * @param int $index
      * @return static
      *
      * @throws GdbotsPbjException
      */
-    public function removeFromList($fieldName, array $values);
+    public function removeFromListAt($fieldName, $index);
 
     /**
      * Adds a key/value pair to a map.

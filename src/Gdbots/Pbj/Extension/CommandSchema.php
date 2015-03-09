@@ -10,6 +10,7 @@ class CommandSchema extends Schema
 {
     const COMMAND_ID_FIELD_NAME = 'command_id';
     const MICROTIME_FIELD_NAME = 'microtime';
+    const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
      * {@inheritdoc}

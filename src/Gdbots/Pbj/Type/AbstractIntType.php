@@ -52,12 +52,4 @@ abstract class AbstractIntType extends AbstractType
     {
         return true;
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSetOrList()
-    {
-        return true;
-    }
 }

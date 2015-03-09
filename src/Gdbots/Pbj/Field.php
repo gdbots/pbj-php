@@ -76,6 +76,9 @@ final class Field implements ToArray, \JsonSerializable
     /** @var string */
     private $className;
 
+    /** @var array */
+    private $anyOfClassNames;
+
     /** @var \Closure */
     private $assertion;
 
@@ -95,6 +98,7 @@ final class Field implements ToArray, \JsonSerializable
      * @param null|mixed $default
      * @param bool $useTypeDefault
      * @param null|string $className
+     * @param null|array $anyOfClassNames
      * @param callable|null $assertion
      */
     public function __construct(
@@ -113,6 +117,7 @@ final class Field implements ToArray, \JsonSerializable
         $default = null,
         $useTypeDefault = true,
         $className = null,
+        array $anyOfClassNames = null,
         \Closure $assertion = null
     ) {
         Assertion::betweenLength($name, 1, 127);
@@ -121,6 +126,10 @@ final class Field implements ToArray, \JsonSerializable
         );
         Assertion::boolean($required);
         Assertion::boolean($useTypeDefault);
+        if (null !== $anyOfClassNames) {
+            Assertion::allClassExists($anyOfClassNames);
+            $className = null;
+        }
         Assertion::nullOrClassExists($className);
 
         $this->name = $name;
@@ -128,6 +137,7 @@ final class Field implements ToArray, \JsonSerializable
         $this->required = $required;
         $this->useTypeDefault = $useTypeDefault;
         $this->className = $className;
+        $this->anyOfClassNames = $anyOfClassNames;
         $this->assertion = $assertion;
 
         $this->applyFieldRule($rule);
@@ -143,13 +153,13 @@ final class Field implements ToArray, \JsonSerializable
     private function applyFieldRule(FieldRule $rule = null)
     {
         $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
-        if ($this->isASet() || $this->isAList()) {
+        if ($this->isASet()) {
             Assertion::true(
-                $this->type->allowedInSetOrList(),
+                $this->type->allowedInSet(),
                 sprintf(
-                    'Field [%s] with type [%s] cannot be used as a set or list.',
+                    'Field [%s] with type [%s] cannot be used in a set.',
                     $this->name,
-                    $this->type->getTypeName()->getValue()
+                    $this->type->getTypeValue()
                 )
             );
         }
@@ -218,7 +228,7 @@ final class Field implements ToArray, \JsonSerializable
         if ($this->type->isScalar()) {
             $this->useTypeDefault = true;
         } else {
-            switch ($this->type->getTypeName()->getValue()) {
+            switch ($this->type->getTypeValue()) {
                 case TypeName::INT_ENUM:
                 case TypeName::STRING_ENUM:
                     Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
@@ -228,7 +238,9 @@ final class Field implements ToArray, \JsonSerializable
                     break;
 
                 case TypeName::MESSAGE:
-                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    if (!$this->hasAnyOfClassNames()) {
+                        Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    }
                     break;
 
                 default:
@@ -424,7 +436,6 @@ final class Field implements ToArray, \JsonSerializable
         }
 
         if ($this->isAMap()) {
-            // todo: review, must a map be scalar too?
             Assertion::true(
                 ArrayUtils::isAssoc($default),
                 sprintf('Field [%s] default must be an associative array.', $this->name)
@@ -454,6 +465,22 @@ final class Field implements ToArray, \JsonSerializable
     }
 
     /**
+     * @return bool
+     */
+    public function hasAnyOfClassNames()
+    {
+        return null !== $this->anyOfClassNames;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAnyOfClassNames()
+    {
+        return $this->anyOfClassNames;
+    }
+
+    /**
      * @param mixed $value
      * @throws AssertionFailed
      * @throws \Exception
@@ -480,7 +507,7 @@ final class Field implements ToArray, \JsonSerializable
     {
         return [
             'name'          => $this->name,
-            'type'          => $this->type->getTypeName()->getValue(),
+            'type'          => $this->type->getTypeValue(),
             'rule'          => $this->rule->getName(),
             'required'      => $this->required,
             'min_length'    => $this->minLength,
@@ -494,6 +521,7 @@ final class Field implements ToArray, \JsonSerializable
             'default'       => $this->getDefault(),
             'use_type_default' => $this->useTypeDefault,
             'class_name'    => $this->className,
+            'any_of_class_names' => $this->anyOfClassNames,
             'has_assertion' => null !== $this->assertion
         ];
     }
@@ -530,6 +558,10 @@ final class Field implements ToArray, \JsonSerializable
         }
 
         if ($this->className !== $other->className) {
+            return false;
+        }
+
+        if (!array_intersect($this->anyOfClassNames, $other->anyOfClassNames)) {
             return false;
         }
 

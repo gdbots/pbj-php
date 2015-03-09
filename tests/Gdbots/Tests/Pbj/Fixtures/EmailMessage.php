@@ -25,6 +25,9 @@ final class EmailMessage extends AbstractMessage
     const PROVIDER_FIELD_NAME   = 'provider';
     const LABELS_FIELD_NAME     = 'labels';
     const NESTED_FIELD_NAME     = 'nested';
+    const ENUM_IN_SET_FIELD_NAME = 'enum_in_set';
+    const ENUM_IN_LIST_FIELD_NAME = 'enum_in_list';
+    const ANY_OF_MESSAGE_FIELD_NAME = 'any_of_message';
 
     /**
      * @return Schema
@@ -66,6 +69,21 @@ final class EmailMessage extends AbstractMessage
             Fb::create(self::LABELS_FIELD_NAME, T\StringType::create())->asASet()->build(),
             Fb::create(self::NESTED_FIELD_NAME, T\MessageType::create())
                 ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                ->build(),
+            Fb::create(self::ENUM_IN_SET_FIELD_NAME, T\StringEnumType::create())
+                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                ->asASet()
+                ->build(),
+            Fb::create(self::ENUM_IN_LIST_FIELD_NAME, T\StringEnumType::create())
+                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                ->asAList()
+                ->build(),
+            Fb::create(self::ANY_OF_MESSAGE_FIELD_NAME, T\MessageType::create())
+                ->anyOfClassNames([
+                    'Gdbots\Tests\Pbj\Fixtures\MapsMessage',
+                    'Gdbots\Tests\Pbj\Fixtures\NestedMessage',
+                ])
+                ->asAList()
                 ->build(),
         ]);
 

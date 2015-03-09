@@ -4,7 +4,6 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
-use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\LogicException;
 use Gdbots\Pbj\Exception\SchemaNotDefined;
@@ -202,12 +201,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         $this->validate();
         $this->isFrozen = true;
-        $messageType = TypeName::MESSAGE();
-        $anyMessageType = TypeName::ANY_MESSAGE();
 
         foreach (static::schema()->getFields() as $field) {
-            $type = $field->getType()->getTypeName();
-            if ($type === $messageType || $type === $anyMessageType) {
+            if ($field->getType()->isMessage()) {
                 /** @var self $value */
                 $value = $this->get($field->getName());
                 if (empty($value)) {
@@ -237,12 +233,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $this->isFrozen = false;
         $this->isReplay = null;
-        $messageType = TypeName::MESSAGE();
-        $anyMessageType = TypeName::ANY_MESSAGE();
 
         foreach (static::schema()->getFields() as $field) {
-            $type = $field->getType()->getTypeName();
-            if ($type === $messageType || $type === $anyMessageType) {
+            if ($field->getType()->isMessage()) {
                 /** @var self $value */
                 $value = $this->get($field->getName());
                 if (empty($value)) {
@@ -454,18 +447,19 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
-        $values = array_filter($values, 'strlen');
-        if (empty($values)) {
-            return $this;
-        }
-
         foreach ($values as $value) {
+            if (0 === strlen($value)) {
+                continue;
+            }
             $field->guardValue($value);
             $key = strtolower(trim((string) $value));
             $this->data[$fieldName][$key] = $value;
         }
 
-        unset($this->clearedFields[$fieldName]);
+        if (!empty($this->data[$fieldName])) {
+            unset($this->clearedFields[$fieldName]);
+        }
+
         return $this;
     }
 
@@ -479,12 +473,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
-        $values = array_filter($values, 'strlen');
-        if (empty($values)) {
-            return $this;
-        }
-
         foreach ($values as $value) {
+            if (0 === strlen($value)) {
+                continue;
+            }
             $key = strtolower(trim((string) $value));
             unset($this->data[$fieldName][$key]);
         }
@@ -506,11 +498,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
 
-        $values = array_filter($values, 'strlen');
-        if (empty($values)) {
-            return $this;
-        }
-
         foreach ($values as $value) {
             $field->guardValue($value);
             $this->data[$fieldName][] = $value;
@@ -524,24 +511,26 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * {@inheritdoc}
      * @return static
      */
-    final public function removeFromList($fieldName, array $values)
+    final public function removeFromListAt($fieldName, $index)
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
+        $index = (int) $index;
 
-        $values = array_filter($values, 'strlen');
-        if (empty($values)) {
+        if (empty($this->data[$fieldName])) {
             return $this;
         }
 
-        $values = array_diff((array)$this->data[$fieldName], $values);
-        $this->data[$fieldName] = $values;
-
+        array_splice($this->data[$fieldName], $index, 1);
         if (empty($this->data[$fieldName])) {
             $this->clearedFields[$fieldName] = true;
+            return $this;
         }
 
+        // reset the numerical indexes
+        // todo: review, does this need to be optimized?
+        $this->data[$fieldName] = array_values($this->data[$fieldName]);
         return $this;
     }
 

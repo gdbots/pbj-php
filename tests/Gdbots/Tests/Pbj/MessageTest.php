@@ -2,11 +2,14 @@
 
 namespace Gdbots\Tests\Pbj;
 
+use Gdbots\Common\Enum;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Serializer\JsonSerializer;
 use Gdbots\Pbj\Serializer\Serializer;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
+use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
@@ -72,6 +75,54 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($message->getLabels(), ['chicken', 'donuts']);
     }
 
+    public function testEnumInSet()
+    {
+        $message = EmailMessage::create()
+            ->addToSet(
+                EmailMessage::ENUM_IN_SET_FIELD_NAME,
+                [
+                    Provider::AOL(),
+                    Provider::AOL(),
+                    Provider::GMAIL(),
+                    Provider::GMAIL(),
+                ]
+            );
+
+        $result = array_map(
+            function (Enum $enum) {
+                return $enum->getValue();
+            },
+            $message->get(EmailMessage::ENUM_IN_SET_FIELD_NAME) ?: []
+        );
+
+        $this->assertCount(2, $result);
+        $this->assertSame($result, ['aol', 'gmail']);
+    }
+
+    public function testEnumInList()
+    {
+        $message = EmailMessage::create()
+            ->addToList(
+                EmailMessage::ENUM_IN_LIST_FIELD_NAME,
+                [
+                    Provider::AOL(),
+                    Provider::AOL(),
+                    Provider::GMAIL(),
+                    Provider::GMAIL(),
+                ]
+            );
+
+        $result = array_map(
+            function (Enum $enum) {
+                return $enum->getValue();
+            },
+            $message->get(EmailMessage::ENUM_IN_LIST_FIELD_NAME)
+        );
+
+        $this->assertCount(4, $result);
+        $this->assertSame($result, ['aol', 'aol', 'gmail', 'gmail']);
+    }
+
     public function testNestedMessage()
     {
         $message = $this->createEmailMessage();
@@ -84,6 +135,20 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $message->setNested($nestedMessage);
         $this->assertSame($nestedMessage->getTest2(), [1, 2]);
         $this->assertSame($message->getNested(), $nestedMessage);
+    }
+
+    public function testAnyOfMessageInList()
+    {
+        $message = EmailMessage::create()
+            ->addToList(
+                EmailMessage::ANY_OF_MESSAGE_FIELD_NAME,
+                [
+                    MapsMessage::create()->addToMap('String', 'test:field:name', 'value1'),
+                    NestedMessage::create()->setTest1('value1')
+                ]
+        );
+
+        $this->assertCount(2, $message->get(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME));
     }
 
     public function testFreeze()

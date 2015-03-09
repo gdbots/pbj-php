@@ -4,11 +4,26 @@ namespace Gdbots\Pbj\Extension;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
+use Gdbots\Pbj\HasMessageRef;
+use Gdbots\Pbj\MessageRef;
 
-abstract class AbstractEvent extends AbstractMessage implements DomainEvent
+abstract class AbstractEvent extends AbstractMessage implements DomainEvent, HasMessageRef
 {
+    /** @var MessageRef */
+    private $messageRef;
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getMessageRef()
+    {
+        if (null === $this->messageRef) {
+            $this->messageRef = new MessageRef($this::schema()->getCurie(), $this->getEventId());
+        }
+        return $this->messageRef;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -31,6 +46,7 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
      */
     final public function setEventId(TimeUuidIdentifier $id)
     {
+        $this->messageRef = null;
         return $this->setSingleValue(EventSchema::EVENT_ID_FIELD_NAME, $id);
     }
 
@@ -62,25 +78,25 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
     /**
      * {@inheritdoc}
      */
-    final public function hasCorrelId()
+    final public function hasCorrelator()
     {
-        return $this->has(EventSchema::CORREL_ID_FIELD_NAME);
+        return $this->has(EventSchema::CORRELATOR_FIELD_NAME);
     }
 
     /**
      * {@inheritdoc}
      */
-    final public function getCorrelId()
+    final public function getCorrelator()
     {
-        return $this->get(EventSchema::CORREL_ID_FIELD_NAME);
+        return $this->get(EventSchema::CORRELATOR_FIELD_NAME);
     }
 
     /**
      * {@inheritdoc}
      * @return static
      */
-    final public function setCorrelId(UuidIdentifier $id)
+    final public function setCorrelator(MessageRef $correlator)
     {
-        return $this->setSingleValue(EventSchema::CORREL_ID_FIELD_NAME, $id);
+        return $this->setSingleValue(EventSchema::CORRELATOR_FIELD_NAME, $correlator);
     }
 }
