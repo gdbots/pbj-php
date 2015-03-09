@@ -103,4 +103,13 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     {
         return $this->toString();
     }
+
+    /**
+     * @param MessageRef $other
+     * @return bool
+     */
+    public function equals(MessageRef $other)
+    {
+        return $this->toString() === $other->toString();
+    }
 }
