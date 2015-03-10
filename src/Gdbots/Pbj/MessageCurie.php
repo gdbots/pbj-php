@@ -40,6 +40,9 @@ final class MessageCurie implements \JsonSerializable
     /** @var string */
     private $message;
 
+    /** @var bool */
+    private $isMixin = false;
+
     /**
      * @param string $vendor
      * @param string $package
@@ -59,6 +62,7 @@ final class MessageCurie implements \JsonSerializable
             $this->category,
             $this->message
         );
+        $this->isMixin = 'mixin' === $this->category;
     }
 
     /**
@@ -78,6 +82,27 @@ final class MessageCurie implements \JsonSerializable
             $schemaId->getPackage(),
             $schemaId->getCategory(),
             $schemaId->getMessage()
+        );
+        return self::$instances[$curie];
+    }
+
+    /**
+     * @param MixinId $mixinId
+     * @return MessageCurie
+     */
+    public static function fromMixinId(MixinId $mixinId)
+    {
+        $curie = substr(str_replace(':' . $mixinId->getVersion()->toString(), '', $mixinId->toString()), 4);
+
+        if (isset(self::$instances[$curie])) {
+            return self::$instances[$curie];
+        }
+
+        self::$instances[$curie] = new self(
+            $mixinId->getVendor(),
+            $mixinId->getPackage(),
+            'mixin',
+            $mixinId->getName()
         );
         return self::$instances[$curie];
     }
@@ -163,5 +188,13 @@ final class MessageCurie implements \JsonSerializable
     public function getMessage()
     {
         return $this->message;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMixin()
+    {
+        return $this->isMixin;
     }
 }

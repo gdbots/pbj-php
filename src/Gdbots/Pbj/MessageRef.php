@@ -5,10 +5,12 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\Exception\InvalidArgumentException;
+use Gdbots\Pbj\Exception\LogicException;
 
 /**
- * Represents a reference to a message.  Typically used to link messages to
- * each as a correlator or "links".
+ * Represents a reference to a message.  Typically used to link messages
+ * together via a correlator or "links".
  */
 final class MessageRef implements FromArray, ToArray, \JsonSerializable
 {
@@ -21,13 +23,15 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     /**
      * @param MessageCurie $curie
      * @param UuidIdentifier $id
-     *
-     * @throws \InvalidArgumentException
+     * @throws LogicException
      */
     public function __construct(MessageCurie $curie, UuidIdentifier $id)
     {
         $this->curie = $curie;
         $this->id = $id;
+        if ($this->curie->isMixin()) {
+            throw new LogicException('Mixins cannot be used in a MessageRef.');
+        }
     }
 
     /**
@@ -52,11 +56,9 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public static function fromArray(array $data = [])
     {
         if (isset($data['curie'])) {
-            /** @var UuidIdentifier $id */
-            $id = UuidIdentifier::fromString($data['id']);
-            return new self(MessageCurie::fromString($data['curie']), $id);
+            return new self(MessageCurie::fromString($data['curie']), UuidIdentifier::fromString($data['id']));
         }
-        throw new \InvalidArgumentException('Payload must be a MessageRef type.');
+        throw new InvalidArgumentException('Payload must be a MessageRef type.');
     }
 
     /**
@@ -82,7 +84,6 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public static function fromString($string)
     {
         $parts = explode(':', $string);
-        /** @var UuidIdentifier $id */
         $id = UuidIdentifier::fromString(array_pop($parts));
         $curie = MessageCurie::fromString(implode(':', $parts));
         return new self($curie, $id);
