@@ -18,9 +18,9 @@ class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
         parent::__construct(
             sprintf(
                 'MessageResolver is unable to resolve schema id [%s] ' .
-                'using resolver key [%s] to a class name.',
+                'using curie [%s] to a class name.',
                 $schemaId->toString(),
-                $schemaId->getResolverKey()
+                $schemaId->getCurieWithMajorRev()
             )
         );
     }

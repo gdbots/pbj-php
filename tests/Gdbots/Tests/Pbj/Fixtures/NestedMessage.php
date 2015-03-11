@@ -20,7 +20,7 @@ final class NestedMessage extends AbstractMessage
      */
     protected static function defineSchema()
     {
-        $schema = Schema::create(__CLASS__, 'pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0', [
+        $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0', __CLASS__, [
             Fb::create(self::TEST1_FIELD_NAME, T\StringType::create())->build(),
             Fb::create(self::TEST2_FIELD_NAME, T\IntType::create())->asASet()->build(),
             Fb::create(self::LOCATION_FIELD_NAME, T\GeoPointType::create())->build(),

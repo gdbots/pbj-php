@@ -1,8 +1,6 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
-
-use Gdbots\Pbj\MessageRef;
+namespace Gdbots\Pbj;
 
 interface HasCorrelator
 {

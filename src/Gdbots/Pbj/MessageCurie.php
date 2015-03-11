@@ -87,27 +87,6 @@ final class MessageCurie implements \JsonSerializable
     }
 
     /**
-     * @param MixinId $mixinId
-     * @return MessageCurie
-     */
-    public static function fromMixinId(MixinId $mixinId)
-    {
-        $curie = substr(str_replace(':' . $mixinId->getVersion()->toString(), '', $mixinId->toString()), 4);
-
-        if (isset(self::$instances[$curie])) {
-            return self::$instances[$curie];
-        }
-
-        self::$instances[$curie] = new self(
-            $mixinId->getVendor(),
-            $mixinId->getPackage(),
-            'mixin',
-            $mixinId->getName()
-        );
-        return self::$instances[$curie];
-    }
-
-    /**
      * @param string $curie
      * @return MessageCurie
      * @throws InvalidMessageCurie

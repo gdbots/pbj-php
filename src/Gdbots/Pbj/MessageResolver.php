@@ -30,21 +30,21 @@ final class MessageResolver
      */
     public static function resolveSchemaId(SchemaId $schemaId)
     {
-        $key = $schemaId->getResolverKey();
-        if (isset(self::$resolved[$key])) {
-            return self::$resolved[$key];
+        $curieMajor = $schemaId->getCurieWithMajorRev();
+        if (isset(self::$resolved[$curieMajor])) {
+            return self::$resolved[$curieMajor];
         }
 
-        if (isset(self::$messages[$key])) {
-            $className = self::$messages[$key];
-            self::$resolved[$key] = $className;
+        if (isset(self::$messages[$curieMajor])) {
+            $className = self::$messages[$curieMajor];
+            self::$resolved[$curieMajor] = $className;
             return $className;
         }
 
         $curie = $schemaId->getCurie()->toString();
         if (isset(self::$messages[$curie])) {
             $className = self::$messages[$curie];
-            self::$resolved[$key] = $className;
+            self::$resolved[$curieMajor] = $className;
             self::$resolved[$curie] = $className;
             return $className;
         }
@@ -83,26 +83,26 @@ final class MessageResolver
      */
     public static function registerSchema(Schema $schema)
     {
-        self::$messages[$schema->getId()->getResolverKey()] = $schema->getClassName();
+        self::$messages[$schema->getId()->getCurieWithMajorRev()] = $schema->getClassName();
     }
 
     /**
-     * Adds a single schema resolver key and class name.
-     * @see SchemaId::getResolverKey
+     * Adds a single schema id and class name.
+     * @see SchemaId::getCurieWithMajorRev
      *
-     * @param SchemaId|string $key
+     * @param SchemaId|string $id
      * @param string $className
      */
-    public static function register($key, $className)
+    public static function register($id, $className)
     {
-        if ($key instanceof SchemaId) {
-            $key = $key->getResolverKey();
+        if ($id instanceof SchemaId) {
+            $id = $id->getCurieWithMajorRev();
         }
-        self::$messages[(string) $key] = $className;
+        self::$messages[(string) $id] = $className;
     }
 
     /**
-     * Registers an array of resolver key => className values to the resolver.
+     * Registers an array of id => className values to the resolver.
      *
      * @param array $map
      */

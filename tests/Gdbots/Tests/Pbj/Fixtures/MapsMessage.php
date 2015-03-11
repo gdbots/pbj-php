@@ -72,7 +72,7 @@ final class MapsMessage extends AbstractMessage
             }
         }
 
-        $schema = Schema::create(__CLASS__, 'pbj:gdbots:tests.pbj:fixtures:maps-message:1-0-0', $fields);
+        $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:maps-message:1-0-0', __CLASS__, $fields);
         MessageResolver::registerSchema($schema);
         return $schema;
     }

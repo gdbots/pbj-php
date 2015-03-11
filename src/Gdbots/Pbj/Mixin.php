@@ -5,9 +5,19 @@ namespace Gdbots\Pbj;
 interface Mixin
 {
     /**
-     * Adds the mixin schema to the builder.
-     *
-     * @param SchemaBuilder $sb
+     * @return Mixin
      */
-    public static function apply(SchemaBuilder $sb);
+    public static function create();
+
+    /**
+     * Returns the id for this mixin.
+     * @return SchemaId
+     */
+    public function getId();
+
+    /**
+     * Returns an array of fields that the mixin provides.
+     * @return Field[]
+     */
+    public function getFields();
 }

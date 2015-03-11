@@ -14,7 +14,7 @@ trait HasMessageRefTrait
      */
     public function getMessageRef()
     {
-        return new MessageRef($this::schema()->getCurie(), $this->getMessageId());
+        return new MessageRef(static::schema()->getCurie(), $this->getMessageId());
     }
 
     /**

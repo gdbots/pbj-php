@@ -25,12 +25,12 @@ class InvalidResolvedSchema extends SchemaException
         $this->resolvedClassName = $resolvedClassName;
         parent::__construct(
             sprintf(
-                'Schema id [%s] with resolver key [%s] was resolved to [%s] but ' .
-                'that message has a resolver key of [%s].  They must match.',
+                'Schema id [%s] with curie [%s] was resolved to [%s] but ' .
+                'that message has a curie of [%s].  They must match.',
                 $this->resolvedSchemaId->toString(),
-                $this->resolvedSchemaId->getResolverKey(),
+                $this->resolvedSchemaId->getCurieWithMajorRev(),
                 $resolvedClassName,
-                $this->schema->getId()->getResolverKey()
+                $this->schema->getId()->getCurieWithMajorRev()
             )
         );
     }
