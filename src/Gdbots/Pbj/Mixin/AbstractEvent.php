@@ -8,10 +8,9 @@ use Gdbots\Pbj\GeneratesMessageRefTrait;
 use Gdbots\Pbj\HasCorrelator;
 use Gdbots\Pbj\HasCorrerlatorTrait;
 
-// todo: attempts/retries transient fields?  or transient fields bag?
-abstract class AbstractCommand extends AbstractMessage implements Command, GeneratesMessageRef, HasCorrelator
+abstract class AbstractEvent extends AbstractMessage implements DomainEvent, GeneratesMessageRef, HasCorrelator
 {
-    use CommandTrait;
+    use EventTrait;
     use GeneratesMessageRefTrait;
     use HasCorrerlatorTrait;
 
@@ -20,6 +19,6 @@ abstract class AbstractCommand extends AbstractMessage implements Command, Gener
      */
     final public function getMessageId()
     {
-        return $this->getCommandId();
+        return $this->getEventId();
     }
 }

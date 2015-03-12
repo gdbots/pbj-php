@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
@@ -9,6 +9,11 @@ use Gdbots\Pbj\MessageRef;
 
 interface Response extends Message
 {
+    const RESPONSE_ID_FIELD_NAME = 'response_id';
+    const MICROTIME_FIELD_NAME = 'microtime';
+    const REQUEST_ID_FIELD_NAME = 'request_id';
+    const CORRELATOR_FIELD_NAME = 'correlator';
+
     /**
      * @return bool
      */

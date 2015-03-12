@@ -2,7 +2,9 @@
 
 namespace Gdbots\Pbj;
 
-abstract class AbstractMixin implements Mixin
+use Gdbots\Common\ToArray;
+
+abstract class AbstractMixin implements Mixin, ToArray, \JsonSerializable
 {
     private static $instances = [];
 
@@ -21,6 +23,33 @@ abstract class AbstractMixin implements Mixin
             self::$instances[$type] = new static();
         }
         return self::$instances[$type];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function toArray()
+    {
+        return [
+            'id' => $this->getId(),
+            'fields' => $this->getFields(),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    final public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @return string
+     */
+    final public function __toString()
+    {
+        return $this->getId()->toString();
     }
 
     /**

@@ -70,6 +70,14 @@ interface Message
     public function isFrozen();
 
     /**
+     * Returns true if the data of the message matches.
+     *
+     * @param Message $other
+     * @return bool
+     */
+    public function equals(Message $other);
+
+    /**
      * Returns true if this message is being replayed.  Providing a value
      * will set the flag but this can only be done once.  Note that
      * setting a message as being "replayed" will also freeze the message.

@@ -90,7 +90,7 @@ final class Schema implements ToArray, \JsonSerializable
     public function toArray()
     {
         return [
-            'id' => $this->id->toString(),
+            'id' => $this->id,
             'curie' => $this->id->getCurie(),
             'class_name' => $this->className,
             'mixins' => array_values($this->mixins),

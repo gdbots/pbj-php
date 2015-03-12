@@ -1,15 +1,18 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 
-// todo: do we need causation_id?
 interface Event extends Message
 {
+    const EVENT_ID_FIELD_NAME = 'event_id';
+    const MICROTIME_FIELD_NAME = 'microtime';
+    const CORRELATOR_FIELD_NAME = 'correlator';
+
     /**
      * @return bool
      */

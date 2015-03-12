@@ -7,14 +7,17 @@ use Gdbots\Identifiers\UuidIdentifier;
 /**
  * @method static Schema schema()
  */
-trait HasMessageRefTrait
+trait GeneratesMessageRefTrait
 {
     /**
+     * @see GeneratesMessageRef::getMessageRef
+     *
+     * @param string $tag
      * @return MessageRef
      */
-    public function getMessageRef()
+    public function generateMessageRef($tag = null)
     {
-        return new MessageRef(static::schema()->getCurie(), $this->getMessageId());
+        return new MessageRef(static::schema()->getCurie(), $this->getMessageId(), $tag);
     }
 
     /**
