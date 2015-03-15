@@ -7,13 +7,10 @@ use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\GeneratesMessageRef;
 use Gdbots\Pbj\GeneratesMessageRefTrait;
-use Gdbots\Pbj\HasCorrelator;
-use Gdbots\Pbj\HasCorrerlatorTrait;
 
-abstract class AbstractEntity extends AbstractMessage implements Entity, GeneratesMessageRef, HasCorrelator
+abstract class AbstractEntity extends AbstractMessage implements Entity, GeneratesMessageRef
 {
     use GeneratesMessageRefTrait;
-    use HasCorrerlatorTrait;
 
     /**
      * {@inheritdoc}

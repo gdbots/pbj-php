@@ -7,6 +7,7 @@ use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
 use Gdbots\Pbj\Exception\MixinAlreadyAdded;
+use Gdbots\Pbj\Exception\MixinNotDefined;
 
 final class Schema implements ToArray, \JsonSerializable
 {
@@ -27,7 +28,7 @@ final class Schema implements ToArray, \JsonSerializable
     /** @var Field[] */
     private $requiredFields = [];
 
-    /** @var SchemaId[] */
+    /** @var Mixin[] */
     private $mixins = [];
 
     /** @var array */
@@ -93,7 +94,12 @@ final class Schema implements ToArray, \JsonSerializable
             'id' => $this->id,
             'curie' => $this->id->getCurie(),
             'class_name' => $this->className,
-            'mixins' => array_values($this->mixins),
+            'mixins' => array_map(
+                function(Mixin $mixin) {
+                    return $mixin->getId();
+                },
+                array_values($this->mixins)
+            ),
             'fields' => $this->fields,
         ];
     }
@@ -143,10 +149,10 @@ final class Schema implements ToArray, \JsonSerializable
     {
         $id = $mixin->getId();
         if (isset($this->mixins[$id->getCurieWithMajorRev()])) {
-            throw new MixinAlreadyAdded($this, $this->mixins[$id->getCurieWithMajorRev()], $id);
+            throw new MixinAlreadyAdded($this, $this->mixins[$id->getCurieWithMajorRev()], $mixin);
         }
 
-        $this->mixins[$id->getCurieWithMajorRev()] = $id;
+        $this->mixins[$id->getCurieWithMajorRev()] = $mixin;
         foreach ($mixin->getFields() as $field) {
             $fieldName = $field->getName();
 
@@ -210,22 +216,6 @@ final class Schema implements ToArray, \JsonSerializable
     }
 
     /**
-     * @return Field[]
-     */
-    public function getFields()
-    {
-        return $this->fields;
-    }
-
-    /**
-     * @return Field[]
-     */
-    public function getRequiredFields()
-    {
-        return $this->requiredFields;
-    }
-
-    /**
      * @param string $fieldName
      * @return bool
      */
@@ -248,15 +238,52 @@ final class Schema implements ToArray, \JsonSerializable
     }
 
     /**
+     * @return Field[]
+     */
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @return Field[]
+     */
+    public function getRequiredFields()
+    {
+        return $this->requiredFields;
+    }
+
+    /**
      * Returns true if the mixin is on this schema.
      * @see SchemaId::getCurieWithMajorRev
      *
-     * @param string $mixin
+     * @param string $mixinId
      * @return bool
      */
-    public function hasMixin($mixin)
+    public function hasMixin($mixinId)
     {
-        return isset($this->mixins[$mixin]);
+        return isset($this->mixins[$mixinId]);
+    }
+
+    /**
+     * @param string $mixinId
+     * @return Mixin
+     * @throws MixinNotDefined
+     */
+    public function getMixin($mixinId)
+    {
+        if (!isset($this->mixins[$mixinId])) {
+            throw new MixinNotDefined($this, $mixinId);
+        }
+        return $this->mixins[$mixinId];
+    }
+
+    /**
+     * @return Mixin[]
+     */
+    public function getMixins()
+    {
+        return $this->mixins;
     }
 
     /**
@@ -265,7 +292,7 @@ final class Schema implements ToArray, \JsonSerializable
      *
      * @return array
      */
-    public function getMixins()
+    public function getMixinIds()
     {
         return $this->mixinIds;
     }

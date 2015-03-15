@@ -2,51 +2,51 @@
 
 namespace Gdbots\Pbj\Exception;
 
+use Gdbots\Pbj\Mixin;
 use Gdbots\Pbj\Schema;
-use Gdbots\Pbj\SchemaId;
 
 class MixinAlreadyAdded extends SchemaException
 {
-    /** @var SchemaId */
-    private $originalMixinId;
+    /** @var Mixin */
+    private $originalMixin;
 
-    /** @var SchemaId */
-    private $duplicateMixinId;
+    /** @var Mixin */
+    private $duplicateMixin;
 
     /**
      * @param Schema $schema
-     * @param SchemaId $originalMixinId
-     * @param SchemaId $duplicateMixinId
+     * @param Mixin $originalMixin
+     * @param Mixin $duplicateMixin
      */
-    public function __construct(Schema $schema, SchemaId $originalMixinId, SchemaId $duplicateMixinId)
+    public function __construct(Schema $schema, Mixin $originalMixin, Mixin $duplicateMixin)
     {
         $this->schema = $schema;
-        $this->originalMixinId = $originalMixinId;
-        $this->duplicateMixinId = $duplicateMixinId;
+        $this->originalMixin = $originalMixin;
+        $this->duplicateMixin = $duplicateMixin;
         parent::__construct(
             sprintf(
                 'Mixin with id [%s] was already added from [%s] to message [%s].  ' .
                 'You cannot add multiple versions of the same mixin.',
-                $this->duplicateMixinId->toString(),
-                $this->originalMixinId->toString(),
+                $this->duplicateMixin->getId()->toString(),
+                $this->originalMixin->getId()->toString(),
                 $this->schema->getClassName()
             )
         );
     }
 
     /**
-     * @return SchemaId
+     * @return Mixin
      */
-    public function getOriginalMixinId()
+    public function getOriginalMixin()
     {
-        return $this->originalMixinId;
+        return $this->originalMixin;
     }
 
     /**
-     * @return SchemaId
+     * @return Mixin
      */
-    public function getDuplicateMixinId()
+    public function getDuplicateMixin()
     {
-        return $this->duplicateMixinId;
+        return $this->duplicateMixin;
     }
 }
