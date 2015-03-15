@@ -1,29 +1,33 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 
-interface Request extends Message
+interface Event extends Message
 {
+    const EVENT_ID_FIELD_NAME = 'event_id';
+    const MICROTIME_FIELD_NAME = 'microtime';
+    const CORRELATOR_FIELD_NAME = 'correlator';
+
     /**
      * @return bool
      */
-    public function hasRequestId();
+    public function hasEventId();
 
     /**
-     * @return UuidIdentifier
+     * @return TimeUuidIdentifier
      */
-    public function getRequestId();
+    public function getEventId();
 
     /**
-     * @param UuidIdentifier $id
+     * @param TimeUuidIdentifier $id
      * @return static
      */
-    public function setRequestId(UuidIdentifier $id);
+    public function setEventId(TimeUuidIdentifier $id);
 
     /**
      * @return bool

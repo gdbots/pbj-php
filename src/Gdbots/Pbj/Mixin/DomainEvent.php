@@ -1,6 +1,6 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 /**
  * Provided as an alias to the Event interface simply to differentiate

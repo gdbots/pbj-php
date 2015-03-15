@@ -5,10 +5,13 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\Exception\InvalidArgumentException;
+use Gdbots\Pbj\Exception\LogicException;
 
 /**
- * Represents a reference to a message.  Typically used to link messages to
- * each as a correlator or "links".
+ * Represents a reference to a message.  Typically used to link messages
+ * together via a correlator or "links".  Format for a reference:
+ * vendor:package:category:message:uuid#tag (tag is optional)
  */
 final class MessageRef implements FromArray, ToArray, \JsonSerializable
 {
@@ -18,16 +21,100 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     /** @var UuidIdentifier */
     private $id;
 
+    /** @var string */
+    private $tag;
+
     /**
      * @param MessageCurie $curie
      * @param UuidIdentifier $id
-     *
-     * @throws \InvalidArgumentException
+     * @param string $tag The tag will be automatically fixed to a slug-formatted-string.
+     * @throws LogicException
      */
-    public function __construct(MessageCurie $curie, UuidIdentifier $id)
+    public function __construct(MessageCurie $curie, UuidIdentifier $id, $tag = null)
     {
         $this->curie = $curie;
         $this->id = $id;
+        if (null !== $tag) {
+            $tag = strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $tag));
+            // replace more than one dash in a row
+            $tag = preg_replace('/\-+/i', '-', $tag);
+            $this->tag = trim($tag, '-') ?: null;
+        }
+
+        if ($this->curie->isMixin()) {
+            throw new LogicException('Mixins cannot be used in a MessageRef.');
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function fromArray(array $data = [])
+    {
+        if (isset($data['curie'])) {
+            $tag = isset($data['tag']) ? $data['tag'] : null;
+            return new self(
+                MessageCurie::fromString($data['curie']),
+                UuidIdentifier::fromString($data['id']),
+                $tag
+            );
+        }
+        throw new InvalidArgumentException('Payload must be a MessageRef type.');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray()
+    {
+        if (null !== $this->tag) {
+            return [
+                'curie' => $this->curie->toString(),
+                'id' => $this->id->toString(),
+                'tag' => $this->tag
+            ];
+        }
+        return ['curie' => $this->curie->toString(), 'id' => $this->id->toString()];
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @param string $string A string with format curie:uuid#tag
+     * @return self
+     */
+    public static function fromString($string)
+    {
+        list($ref, $tag) = explode('#', $string, 2);
+        $parts = explode(':', $ref);
+        $id = UuidIdentifier::fromString(array_pop($parts));
+        $curie = MessageCurie::fromString(implode(':', $parts));
+        return new self($curie, $id, $tag);
+    }
+
+    /**
+     * @return string
+     */
+    public function toString()
+    {
+        if (null !== $this->tag) {
+            return $this->curie->toString() . ':' . $this->id->toString() . '#' . $this->tag;
+        }
+        return $this->curie->toString() . ':' . $this->id->toString();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->toString();
     }
 
     /**
@@ -47,61 +134,19 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
-     * {@inheritdoc}
+     * @return bool
      */
-    public static function fromArray(array $data = [])
+    public function hasTag()
     {
-        if (isset($data['curie'])) {
-            /** @var UuidIdentifier $id */
-            $id = UuidIdentifier::fromString($data['id']);
-            return new self(MessageCurie::fromString($data['curie']), $id);
-        }
-        throw new \InvalidArgumentException('Payload must be a MessageRef type.');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function toArray()
-    {
-        return ['curie' => $this->curie->toString(), 'id' => $this->id->toString()];
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
-
-    /**
-     * @param string $string A string with format curie:id
-     * @return self
-     */
-    public static function fromString($string)
-    {
-        $parts = explode(':', $string);
-        /** @var UuidIdentifier $id */
-        $id = UuidIdentifier::fromString(array_pop($parts));
-        $curie = MessageCurie::fromString(implode(':', $parts));
-        return new self($curie, $id);
+        return null !== $this->tag;
     }
 
     /**
      * @return string
      */
-    public function toString()
+    public function getTag()
     {
-        return $this->curie->toString() . ':' . $this->id->toString();
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->toString();
+        return $this->tag;
     }
 
     /**

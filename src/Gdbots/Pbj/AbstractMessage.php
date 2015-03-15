@@ -276,6 +276,15 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * This could probably use some work.  :)  low level serialization string match.
+     */
+    public function equals(Message $other)
+    {
+        return json_encode($this) === json_encode($other);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     final public function isReplay($replay = null)
     {
