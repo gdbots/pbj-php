@@ -3,7 +3,7 @@ CHANGELOG for 0.x
 
 This changelog references the relevant changes done in 0.x versions.
 
-* 0.2.0 (2015-03-??)
+* 0.2.0 (2015-03-15)
 
  * #1: [Type] Add `isMessage` method to interface for simple check to determine if fields contain a nested message.
  * #1: [MessageType] Impements `anyOfClassNames` so a field can support an array of possible messages.

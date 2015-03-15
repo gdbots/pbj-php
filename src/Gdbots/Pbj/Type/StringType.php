@@ -7,6 +7,7 @@ use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
 
+// todo: add "slug" format and "dated-slug" format?
 final class StringType extends AbstractStringType
 {
     /**
