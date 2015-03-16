@@ -127,7 +127,8 @@ final class Field implements ToArray, \JsonSerializable
         Assertion::boolean($required);
         Assertion::boolean($useTypeDefault);
         if (null !== $anyOfClassNames) {
-            Assertion::allClassExists($anyOfClassNames);
+            // todo: review, separate out concept of "instanceof" with "anyOf"
+            //Assertion::allClassExists($anyOfClassNames);
             $className = null;
         }
         Assertion::nullOrClassExists($className);
