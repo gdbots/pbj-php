@@ -14,7 +14,7 @@ trait HasCorrerlatorTrait
      */
     public function hasCorrelator()
     {
-        return $this->has(HasCorrelator::CORRELATOR_FIELD_NAME);
+        return $this->has('correlator');
     }
 
     /**
@@ -22,7 +22,7 @@ trait HasCorrerlatorTrait
      */
     public function getCorrelator()
     {
-        return $this->get(HasCorrelator::CORRELATOR_FIELD_NAME);
+        return $this->get('correlator');
     }
 
     /**
@@ -31,6 +31,6 @@ trait HasCorrerlatorTrait
      */
     public function setCorrelator(MessageRef $correlator)
     {
-        return $this->setSingleValue(HasCorrelator::CORRELATOR_FIELD_NAME, $correlator);
+        return $this->setSingleValue('correlator', $correlator);
     }
 }

@@ -4,8 +4,6 @@ namespace Gdbots\Pbj;
 
 interface HasCorrelator
 {
-    const CORRELATOR_FIELD_NAME = 'correlator';
-
     /**
      * @return bool
      */

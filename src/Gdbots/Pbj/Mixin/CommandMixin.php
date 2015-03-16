@@ -4,7 +4,6 @@ namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Pbj\AbstractMixin;
 use Gdbots\Pbj\FieldBuilder as Fb;
-use Gdbots\Pbj\HasCorrelator;
 use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\Type as T;
 
@@ -30,7 +29,7 @@ final class CommandMixin extends AbstractMixin
             Fb::create(Command::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(HasCorrelator::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
+            Fb::create(Command::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
                 ->build(),
         ];
     }

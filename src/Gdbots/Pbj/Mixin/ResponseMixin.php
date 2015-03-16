@@ -4,7 +4,6 @@ namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Pbj\AbstractMixin;
 use Gdbots\Pbj\FieldBuilder as Fb;
-use Gdbots\Pbj\HasCorrelator;
 use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\Type as T;
 
@@ -34,7 +33,7 @@ final class ResponseMixin extends AbstractMixin
                 ->required()
                 ->useTypeDefault(false)
                 ->build(),
-            Fb::create(HasCorrelator::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
+            Fb::create(Response::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
                 ->build(),
         ];
     }
