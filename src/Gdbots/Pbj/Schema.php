@@ -186,6 +186,15 @@ final class Schema implements ToArray, \JsonSerializable
     }
 
     /**
+     * @see SchemaId::getCurieWithMajorRev
+     * @return string
+     */
+    public function getCurieWithMajorRev()
+    {
+        return $this->id->getCurieWithMajorRev();
+    }
+
+    /**
      * @return string
      */
     public function getClassName()
