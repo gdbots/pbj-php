@@ -7,6 +7,7 @@ use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
 
+// todo: add "slug" format and "dated-slug" format?
 final class StringType extends AbstractStringType
 {
     /**
@@ -100,13 +101,5 @@ final class StringType extends AbstractStringType
     public function getMaxBytes()
     {
         return 255;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSetOrList()
-    {
-        return true;
     }
 }

@@ -70,6 +70,14 @@ interface Message
     public function isFrozen();
 
     /**
+     * Returns true if the data of the message matches.
+     *
+     * @param Message $other
+     * @return bool
+     */
+    public function equals(Message $other);
+
+    /**
      * Returns true if this message is being replayed.  Providing a value
      * will set the flag but this can only be done once.  Note that
      * setting a message as being "replayed" will also freeze the message.
@@ -189,15 +197,15 @@ interface Message
     public function addToList($fieldName, array $values);
 
     /**
-     * Removes an array of values from a list.
+     * Removes the element from the array at the index.
      *
      * @param string $fieldName
-     * @param array $values
+     * @param int $index
      * @return static
      *
      * @throws GdbotsPbjException
      */
-    public function removeFromList($fieldName, array $values);
+    public function removeFromListAt($fieldName, $index);
 
     /**
      * Adds a key/value pair to a map.

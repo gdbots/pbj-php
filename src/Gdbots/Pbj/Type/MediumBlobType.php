@@ -11,4 +11,12 @@ final class MediumBlobType extends AbstractBinaryType
     {
         return 16777215;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSet()
+    {
+        return false;
+    }
 }

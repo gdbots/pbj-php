@@ -1,28 +1,33 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
-interface Response extends Message
+interface Request extends Message
 {
+    const REQUEST_ID_FIELD_NAME = 'request_id';
+    const MICROTIME_FIELD_NAME = 'microtime';
+    const CORRELATOR_FIELD_NAME = 'correlator';
+
     /**
      * @return bool
      */
-    public function hasResponseId();
+    public function hasRequestId();
 
     /**
      * @return UuidIdentifier
      */
-    public function getResponseId();
+    public function getRequestId();
 
     /**
      * @param UuidIdentifier $id
      * @return static
      */
-    public function setResponseId(UuidIdentifier $id);
+    public function setRequestId(UuidIdentifier $id);
 
     /**
      * @return bool
@@ -43,16 +48,16 @@ interface Response extends Message
     /**
      * @return bool
      */
-    public function hasRequestId();
+    public function hasCorrelator();
 
     /**
-     * @return UuidIdentifier
+     * @return MessageRef
      */
-    public function getRequestId();
+    public function getCorrelator();
 
     /**
-     * @param UuidIdentifier $id
+     * @param MessageRef $correlator
      * @return static
      */
-    public function setRequestId(UuidIdentifier $id);
+    public function setCorrelator(MessageRef $correlator);
 }

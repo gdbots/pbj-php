@@ -40,6 +40,9 @@ final class MessageCurie implements \JsonSerializable
     /** @var string */
     private $message;
 
+    /** @var bool */
+    private $isMixin = false;
+
     /**
      * @param string $vendor
      * @param string $package
@@ -59,6 +62,7 @@ final class MessageCurie implements \JsonSerializable
             $this->category,
             $this->message
         );
+        $this->isMixin = 'mixin' === $this->category;
     }
 
     /**
@@ -163,5 +167,13 @@ final class MessageCurie implements \JsonSerializable
     public function getMessage()
     {
         return $this->message;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMixin()
+    {
+        return $this->isMixin;
     }
 }

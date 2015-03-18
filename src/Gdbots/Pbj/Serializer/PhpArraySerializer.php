@@ -8,10 +8,12 @@ use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\TypeName;
+use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\Schema;
 
 class PhpArraySerializer extends AbstractSerializer
@@ -191,6 +193,8 @@ class PhpArraySerializer extends AbstractSerializer
      * @param Field $field
      * @param array $options
      * @return mixed
+     *
+     * @throws DecodeValueFailed
      */
     private function decodeValue($value, Field $field, array $options)
     {
@@ -199,11 +203,18 @@ class PhpArraySerializer extends AbstractSerializer
             return $type->decode($value, $field);
         }
 
+        if ($type->isMessage()) {
+            return $this->deserialize($value, $options);
+        }
+
         if ($type->getTypeName() === TypeName::GEO_POINT()) {
             return GeoPoint::fromArray($value);
         }
 
-        // assuming for now that everything else is a nested message
-        return $this->deserialize($value, $options);
+        if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
+            return MessageRef::fromArray($value);
+        }
+
+        throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
     }
 }

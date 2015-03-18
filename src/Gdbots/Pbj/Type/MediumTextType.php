@@ -11,4 +11,12 @@ final class MediumTextType extends AbstractStringType
     {
         return 16777215;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSet()
+    {
+        return false;
+    }
 }

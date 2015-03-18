@@ -6,6 +6,7 @@ header('Content-Type: text/plain');
 
 use Gdbots\Pbj\Serializer\JsonSerializer;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 /**
@@ -16,6 +17,7 @@ function createEmailMessage() {
     // auto registers the schema with the MessageResolver
     // only done for tests or dynamic messages.
     EmailMessage::schema();
+    MapsMessage::schema();
     NestedMessage::schema();
     return (new JsonSerializer())->deserialize($json);
 }

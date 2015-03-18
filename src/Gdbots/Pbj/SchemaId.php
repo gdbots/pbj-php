@@ -23,6 +23,9 @@ use Gdbots\Pbj\Exception\InvalidSchemaId;
  * Message Curie Format:
  *  vendor:package:category:message
  *
+ * Message Curie With Major Version Format:
+ *  vendor:package:category:message:v#
+ *
  * Formats:
  *  VENDOR:   [a-z0-9-]+
  *  PACKAGE:  [a-z0-9\.-]+
@@ -208,12 +211,17 @@ final class SchemaId implements \JsonSerializable
     }
 
     /**
-     * Returns the string the MessageResolver should use to find the class name for this schema.
+     * Returns the major version qualified curie.  This should be used by the MessageResolver,
+     * event dispatchers, etc. where consumers will need to be able to reliably type hint or
+     * locate classes and provide functionality for a given message, with the expectation
+     * that a major revision is likely not compatible with another major revision of the
+     * same message.
+     *
      * e.g. "vendor:package:category:message:v1"
      *
      * @return string
      */
-    public function getResolverKey()
+    public function getCurieWithMajorRev()
     {
         return $this->curie . ':v' . $this->version->getMajor();
     }

@@ -1,30 +1,33 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
-// todo: do we need correl_id here and causation_id?
-interface Event extends Message
+interface Command extends Message
 {
+    const COMMAND_ID_FIELD_NAME = 'command_id';
+    const MICROTIME_FIELD_NAME = 'microtime';
+    const CORRELATOR_FIELD_NAME = 'correlator';
+
     /**
      * @return bool
      */
-    public function hasEventId();
+    public function hasCommandId();
 
     /**
      * @return TimeUuidIdentifier
      */
-    public function getEventId();
+    public function getCommandId();
 
     /**
      * @param TimeUuidIdentifier $id
      * @return static
      */
-    public function setEventId(TimeUuidIdentifier $id);
+    public function setCommandId(TimeUuidIdentifier $id);
 
     /**
      * @return bool
@@ -45,16 +48,16 @@ interface Event extends Message
     /**
      * @return bool
      */
-    public function hasCorrelId();
+    public function hasCorrelator();
 
     /**
-     * @return UuidIdentifier
+     * @return MessageRef
      */
-    public function getCorrelId();
+    public function getCorrelator();
 
     /**
-     * @param UuidIdentifier $id
+     * @param MessageRef $correlator
      * @return static
      */
-    public function setCorrelId(UuidIdentifier $id);
+    public function setCorrelator(MessageRef $correlator);
 }

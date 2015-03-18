@@ -50,4 +50,12 @@ final class GeoPointType extends AbstractType
     {
         return false;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSet()
+    {
+        return false;
+    }
 }

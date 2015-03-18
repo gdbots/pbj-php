@@ -27,7 +27,7 @@ abstract class AbstractSerializer implements Serializer
         $message = new $className();
         Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
 
-        if ($message::schema()->getId()->getResolverKey() !== $schemaId->getResolverKey()) {
+        if ($message::schema()->getId()->getCurieWithMajorRev() !== $schemaId->getCurieWithMajorRev()) {
             throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
         }
 

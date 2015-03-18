@@ -6,12 +6,10 @@ use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
+use Gdbots\Pbj\Exception\MixinAlreadyAdded;
+use Gdbots\Pbj\Exception\MixinNotDefined;
 
-/*
- * todo: refactor custom schemas as extensions?
- * how could a consumer know a message has an extension?
- */
-class Schema implements ToArray, \JsonSerializable
+final class Schema implements ToArray, \JsonSerializable
 {
     const PBJ_FIELD_NAME = '_schema';
 
@@ -30,15 +28,36 @@ class Schema implements ToArray, \JsonSerializable
     /** @var Field[] */
     private $requiredFields = [];
 
+    /** @var Mixin[] */
+    private $mixins = [];
+
+    /** @var array */
+    private $mixinIds = [];
+
     /**
-     * @param string $className
-     * @param SchemaId $id
+     * Fields added by mixins that are okay to be overridden
+     * by the schema of the message itself.
+     *
+     * @var array
      */
-    final private function __construct($className, SchemaId $id)
+    private $overridable = [];
+
+    /**
+     * @param SchemaId|string $id
+     * @param string $className
+     * @param Field[] $fields
+     * @param Mixin[] $mixins
+     */
+    public function __construct($id, $className, array $fields = [], array $mixins = [])
     {
+        Assertion::classExists($className, null, 'className');
+        Assertion::allIsInstanceOf($fields, 'Gdbots\Pbj\Field', null, 'fields');
+        Assertion::allIsInstanceOf($mixins, 'Gdbots\Pbj\Mixin', null, 'mixins');
+
+        $this->id = $id instanceof SchemaId ? $id : SchemaId::fromString($id);
         $this->className = $className;
         $this->classShortName = ClassUtils::getShortName($this->className);
-        $this->id = $id;
+
         $this->addField(
             FieldBuilder::create(self::PBJ_FIELD_NAME, Type\StringType::create())
                 ->required()
@@ -47,53 +66,21 @@ class Schema implements ToArray, \JsonSerializable
                 ->build()
         );
 
-        foreach ($this->getExtendedSchemaFields() as $field) {
+        foreach ($mixins as $mixin) {
+            $this->addMixin($mixin);
+        }
+
+        foreach ($fields as $field) {
             $this->addField($field);
         }
-    }
 
-    /**
-     * When custom schemas are used you can override this method to inject
-     * a set of fixed fields that all messages defined with this schema
-     * must have.  By default the only fixed/required field is the "_schema" field.
-     *
-     * It may be beneficial to have a set of fields that each "category" of
-     * messages should have.  An event, command, request, etc.  Those having
-     * an "event_id" or "microtime" would definitely make sense.
-     *
-     * @return Field[]
-     * @throws \Exception
-     */
-    protected function getExtendedSchemaFields()
-    {
-        return [];
-    }
-
-    /**
-     * @param string $className
-     * @param SchemaId|string $schemaId
-     * @param Field[] $fields
-     * @return Schema
-     */
-    final public static function create($className, $schemaId, array $fields = [])
-    {
-        $id = $schemaId instanceof SchemaId ? $schemaId : SchemaId::fromString($schemaId);
-        Assertion::classExists($className, null, 'className');
-        Assertion::allIsInstanceOf($fields, 'Gdbots\Pbj\Field', null, 'fields');
-
-        /** @var Schema $schema */
-        $schema = new static($className, $id);
-        foreach ($fields as $field) {
-            $schema->addField($field);
-        }
-
-        return $schema;
+        $this->mixinIds = array_keys($this->mixins);
     }
 
     /**
      * @return string
      */
-    final public function toString()
+    public function toString()
     {
         return $this->id->toString();
     }
@@ -101,20 +88,26 @@ class Schema implements ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    final public function toArray()
+    public function toArray()
     {
         return [
-            'id' => $this->id->toString(),
+            'id' => $this->id,
             'curie' => $this->id->getCurie(),
             'class_name' => $this->className,
-            'fields' => $this->fields
+            'mixins' => array_map(
+                function(Mixin $mixin) {
+                    return $mixin->getId();
+                },
+                array_values($this->mixins)
+            ),
+            'fields' => $this->fields,
         ];
     }
 
     /**
      * @return array
      */
-    final public function jsonSerialize()
+    public function jsonSerialize()
     {
         return $this->toArray();
     }
@@ -122,7 +115,7 @@ class Schema implements ToArray, \JsonSerializable
     /**
      * @return string
      */
-    final public function __toString()
+    public function __toString()
     {
         return $this->id->toString();
     }
@@ -133,19 +126,53 @@ class Schema implements ToArray, \JsonSerializable
      */
     private function addField(Field $field)
     {
-        if ($this->hasField($field->getName())) {
-            throw new FieldAlreadyDefined($this, $field->getName());
+        $fieldName = $field->getName();
+
+        if ($this->hasField($fieldName) && !isset($this->overridable[$fieldName])) {
+            throw new FieldAlreadyDefined($this, $fieldName);
         }
-        $this->fields[$field->getName()] = $field;
+
+        unset($this->overridable[$fieldName]);
+        $this->fields[$fieldName] = $field;
+
         if ($field->isRequired()) {
-            $this->requiredFields[$field->getName()] = $field;
+            $this->requiredFields[$fieldName] = $field;
+        }
+    }
+
+    /**
+     * @param Mixin $mixin
+     * @throws FieldAlreadyDefined
+     * @throws MixinAlreadyAdded
+     */
+    private function addMixin(Mixin $mixin)
+    {
+        $id = $mixin->getId();
+        if (isset($this->mixins[$id->getCurieWithMajorRev()])) {
+            throw new MixinAlreadyAdded($this, $this->mixins[$id->getCurieWithMajorRev()], $mixin);
+        }
+
+        $this->mixins[$id->getCurieWithMajorRev()] = $mixin;
+        foreach ($mixin->getFields() as $field) {
+            $fieldName = $field->getName();
+
+            // a mixin cannot override the field of another mixin
+            if ($this->hasField($fieldName)) {
+                throw new FieldAlreadyDefined($this, $fieldName);
+            }
+
+            $this->overridable[$fieldName] = true;
+            $this->fields[$fieldName] = $field;
+            if ($field->isRequired()) {
+                $this->requiredFields[$fieldName] = $field;
+            }
         }
     }
 
     /**
      * @return SchemaId
      */
-    final public function getId()
+    public function getId()
     {
         return $this->id;
     }
@@ -153,15 +180,24 @@ class Schema implements ToArray, \JsonSerializable
     /**
      * @return MessageCurie
      */
-    final public function getCurie()
+    public function getCurie()
     {
         return $this->id->getCurie();
     }
 
     /**
+     * @see SchemaId::getCurieWithMajorRev
      * @return string
      */
-    final public function getClassName()
+    public function getCurieWithMajorRev()
+    {
+        return $this->id->getCurieWithMajorRev();
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName()
     {
         return $this->className;
     }
@@ -169,7 +205,7 @@ class Schema implements ToArray, \JsonSerializable
     /**
      * @return string
      */
-    final public function getClassShortName()
+    public function getClassShortName()
     {
         return $this->classShortName;
     }
@@ -183,32 +219,16 @@ class Schema implements ToArray, \JsonSerializable
      *
      * @return string
      */
-    final public function getHandlerMethodName()
+    public function getHandlerMethodName()
     {
         return lcfirst($this->classShortName);
-    }
-
-    /**
-     * @return Field[]
-     */
-    final public function getFields()
-    {
-        return $this->fields;
-    }
-
-    /**
-     * @return Field[]
-     */
-    final public function getRequiredFields()
-    {
-        return $this->requiredFields;
     }
 
     /**
      * @param string $fieldName
      * @return bool
      */
-    final public function hasField($fieldName)
+    public function hasField($fieldName)
     {
         return isset($this->fields[$fieldName]);
     }
@@ -218,11 +238,71 @@ class Schema implements ToArray, \JsonSerializable
      * @return Field
      * @throws FieldNotDefined
      */
-    final public function getField($fieldName)
+    public function getField($fieldName)
     {
         if (!isset($this->fields[$fieldName])) {
             throw new FieldNotDefined($this, $fieldName);
         }
         return $this->fields[$fieldName];
+    }
+
+    /**
+     * @return Field[]
+     */
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @return Field[]
+     */
+    public function getRequiredFields()
+    {
+        return $this->requiredFields;
+    }
+
+    /**
+     * Returns true if the mixin is on this schema.
+     * @see SchemaId::getCurieWithMajorRev
+     *
+     * @param string $mixinId
+     * @return bool
+     */
+    public function hasMixin($mixinId)
+    {
+        return isset($this->mixins[$mixinId]);
+    }
+
+    /**
+     * @param string $mixinId
+     * @return Mixin
+     * @throws MixinNotDefined
+     */
+    public function getMixin($mixinId)
+    {
+        if (!isset($this->mixins[$mixinId])) {
+            throw new MixinNotDefined($this, $mixinId);
+        }
+        return $this->mixins[$mixinId];
+    }
+
+    /**
+     * @return Mixin[]
+     */
+    public function getMixins()
+    {
+        return $this->mixins;
+    }
+
+    /**
+     * Returns an array of curies with the major rev.
+     * @see SchemaId::getCurieWithMajorRev
+     *
+     * @return array
+     */
+    public function getMixinIds()
+    {
+        return $this->mixinIds;
     }
 }

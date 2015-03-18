@@ -21,6 +21,12 @@ interface Type
     public function getTypeName();
 
     /**
+     * Shortcut to returning the value of the TypeName
+     * @return string
+     */
+    public function getTypeValue();
+
+    /**
      * @param mixed $value
      * @param Field $field
      * @throws \Exception
@@ -89,6 +95,11 @@ interface Type
     public function isString();
 
     /**
+     * @return bool
+     */
+    public function isMessage();
+
+    /**
      * Returns the minimum value supported by an integer type.
      * @return int
      */
@@ -109,5 +120,5 @@ interface Type
     /**
      * @return bool
      */
-    public function allowedInSetOrList();
+    public function allowedInSet();
 }

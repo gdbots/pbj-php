@@ -1,18 +1,17 @@
 <?php
 
-namespace Gdbots\Pbj\Extension;
+namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
-use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 
 interface Entity extends Message
 {
-    /**
-     * @return Field
-     */
-    public static function defineEntityIdField();
+    const ENTITY_ID_FIELD_NAME = 'id';
+    const ETAG_FIELD_NAME = 'etag';
+    const CREATED_AT_FIELD_NAME = 'created_at';
+    const UPDATED_AT_FIELD_NAME = 'updated_at';
 
     /**
      * @return bool
