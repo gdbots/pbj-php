@@ -40,7 +40,8 @@ final class EmailMessage extends AbstractMessage
                     //->useTypeDefault(false)
                     ->required()
                     ->build(),
-                Fb::create(self::FROM_NAME_FIELD_NAME, T\StringType::create())->build(),
+                Fb::create(self::FROM_NAME_FIELD_NAME, T\StringType::create())
+                    ->build(),
                 Fb::create(self::FROM_EMAIL_FIELD_NAME, T\StringType::create())
                     ->required()
                     ->format('email')
@@ -80,10 +81,7 @@ final class EmailMessage extends AbstractMessage
                     ->asAList()
                     ->build(),
                 Fb::create(self::ANY_OF_MESSAGE_FIELD_NAME, T\MessageType::create())
-                    ->anyOfClassNames([
-                        'Gdbots\Tests\Pbj\Fixtures\MapsMessage',
-                        'Gdbots\Tests\Pbj\Fixtures\NestedMessage',
-                    ])
+                    ->className('Gdbots\Pbj\Message')
                     ->asAList()
                     ->build(),
             ]

@@ -6,6 +6,7 @@ use Gdbots\Common\Enum;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Common\Util\NumberUtils;
+use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Enum\TypeName;
@@ -126,12 +127,24 @@ final class Field implements ToArray, \JsonSerializable
         );
         Assertion::boolean($required);
         Assertion::boolean($useTypeDefault);
-        if (null !== $anyOfClassNames) {
-            // todo: review, separate out concept of "instanceof" with "anyOf"
-            //Assertion::allClassExists($anyOfClassNames);
-            $className = null;
+
+        /*
+         * a message type allows for interfaces to be used
+         * as the "className".  so long as the provided argument
+         * passes the instanceof check it's okay.
+         */
+        if ($type->getTypeValue() === TypeName::MESSAGE) {
+            if (!class_exists($className) && !interface_exists($className)) {
+                Assertion::true(
+                    false,
+                    sprintf('Field [%s] className [%s] must be a class or interface.', $name, $className)
+                );
+            }
+        } else {
+            // anyOf is only supported on nested messages
+            Assertion::nullOrClassExists($className);
+            $anyOfClassNames = null;
         }
-        Assertion::nullOrClassExists($className);
 
         $this->name = $name;
         $this->type = $type;
@@ -230,17 +243,18 @@ final class Field implements ToArray, \JsonSerializable
             $this->useTypeDefault = true;
         } else {
             switch ($this->type->getTypeValue()) {
+                case TypeName::IDENTIFIER:
+                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    if (!$this->default instanceof Identifier) {
+                        $this->default = $this->type->decode($this->default, $this);
+                    }
+                    break;
+
                 case TypeName::INT_ENUM:
                 case TypeName::STRING_ENUM:
                     Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
                     if (!$this->default instanceof Enum) {
                         $this->default = $this->type->decode($this->default, $this);
-                    }
-                    break;
-
-                case TypeName::MESSAGE:
-                    if (!$this->hasAnyOfClassNames()) {
-                        Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
                     }
                     break;
 

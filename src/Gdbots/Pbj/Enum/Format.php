@@ -10,10 +10,12 @@ use Gdbots\Common\Enum;
  * @method static Format UNKNOWN()
  * @method static Format DATE()
  * @method static Format DATE_TIME()
+ * @method static Format DATED_SLUG()
  * @method static Format EMAIL()
  * @method static Format HOSTNAME()
  * @method static Format IPV4()
  * @method static Format IPV6()
+ * @method static Format SLUG()
  * @method static Format URI()
  * @method static Format URL()
  * @method static Format UUID()
@@ -23,10 +25,12 @@ final class Format extends Enum
     const UNKNOWN = 'unknown';
     const DATE = 'date';
     const DATE_TIME = 'date-time';
+    const DATED_SLUG = 'dated-slug';
     const EMAIL = 'email';
     const HOSTNAME = 'hostname';
     const IPV4 = 'ipv4';
     const IPV6 = 'ipv6';
+    const SLUG = 'slug';
     const URI = 'uri';
     const URL = 'url';
     const UUID = 'uuid';

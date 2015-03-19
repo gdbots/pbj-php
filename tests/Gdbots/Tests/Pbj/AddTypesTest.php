@@ -198,6 +198,12 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                             }
                             break;
 
+                        case 'Identifier':
+                            if (in_array($k, ['TimeUuid', 'Uuid'])) {
+                                continue 2;
+                            }
+                            break;
+
                         case 'MediumBlob':
                             if (in_array($k, $allStrings)) {
                                 continue 2;
@@ -229,7 +235,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                             break;
 
                         case 'Uuid':
-                            if (in_array($k, ['TimeUuid'])) {
+                            if (in_array($k, ['Identifier', 'TimeUuid'])) {
                                 continue 2;
                             }
                             break;
