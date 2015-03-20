@@ -44,6 +44,13 @@ final class MapsMessage extends AbstractMessage
         /** @var T\Type $class */
         foreach (self::getAllTypes() as $type => $class) {
             switch ($type) {
+                case 'Identifier':
+                    $fields[] = Fb::create($type, $class::create())
+                        ->asAMap()
+                        ->className('Gdbots\Identifiers\TimeUuidIdentifier')
+                        ->build();
+                    break;
+
                 case 'IntEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()

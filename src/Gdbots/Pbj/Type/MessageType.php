@@ -17,8 +17,9 @@ final class MessageType extends AbstractType
     {
         /** @var Message $value */
         Assertion::isInstanceOf($value, 'Gdbots\Pbj\Message', null, $field->getName());
+        Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+
         if (!$field->hasAnyOfClassNames()) {
-            Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
             return;
         }
 

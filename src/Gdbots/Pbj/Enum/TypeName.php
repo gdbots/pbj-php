@@ -14,6 +14,7 @@ use Gdbots\Common\Enum;
  * @method static TypeName DECIMAL()
  * @method static TypeName FLOAT()
  * @method static TypeName GEO_POINT()
+ * @method static TypeName IDENTIFIER()
  * @method static TypeName INT()
  * @method static TypeName INT_ENUM()
  * @method static TypeName MEDIUM_BLOB()
@@ -47,6 +48,7 @@ final class TypeName extends Enum
     const DECIMAL = 'decimal';
     const FLOAT = 'float';
     const GEO_POINT = 'geo-point';
+    const IDENTIFIER = 'identifier';
     const INT = 'int';
     const INT_ENUM = 'int-enum';
     const MICROTIME = 'microtime';
