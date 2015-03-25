@@ -29,9 +29,7 @@ final class ResponseMixin extends AbstractMixin
             Fb::create(Response::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(Response::REQUEST_ID_FIELD_NAME, T\UuidType::create())
-                ->required()
-                ->useTypeDefault(false)
+            Fb::create(Response::REQUEST_REF_FIELD_NAME, T\MessageRefType::create())
                 ->build(),
             Fb::create(Response::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
                 ->build(),

@@ -23,8 +23,18 @@ final class EntityMixin extends AbstractMixin
     public function getFields()
     {
         return [
+            /*
+             * todo: review, should we leave the entity id up to the concrete classes?
+             * this "convenience" creates some interesting issues
+             */
             Fb::create(Entity::ENTITY_ID_FIELD_NAME, T\UuidType::create())
                 ->required()
+                ->withDefault(function (Entity $message = null) {
+                    if (!$message) {
+                        return null;
+                    }
+                    return $message->generateEntityId();
+                })
                 ->build(),
             Fb::create(Entity::ETAG_FIELD_NAME, T\StringType::create())
                 ->pattern('/^[A-Za-z0-9_\-]+$/')

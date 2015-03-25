@@ -5,14 +5,12 @@ namespace Gdbots\Pbj;
 interface HasCorrelator
 {
     /**
-     * Correlates a message to another that also has a correlator with
-     * an optional tag to qualify the reference.
+     * Copies a correlator from another message if the message is not frozen.
      *
      * @param HasCorrelator $other
-     * @param string $tag
      * @return static
      */
-    public function correlateWith(HasCorrelator $other, $tag = null);
+    public function copyCorrelator(HasCorrelator $other);
 
     /**
      * @return bool

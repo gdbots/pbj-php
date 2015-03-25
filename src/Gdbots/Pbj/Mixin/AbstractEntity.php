@@ -21,6 +21,14 @@ abstract class AbstractEntity extends AbstractMessage implements Entity, Generat
     }
 
     /**
+     * @return UuidIdentifier
+     */
+    public function generateEntityId()
+    {
+        return static::schema()->getField(Entity::ENTITY_ID_FIELD_NAME)->getType()->getDefault();
+    }
+
+    /**
      * @return bool
      */
     final public function hasEntityId()
