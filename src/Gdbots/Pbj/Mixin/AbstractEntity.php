@@ -5,19 +5,17 @@ namespace Gdbots\Pbj\Mixin;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
-use Gdbots\Pbj\GeneratesMessageRef;
-use Gdbots\Pbj\GeneratesMessageRefTrait;
+use Gdbots\Pbj\MessageRef;
 
-abstract class AbstractEntity extends AbstractMessage implements Entity, GeneratesMessageRef
+abstract class AbstractEntity extends AbstractMessage implements Entity
 {
-    use GeneratesMessageRefTrait;
-
     /**
-     * {@inheritdoc}
+     * @param string $tag
+     * @return MessageRef
      */
-    final public function getMessageId()
+    final public function generateMessageRef($tag = null)
     {
-        return $this->getEntityId();
+        return new MessageRef(static::schema()->getCurie(), $this->getEntityId(), $tag);
     }
 
     /**
@@ -26,14 +24,6 @@ abstract class AbstractEntity extends AbstractMessage implements Entity, Generat
     public function generateEntityId()
     {
         return static::schema()->getField(Entity::ENTITY_ID_FIELD_NAME)->getType()->getDefault();
-    }
-
-    /**
-     * @return bool
-     */
-    final public function hasEntityId()
-    {
-        return $this->has(Entity::ENTITY_ID_FIELD_NAME);
     }
 
     /**
@@ -79,11 +69,11 @@ abstract class AbstractEntity extends AbstractMessage implements Entity, Generat
     }
 
     /**
-     * @return bool
+     * @return static
      */
-    final public function hasCreatedAt()
+    final public function clearEtag()
     {
-        return $this->has(Entity::CREATED_AT_FIELD_NAME);
+        return $this->clear(Entity::ETAG_FIELD_NAME);
     }
 
     /**

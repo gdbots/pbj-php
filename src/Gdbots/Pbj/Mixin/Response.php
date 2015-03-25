@@ -15,9 +15,10 @@ interface Response extends Message
     const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
-     * @return bool
+     * @param string $tag
+     * @return MessageRef
      */
-    public function hasResponseId();
+    public function generateMessageRef($tag = null);
 
     /**
      * @return UuidIdentifier
@@ -29,11 +30,6 @@ interface Response extends Message
      * @return static
      */
     public function setResponseId(UuidIdentifier $id);
-
-    /**
-     * @return bool
-     */
-    public function hasMicrotime();
 
     /**
      * @return Microtime

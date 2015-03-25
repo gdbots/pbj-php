@@ -2,33 +2,22 @@
 
 namespace Gdbots\Pbj\Mixin;
 
-use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
-use Gdbots\Pbj\GeneratesMessageRef;
-use Gdbots\Pbj\GeneratesMessageRefTrait;
-use Gdbots\Pbj\HasCorrelator;
-use Gdbots\Pbj\HasCorrerlatorTrait;
+use Gdbots\Pbj\MessageRef;
 
-abstract class AbstractEvent extends AbstractMessage implements DomainEvent, GeneratesMessageRef, HasCorrelator
+abstract class AbstractEvent extends AbstractMessage implements DomainEvent
 {
-    use GeneratesMessageRefTrait;
-    use HasCorrerlatorTrait;
+    use CorrelatorTrait;
+    use MicrotimeTrait;
 
     /**
-     * {@inheritdoc}
+     * @param string $tag
+     * @return MessageRef
      */
-    final public function getMessageId()
+    final public function generateMessageRef($tag = null)
     {
-        return $this->getEventId();
-    }
-
-    /**
-     * @return bool
-     */
-    final public function hasEventId()
-    {
-        return $this->has(Event::EVENT_ID_FIELD_NAME);
+        return new MessageRef(static::schema()->getCurie(), $this->getEventId(), $tag);
     }
 
     /**
@@ -46,30 +35,5 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent, Gen
     final public function setEventId(TimeUuidIdentifier $id)
     {
         return $this->setSingleValue(Event::EVENT_ID_FIELD_NAME, $id);
-    }
-
-    /**
-     * @return bool
-     */
-    final public function hasMicrotime()
-    {
-        return $this->has(Event::MICROTIME_FIELD_NAME);
-    }
-
-    /**
-     * @return Microtime
-     */
-    final public function getMicrotime()
-    {
-        return $this->get(Event::MICROTIME_FIELD_NAME);
-    }
-
-    /**
-     * @param Microtime $microtime
-     * @return static
-     */
-    final public function setMicrotime(Microtime $microtime)
-    {
-        return $this->setSingleValue(Event::MICROTIME_FIELD_NAME, $microtime);
     }
 }

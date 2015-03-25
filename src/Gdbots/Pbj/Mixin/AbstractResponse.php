@@ -2,34 +2,22 @@
 
 namespace Gdbots\Pbj\Mixin;
 
-use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
-use Gdbots\Pbj\GeneratesMessageRef;
-use Gdbots\Pbj\GeneratesMessageRefTrait;
-use Gdbots\Pbj\HasCorrelator;
-use Gdbots\Pbj\HasCorrerlatorTrait;
 use Gdbots\Pbj\MessageRef;
 
-abstract class AbstractResponse extends AbstractMessage implements GeneratesMessageRef, HasCorrelator, Response
+abstract class AbstractResponse extends AbstractMessage implements Response
 {
-    use GeneratesMessageRefTrait;
-    use HasCorrerlatorTrait;
+    use CorrelatorTrait;
+    use MicrotimeTrait;
 
     /**
-     * {@inheritdoc}
+     * @param string $tag
+     * @return MessageRef
      */
-    final public function getMessageId()
+    final public function generateMessageRef($tag = null)
     {
-        return $this->getResponseId();
-    }
-
-    /**
-     * @return bool
-     */
-    final public function hasResponseId()
-    {
-        return $this->has(Response::RESPONSE_ID_FIELD_NAME);
+        return new MessageRef(static::schema()->getCurie(), $this->getResponseId(), $tag);
     }
 
     /**
@@ -47,31 +35,6 @@ abstract class AbstractResponse extends AbstractMessage implements GeneratesMess
     final public function setResponseId(UuidIdentifier $id)
     {
         return $this->setSingleValue(Response::RESPONSE_ID_FIELD_NAME, $id);
-    }
-
-    /**
-     * @return bool
-     */
-    final public function hasMicrotime()
-    {
-        return $this->has(Response::MICROTIME_FIELD_NAME);
-    }
-
-    /**
-     * @return Microtime
-     */
-    final public function getMicrotime()
-    {
-        return $this->get(Response::MICROTIME_FIELD_NAME);
-    }
-
-    /**
-     * @param Microtime $microtime
-     * @return static
-     */
-    final public function setMicrotime(Microtime $microtime)
-    {
-        return $this->setSingleValue(Response::MICROTIME_FIELD_NAME, $microtime);
     }
 
     /**

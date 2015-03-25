@@ -5,6 +5,7 @@ namespace Gdbots\Pbj\Mixin;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageRef;
 
 interface Entity extends Message
 {
@@ -14,14 +15,15 @@ interface Entity extends Message
     const UPDATED_AT_FIELD_NAME = 'updated_at';
 
     /**
+     * @param string $tag
+     * @return MessageRef
+     */
+    public function generateMessageRef($tag = null);
+
+    /**
      * @return UuidIdentifier
      */
     public function generateEntityId();
-
-    /**
-     * @return bool
-     */
-    public function hasEntityId();
 
     /**
      * @return UuidIdentifier
@@ -51,9 +53,9 @@ interface Entity extends Message
     public function setEtag($etag);
 
     /**
-     * @return bool
+     * @return static
      */
-    public function hasCreatedAt();
+    public function clearEtag();
 
     /**
      * @return Microtime

@@ -14,9 +14,10 @@ interface Command extends Message
     const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
-     * @return bool
+     * @param string $tag
+     * @return MessageRef
      */
-    public function hasCommandId();
+    public function generateMessageRef($tag = null);
 
     /**
      * @return TimeUuidIdentifier
@@ -28,11 +29,6 @@ interface Command extends Message
      * @return static
      */
     public function setCommandId(TimeUuidIdentifier $id);
-
-    /**
-     * @return bool
-     */
-    public function hasMicrotime();
 
     /**
      * @return Microtime

@@ -1,27 +1,16 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\Mixin;
+
+use Gdbots\Pbj\MessageRef;
 
 /**
  * @method bool has(string $fieldName)
  * @method mixed get(string $fieldName)
  * @method static setSingleValue(string $fieldName, mixed $value)
- * @method bool isFrozen()
  */
-trait HasCorrerlatorTrait
+trait CorrelatorTrait
 {
-    /**
-     * @param HasCorrelator $other
-     * @return static
-     */
-    public function copyCorrelator(HasCorrelator $other)
-    {
-        if ($this->isFrozen() || !$other->hasCorrelator()) {
-            return $this;
-        }
-        return $this->setCorrelator($other->getCorrelator());
-    }
-
     /**
      * @return bool
      */

@@ -8,7 +8,7 @@ This changelog references the relevant changes done in 0.x versions.
 * #2: [Type] Removed `allowedInSetOrList` and added `allowedInSet` since all field rules except `set` support all types.
 * [Message] Removed `removeFromList` method from interface and abstract message.
 * [Message] Added `removeFromListAt` method to interface and abstract message.
-* [MessageRef], [HasMessageRef], [MessageRefType] Added new class for creating links/references to other messages.
+* [MessageRef], [MessageRefType] Added new class for creating links/references to other messages.
 * Removed all correl_id fields from extensions and hasCorrelId, getCorrelId, setCorrelId, in favor of `correlator`.
 * Killed all `Extension` classes and converted them to `Mixins`.
 * [Schema] Eliminated schema extension capability, must use mixins now as `Schema` is now marked as final.
