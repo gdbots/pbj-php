@@ -9,6 +9,7 @@ use Gdbots\Pbj\GeneratesMessageRef;
 use Gdbots\Pbj\GeneratesMessageRefTrait;
 use Gdbots\Pbj\HasCorrelator;
 use Gdbots\Pbj\HasCorrerlatorTrait;
+use Gdbots\Pbj\MessageRef;
 
 abstract class AbstractResponse extends AbstractMessage implements GeneratesMessageRef, HasCorrelator, Response
 {
@@ -76,25 +77,25 @@ abstract class AbstractResponse extends AbstractMessage implements GeneratesMess
     /**
      * @return bool
      */
-    final public function hasRequestId()
+    final public function hasRequestRef()
     {
-        return $this->has(Response::REQUEST_ID_FIELD_NAME);
+        return $this->has(Response::REQUEST_REF_FIELD_NAME);
     }
 
     /**
-     * @return UuidIdentifier
+     * @return MessageRef
      */
-    final public function getRequestId()
+    final public function getRequestRef()
     {
-        return $this->get(Response::REQUEST_ID_FIELD_NAME);
+        return $this->get(Response::REQUEST_REF_FIELD_NAME);
     }
 
     /**
-     * @param UuidIdentifier $id
+     * @param MessageRef $requestRef
      * @return static
      */
-    final public function setRequestId(UuidIdentifier $id)
+    final public function setRequestRef(MessageRef $requestRef)
     {
-        return $this->setSingleValue(Response::REQUEST_ID_FIELD_NAME, $id);
+        return $this->setSingleValue(Response::REQUEST_REF_FIELD_NAME, $requestRef);
     }
 }

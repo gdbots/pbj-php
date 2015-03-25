@@ -11,7 +11,7 @@ interface Response extends Message
 {
     const RESPONSE_ID_FIELD_NAME = 'response_id';
     const MICROTIME_FIELD_NAME = 'microtime';
-    const REQUEST_ID_FIELD_NAME = 'request_id';
+    const REQUEST_REF_FIELD_NAME = 'request_ref';
     const CORRELATOR_FIELD_NAME = 'correlator';
 
     /**
@@ -49,18 +49,18 @@ interface Response extends Message
     /**
      * @return bool
      */
-    public function hasRequestId();
+    public function hasRequestRef();
 
     /**
-     * @return UuidIdentifier
+     * @return MessageRef
      */
-    public function getRequestId();
+    public function getRequestRef();
 
     /**
-     * @param UuidIdentifier $id
+     * @param MessageRef $requestRef
      * @return static
      */
-    public function setRequestId(UuidIdentifier $id);
+    public function setRequestRef(MessageRef $requestRef);
 
     /**
      * @return bool

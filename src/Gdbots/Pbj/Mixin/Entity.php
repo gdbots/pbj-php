@@ -14,6 +14,11 @@ interface Entity extends Message
     const UPDATED_AT_FIELD_NAME = 'updated_at';
 
     /**
+     * @return UuidIdentifier
+     */
+    public function generateEntityId();
+
+    /**
      * @return bool
      */
     public function hasEntityId();
