@@ -4,6 +4,7 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
+use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Exception\LogicException;
@@ -35,10 +36,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         $this->curie = $curie;
         $this->id = $id;
         if (null !== $tag) {
-            $tag = strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $tag));
-            // replace more than one dash in a row
-            $tag = preg_replace('/\-+/i', '-', $tag);
-            $this->tag = trim($tag, '-') ?: null;
+            $this->tag = SlugUtils::create($tag) ?: null;
         }
 
         if ($this->curie->isMixin()) {
