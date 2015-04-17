@@ -9,7 +9,7 @@ use Gdbots\Pbj\MessageRef;
 
 interface Entity extends Message
 {
-    const ENTITY_ID_FIELD_NAME = 'id';
+    const ENTITY_ID_FIELD_NAME = '_id';
     const ETAG_FIELD_NAME = 'etag';
     const CREATED_AT_FIELD_NAME = 'created_at';
     const UPDATED_AT_FIELD_NAME = 'updated_at';
