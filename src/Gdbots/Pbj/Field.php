@@ -240,7 +240,9 @@ final class Field implements ToArray, \JsonSerializable
         $this->default = $default;
 
         if ($this->type->isScalar()) {
-            $this->useTypeDefault = true;
+            if ($this->type->getTypeName() !== TypeName::TIMESTAMP()) {
+                $this->useTypeDefault = true;
+            }
         } else {
             switch ($this->type->getTypeValue()) {
                 case TypeName::IDENTIFIER:

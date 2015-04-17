@@ -3,6 +3,7 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Util\DateUtils;
+use Gdbots\Common\Util\HashtagUtils;
 use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
@@ -52,6 +53,14 @@ final class StringType extends AbstractStringType
 
             case Format::EMAIL:
                 Assertion::email($value, null, $field->getName());
+                break;
+
+            case Format::HASHTAG:
+                Assertion::true(
+                    HashtagUtils::isValid($value),
+                    sprintf('Field [%s] must be a valid hashtag.  @see HashtagUtils::isValid', $field->getName()),
+                    $field->getName()
+                );
                 break;
 
             case Format::IPV4:

@@ -6,7 +6,8 @@ This changelog references the relevant changes done in 0.x versions.
 * issue #6: [PhpArraySerializer] Do not try to deserialize a null value.
 * issue #5: [MessageRef] The `id` will now support any string matching `/^[A-Za-z0-9:_\-]+$/`.
 * [Entity] Changed entity id field name from `id` to `_id`.
-* issue #4: [TimestampType] Do not use `time()` for default and return null rather than 0 if not set.
+* issue #4: [Field] TimestampType default can now be disabled with `useTypeDefault = false`.
+* [Format] Added "hashtag" option and implemented check in [StringType].
 
 
 ## v0.2.0

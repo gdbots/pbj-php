@@ -26,9 +26,6 @@ final class TimestampType extends AbstractType
      */
     public function encode($value, Field $field)
     {
-        if (null === $value) {
-            return null;
-        }
         return (int) $value;
     }
 
@@ -37,10 +34,15 @@ final class TimestampType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        if (null === $value) {
-            return null;
-        }
         return (int) $value;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDefault()
+    {
+        return time();
     }
 
     /**
