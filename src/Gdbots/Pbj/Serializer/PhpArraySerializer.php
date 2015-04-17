@@ -113,7 +113,7 @@ class PhpArraySerializer extends AbstractSerializer
         $schema = $message::schema();
 
         foreach ($data as $fieldName => $value) {
-            if (!$schema->hasField($fieldName)) {
+            if (null === $value || !$schema->hasField($fieldName)) {
                 // todo: review, what to do with unknown fields
                 continue;
             }
