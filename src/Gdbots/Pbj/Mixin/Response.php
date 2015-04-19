@@ -26,10 +26,10 @@ interface Response extends Message
     public function getResponseId();
 
     /**
-     * @param UuidIdentifier $id
+     * @param UuidIdentifier $responseId
      * @return static
      */
-    public function setResponseId(UuidIdentifier $id);
+    public function setResponseId(UuidIdentifier $responseId);
 
     /**
      * @return Microtime
@@ -59,6 +59,11 @@ interface Response extends Message
     public function setRequestRef(MessageRef $requestRef);
 
     /**
+     * @return static
+     */
+    public function clearRequestRef();
+
+    /**
      * @return bool
      */
     public function hasCorrelator();
@@ -73,4 +78,9 @@ interface Response extends Message
      * @return static
      */
     public function setCorrelator(MessageRef $correlator);
+
+    /**
+     * @return static
+     */
+    public function clearCorrelator();
 }

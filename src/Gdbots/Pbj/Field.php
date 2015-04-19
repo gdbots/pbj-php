@@ -240,12 +240,15 @@ final class Field implements ToArray, \JsonSerializable
         $this->default = $default;
 
         if ($this->type->isScalar()) {
-            $this->useTypeDefault = true;
+            if ($this->type->getTypeName() !== TypeName::TIMESTAMP()) {
+                $this->useTypeDefault = true;
+            }
         } else {
+            $decodeDefault = null !== $this->default && !$this->default instanceof \Closure;
             switch ($this->type->getTypeValue()) {
                 case TypeName::IDENTIFIER:
                     Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
-                    if (!$this->default instanceof Identifier) {
+                    if ($decodeDefault && !$this->default instanceof Identifier) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
                     break;
@@ -253,7 +256,7 @@ final class Field implements ToArray, \JsonSerializable
                 case TypeName::INT_ENUM:
                 case TypeName::STRING_ENUM:
                     Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
-                    if (!$this->default instanceof Enum) {
+                    if ($decodeDefault && !$this->default instanceof Enum) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
                     break;

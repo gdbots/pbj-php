@@ -25,7 +25,7 @@ final class MicrotimeType extends AbstractType
         if ($value instanceof Microtime) {
             return $value->toString();
         }
-        return '0';
+        return null;
     }
 
     /**
@@ -33,12 +33,12 @@ final class MicrotimeType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        if ($value instanceof Microtime) {
-            return $value;
-        }
-
         if (empty($value)) {
             return null;
+        }
+
+        if ($value instanceof Microtime) {
+            return $value;
         }
 
         return Microtime::fromString((string) $value);

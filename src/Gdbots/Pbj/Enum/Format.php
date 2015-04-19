@@ -12,6 +12,7 @@ use Gdbots\Common\Enum;
  * @method static Format DATE_TIME()
  * @method static Format DATED_SLUG()
  * @method static Format EMAIL()
+ * @method static Format HASHTAG()
  * @method static Format HOSTNAME()
  * @method static Format IPV4()
  * @method static Format IPV6()
@@ -27,6 +28,7 @@ final class Format extends Enum
     const DATE_TIME = 'date-time';
     const DATED_SLUG = 'dated-slug';
     const EMAIL = 'email';
+    const HASHTAG = 'hashtag';
     const HOSTNAME = 'hostname';
     const IPV4 = 'ipv4';
     const IPV6 = 'ipv6';

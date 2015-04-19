@@ -25,10 +25,10 @@ interface Command extends Message
     public function getCommandId();
 
     /**
-     * @param TimeUuidIdentifier $id
+     * @param TimeUuidIdentifier $commandId
      * @return static
      */
-    public function setCommandId(TimeUuidIdentifier $id);
+    public function setCommandId(TimeUuidIdentifier $commandId);
 
     /**
      * @return Microtime
@@ -56,4 +56,9 @@ interface Command extends Message
      * @return static
      */
     public function setCorrelator(MessageRef $correlator);
+
+    /**
+     * @return static
+     */
+    public function clearCorrelator();
 }

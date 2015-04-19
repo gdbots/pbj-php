@@ -37,11 +37,12 @@ final class IntEnumType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        /** @var Enum $className */
-        $className = $field->getClassName();
         if (null === $value) {
             return null;
         }
+
+        /** @var Enum $className */
+        $className = $field->getClassName();
 
         try {
             return $className::create((int) $value);

@@ -25,10 +25,10 @@ interface Request extends Message
     public function getRequestId();
 
     /**
-     * @param UuidIdentifier $id
+     * @param UuidIdentifier $requestId
      * @return static
      */
-    public function setRequestId(UuidIdentifier $id);
+    public function setRequestId(UuidIdentifier $requestId);
 
     /**
      * @return Microtime
@@ -56,4 +56,9 @@ interface Request extends Message
      * @return static
      */
     public function setCorrelator(MessageRef $correlator);
+
+    /**
+     * @return static
+     */
+    public function clearCorrelator();
 }

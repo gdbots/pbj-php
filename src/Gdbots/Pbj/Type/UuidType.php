@@ -35,14 +35,14 @@ final class UuidType extends AbstractType
      */
     public function decode($value, Field $field)
     {
+        if (empty($value)) {
+            return null;
+        }
+
         /** @var UuidIdentifier $className */
         $className = $field->getClassName() ?: 'Gdbots\Identifiers\UuidIdentifier';
         if ($value instanceof $className) {
             return $value;
-        }
-
-        if (empty($value)) {
-            return null;
         }
 
         return $className::fromString((string) $value);

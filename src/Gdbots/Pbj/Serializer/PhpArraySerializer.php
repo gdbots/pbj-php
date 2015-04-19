@@ -118,6 +118,11 @@ class PhpArraySerializer extends AbstractSerializer
                 continue;
             }
 
+            if (null === $value) {
+                $message->clear($fieldName);
+                continue;
+            }
+
             $field = $schema->getField($fieldName);
 
             switch ($field->getRule()->getValue()) {

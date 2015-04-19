@@ -5,21 +5,23 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\SlugUtils;
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Exception\LogicException;
 
 /**
  * Represents a reference to a message.  Typically used to link messages
  * together via a correlator or "links".  Format for a reference:
- * vendor:package:category:message:uuid#tag (tag is optional)
+ * vendor:package:category:message:id#tag (tag is optional)
  */
 final class MessageRef implements FromArray, ToArray, \JsonSerializable
 {
     /** @var MessageCurie */
     private $curie;
 
-    /** @var UuidIdentifier */
+    /**
+     * Any string matching pattern /^[A-Za-z0-9:_\-]+$/
+     * @var string
+     */
     private $id;
 
     /** @var string */
@@ -27,14 +29,16 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param MessageCurie $curie
-     * @param UuidIdentifier $id
+     * @param string $id
      * @param string $tag The tag will be automatically fixed to a slug-formatted-string.
-     * @throws LogicException
+     * @throws \Exception
      */
-    public function __construct(MessageCurie $curie, UuidIdentifier $id, $tag = null)
+    public function __construct(MessageCurie $curie, $id, $tag = null)
     {
         $this->curie = $curie;
-        $this->id = $id;
+        $this->id = (string) $id;
+        Assertion::regex($this->id, '/^[A-Za-z0-9:_\-]+$/');
+
         if (null !== $tag) {
             $this->tag = SlugUtils::create($tag) ?: null;
         }
@@ -51,11 +55,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     {
         if (isset($data['curie'])) {
             $tag = isset($data['tag']) ? $data['tag'] : null;
-            return new self(
-                MessageCurie::fromString($data['curie']),
-                UuidIdentifier::fromString($data['id']),
-                $tag
-            );
+            return new self(MessageCurie::fromString($data['curie']), $data['id'], $tag);
         }
         throw new InvalidArgumentException('Payload must be a MessageRef type.');
     }
@@ -66,13 +66,9 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public function toArray()
     {
         if (null !== $this->tag) {
-            return [
-                'curie' => $this->curie->toString(),
-                'id' => $this->id->toString(),
-                'tag' => $this->tag
-            ];
+            return ['curie' => $this->curie->toString(), 'id' => $this->id, 'tag' => $this->tag];
         }
-        return ['curie' => $this->curie->toString(), 'id' => $this->id->toString()];
+        return ['curie' => $this->curie->toString(), 'id' => $this->id];
     }
 
     /**
@@ -84,14 +80,14 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
-     * @param string $string A string with format curie:uuid#tag
+     * @param string $string A string with format curie:id#tag
      * @return self
      */
     public static function fromString($string)
     {
         list($ref, $tag) = explode('#', $string, 2);
-        $parts = explode(':', $ref);
-        $id = UuidIdentifier::fromString(array_pop($parts));
+        $parts = explode(':', $ref, 5);
+        $id = array_pop($parts);
         $curie = MessageCurie::fromString(implode(':', $parts));
         return new self($curie, $id, $tag);
     }
@@ -102,9 +98,9 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public function toString()
     {
         if (null !== $this->tag) {
-            return $this->curie->toString() . ':' . $this->id->toString() . '#' . $this->tag;
+            return $this->curie->toString() . ':' . $this->id . '#' . $this->tag;
         }
-        return $this->curie->toString() . ':' . $this->id->toString();
+        return $this->curie->toString() . ':' . $this->id;
     }
 
     /**
@@ -124,7 +120,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
-     * @return UuidIdentifier
+     * @return string
      */
     public function getId()
     {

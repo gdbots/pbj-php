@@ -2,6 +2,7 @@
 
 namespace Gdbots\Pbj\Mixin;
 
+use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMixin;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\SchemaId;
@@ -23,17 +24,11 @@ final class EntityMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            /*
-             * todo: review, should we leave the entity id up to the concrete classes?
-             * this "convenience" creates some interesting issues
-             */
-            Fb::create(Entity::ENTITY_ID_FIELD_NAME, T\UuidType::create())
+            Fb::create(Entity::ENTITY_ID_FIELD_NAME, T\IdentifierType::create())
                 ->required()
-                ->withDefault(function (Entity $message = null) {
-                    if (!$message) {
-                        return null;
-                    }
-                    return $message->generateEntityId();
+                ->className('Gdbots\Identifiers\UuidIdentifier')
+                ->withDefault(function () {
+                    return UuidIdentifier::generate();
                 })
                 ->build(),
             Fb::create(Entity::ETAG_FIELD_NAME, T\StringType::create())

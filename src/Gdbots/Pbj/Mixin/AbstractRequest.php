@@ -29,11 +29,11 @@ abstract class AbstractRequest extends AbstractMessage implements Request
     }
 
     /**
-     * @param UuidIdentifier $id
+     * @param UuidIdentifier $requestId
      * @return static
      */
-    final public function setRequestId(UuidIdentifier $id)
+    final public function setRequestId(UuidIdentifier $requestId)
     {
-        return $this->setSingleValue(Request::REQUEST_ID_FIELD_NAME, $id);
+        return $this->setSingleValue(Request::REQUEST_ID_FIELD_NAME, $requestId);
     }
 }

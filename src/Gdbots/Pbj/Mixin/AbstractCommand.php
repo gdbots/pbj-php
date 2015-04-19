@@ -30,11 +30,11 @@ abstract class AbstractCommand extends AbstractMessage implements Command
     }
 
     /**
-     * @param TimeUuidIdentifier $id
+     * @param TimeUuidIdentifier $commandId
      * @return static
      */
-    final public function setCommandId(TimeUuidIdentifier $id)
+    final public function setCommandId(TimeUuidIdentifier $commandId)
     {
-        return $this->setSingleValue(Command::COMMAND_ID_FIELD_NAME, $id);
+        return $this->setSingleValue(Command::COMMAND_ID_FIELD_NAME, $commandId);
     }
 }

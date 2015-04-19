@@ -34,12 +34,12 @@ final class DateType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        if ($value instanceof \DateTime) {
-            return $value;
-        }
-
         if (empty($value)) {
             return null;
+        }
+
+        if ($value instanceof \DateTime) {
+            return $value;
         }
 
         $date = \DateTime::createFromFormat('!Y-m-d', $value);

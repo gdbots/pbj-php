@@ -38,12 +38,12 @@ final class DateTimeType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        if ($value instanceof \DateTime) {
-            return $this->convertToUtc($value);
-        }
-
         if (empty($value)) {
             return null;
+        }
+
+        if ($value instanceof \DateTime) {
+            return $this->convertToUtc($value);
         }
 
         $date = \DateTime::createFromFormat(DateUtils::ISO8601, $value);

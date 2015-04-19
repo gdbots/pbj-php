@@ -2,10 +2,19 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.2.1
+* issue #8: [EntityMixin] Make the type for `_id` an `IdentifierType` and use a random uuid as default.
+* issue #8: [Entity] Changed entity id field name from `id` to `_id` and removed `setEntityId` from interface.
+* issue #6: [PhpArraySerializer] Do not try to deserialize a null value, instead clear the field.
+* issue #5: [MessageRef] The `id` will now support any string matching `/^[A-Za-z0-9:_\-]+$/`.
+* issue #4: [Field] TimestampType default can now be disabled with `useTypeDefault = false`.
+* [Format] Added "hashtag" option and implemented check in [StringType].
+
+
 ## v0.2.0
-* #1: [Type] Add `isMessage` method to interface for simple check to determine if fields contain a nested message.
-* #1: [MessageType] Impements `anyOfClassNames` so a field can support an array of possible messages.
-* #2: [Type] Removed `allowedInSetOrList` and added `allowedInSet` since all field rules except `set` support all types.
+* issue #1: [Type] Add `isMessage` method to interface for simple check to determine if fields contain a nested message.
+* issue #1: [MessageType] Impements `anyOfClassNames` so a field can support an array of possible messages.
+* issue #2: [Type] Removed `allowedInSetOrList` and added `allowedInSet` since all field rules except `set` support all types.
 * [Message] Removed `removeFromList` method from interface and abstract message.
 * [Message] Added `removeFromListAt` method to interface and abstract message.
 * [MessageRef], [MessageRefType] Added new class for creating links/references to other messages.
