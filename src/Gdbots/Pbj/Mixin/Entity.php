@@ -3,7 +3,7 @@
 namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 
@@ -21,20 +21,22 @@ interface Entity extends Message
     public function generateMessageRef($tag = null);
 
     /**
-     * @return UuidIdentifier
+     * @return bool
      */
-    public function generateEntityId();
+    public function hasEntityId();
 
     /**
-     * @return UuidIdentifier
+     * @return Identifier
      */
     public function getEntityId();
 
     /**
-     * @param UuidIdentifier $id
+     * Implement on concrete message to enforce proper type hint.
+     *
+     * @param Identifier $entityId
      * @return static
      */
-    public function setEntityId(UuidIdentifier $id);
+    //public function setEntityId(Identifier $entityId);
 
     /**
      * @return bool
@@ -63,10 +65,10 @@ interface Entity extends Message
     public function getCreatedAt();
 
     /**
-     * @param Microtime $microtime
+     * @param Microtime $createdAt
      * @return static
      */
-    public function setCreatedAt(Microtime $microtime);
+    public function setCreatedAt(Microtime $createdAt);
 
     /**
      * @return bool
@@ -79,8 +81,13 @@ interface Entity extends Message
     public function getUpdatedAt();
 
     /**
-     * @param Microtime $microtime
+     * @param Microtime $updatedAt
      * @return static
      */
-    public function setUpdatedAt(Microtime $microtime);
+    public function setUpdatedAt(Microtime $updatedAt);
+
+    /**
+     * @return static
+     */
+    public function clearUpdatedAt();
 }

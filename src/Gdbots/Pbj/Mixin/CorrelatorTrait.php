@@ -8,6 +8,7 @@ use Gdbots\Pbj\MessageRef;
  * @method bool has(string $fieldName)
  * @method mixed get(string $fieldName)
  * @method static setSingleValue(string $fieldName, mixed $value)
+ * @method static clear(string $fieldName)
  */
 trait CorrelatorTrait
 {
@@ -34,5 +35,13 @@ trait CorrelatorTrait
     public function setCorrelator(MessageRef $correlator)
     {
         return $this->setSingleValue('correlator', $correlator);
+    }
+
+    /**
+     * @return static
+     */
+    public function clearCorrelator()
+    {
+        return $this->clear('correlator');
     }
 }

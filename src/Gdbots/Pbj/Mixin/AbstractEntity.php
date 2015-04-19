@@ -3,7 +3,7 @@
 namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\MessageRef;
 
@@ -19,28 +19,19 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
     }
 
     /**
-     * @return UuidIdentifier
+     * @return bool
      */
-    public function generateEntityId()
+    public function hasEntityId()
     {
-        return static::schema()->getField(Entity::ENTITY_ID_FIELD_NAME)->getType()->getDefault();
+        return $this->has(Entity::ENTITY_ID_FIELD_NAME);
     }
 
     /**
-     * @return UuidIdentifier
+     * @return Identifier
      */
-    final public function getEntityId()
+    public function getEntityId()
     {
         return $this->get(Entity::ENTITY_ID_FIELD_NAME);
-    }
-
-    /**
-     * @param UuidIdentifier $id
-     * @return static
-     */
-    final public function setEntityId(UuidIdentifier $id)
-    {
-        return $this->setSingleValue(Entity::ENTITY_ID_FIELD_NAME, $id);
     }
 
     /**
@@ -85,12 +76,12 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
     }
 
     /**
-     * @param Microtime $microtime
+     * @param Microtime $createdAt
      * @return static
      */
-    final public function setCreatedAt(Microtime $microtime)
+    final public function setCreatedAt(Microtime $createdAt)
     {
-        return $this->setSingleValue(Entity::CREATED_AT_FIELD_NAME, $microtime);
+        return $this->setSingleValue(Entity::CREATED_AT_FIELD_NAME, $createdAt);
     }
 
     /**
@@ -110,11 +101,19 @@ abstract class AbstractEntity extends AbstractMessage implements Entity
     }
 
     /**
-     * @param Microtime $microtime
+     * @param Microtime $updatedAt
      * @return static
      */
-    final public function setUpdatedAt(Microtime $microtime)
+    final public function setUpdatedAt(Microtime $updatedAt)
     {
-        return $this->setSingleValue(Entity::UPDATED_AT_FIELD_NAME, $microtime);
+        return $this->setSingleValue(Entity::UPDATED_AT_FIELD_NAME, $updatedAt);
+    }
+
+    /**
+     * @return static
+     */
+    final public function clearUpdatedAt()
+    {
+        return $this->clear(Entity::UPDATED_AT_FIELD_NAME);
     }
 }

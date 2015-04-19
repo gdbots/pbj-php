@@ -35,14 +35,14 @@ final class TimeUuidType extends AbstractType
      */
     public function decode($value, Field $field)
     {
+        if (empty($value)) {
+            return null;
+        }
+
         /** @var TimeUuidIdentifier $className */
         $className = $field->getClassName() ?: 'Gdbots\Identifiers\TimeUuidIdentifier';
         if ($value instanceof $className) {
             return $value;
-        }
-
-        if (empty($value)) {
-            return null;
         }
 
         return $className::fromString((string) $value);

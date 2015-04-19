@@ -52,11 +52,12 @@ final class IdentifierType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        /** @var Identifier $className */
-        $className = $field->getClassName();
         if (empty($value)) {
             return null;
         }
+
+        /** @var Identifier $className */
+        $className = $field->getClassName();
 
         try {
             return $className::fromString((string) $value);

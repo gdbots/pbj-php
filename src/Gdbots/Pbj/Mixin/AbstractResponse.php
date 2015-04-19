@@ -29,12 +29,12 @@ abstract class AbstractResponse extends AbstractMessage implements Response
     }
 
     /**
-     * @param UuidIdentifier $id
+     * @param UuidIdentifier $responseId
      * @return static
      */
-    final public function setResponseId(UuidIdentifier $id)
+    final public function setResponseId(UuidIdentifier $responseId)
     {
-        return $this->setSingleValue(Response::RESPONSE_ID_FIELD_NAME, $id);
+        return $this->setSingleValue(Response::RESPONSE_ID_FIELD_NAME, $responseId);
     }
 
     /**
@@ -60,5 +60,13 @@ abstract class AbstractResponse extends AbstractMessage implements Response
     final public function setRequestRef(MessageRef $requestRef)
     {
         return $this->setSingleValue(Response::REQUEST_REF_FIELD_NAME, $requestRef);
+    }
+
+    /**
+     * @return static
+     */
+    final public function clearRequestRef()
+    {
+        return $this->clear(Response::REQUEST_REF_FIELD_NAME);
     }
 }

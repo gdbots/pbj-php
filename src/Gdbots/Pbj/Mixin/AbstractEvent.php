@@ -29,11 +29,11 @@ abstract class AbstractEvent extends AbstractMessage implements DomainEvent
     }
 
     /**
-     * @param TimeUuidIdentifier $id
+     * @param TimeUuidIdentifier $eventId
      * @return static
      */
-    final public function setEventId(TimeUuidIdentifier $id)
+    final public function setEventId(TimeUuidIdentifier $eventId)
     {
-        return $this->setSingleValue(Event::EVENT_ID_FIELD_NAME, $id);
+        return $this->setSingleValue(Event::EVENT_ID_FIELD_NAME, $eventId);
     }
 }

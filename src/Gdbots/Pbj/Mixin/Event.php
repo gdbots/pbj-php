@@ -25,10 +25,10 @@ interface Event extends Message
     public function getEventId();
 
     /**
-     * @param TimeUuidIdentifier $id
+     * @param TimeUuidIdentifier $eventId
      * @return static
      */
-    public function setEventId(TimeUuidIdentifier $id);
+    public function setEventId(TimeUuidIdentifier $eventId);
 
     /**
      * @return Microtime
@@ -56,4 +56,9 @@ interface Event extends Message
      * @return static
      */
     public function setCorrelator(MessageRef $correlator);
+
+    /**
+     * @return static
+     */
+    public function clearCorrelator();
 }

@@ -3,9 +3,10 @@ This changelog references the relevant changes done in 0.x versions.
 
 
 ## v0.2.1
-* issue #6: [PhpArraySerializer] Do not try to deserialize a null value.
+* issue #8: [EntityMixin] Make the type for `_id` an `IdentifierType` and use a random uuid as default.
+* issue #8: [Entity] Changed entity id field name from `id` to `_id` and removed `setEntityId` from interface.
+* issue #6: [PhpArraySerializer] Do not try to deserialize a null value, instead clear the field.
 * issue #5: [MessageRef] The `id` will now support any string matching `/^[A-Za-z0-9:_\-]+$/`.
-* [Entity] Changed entity id field name from `id` to `_id`.
 * issue #4: [Field] TimestampType default can now be disabled with `useTypeDefault = false`.
 * [Format] Added "hashtag" option and implemented check in [StringType].
 
