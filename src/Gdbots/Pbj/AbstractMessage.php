@@ -328,7 +328,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * Populates the default on a single field if it's not already set
-     * and the default generated is not a null/empty value.
+     * and the default generated is not a null value or empty array.
      *
      * @param Field $field
      * @return bool Returns true if a non null/empty default was applied or already present.
@@ -376,7 +376,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             return false;
         }
 
-        return !empty($this->data[$fieldName]);
+        if (is_array($this->data[$fieldName])) {
+            return !empty($this->data[$fieldName]);
+        }
+
+        return true;
     }
 
     /**

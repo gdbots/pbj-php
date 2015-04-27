@@ -1,49 +1,54 @@
 <?php
 
-namespace Gdbots\Pbj\Serializer;
+namespace Gdbots\Pbj\Marshaler\Elastica;
 
+use Elastica\Document;
+use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Common\GeoPoint;
 use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Exception\InvalidResolvedSchema;
+use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
-use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
+use Gdbots\Pbj\SchemaId;
 
-class PhpArraySerializer extends AbstractSerializer
+class DocumentMarshaler
 {
     /**
-     * {@inheritdoc}
+     * @param Message $message
+     * @param Document $document
+     * @return Document
      */
-    public function serialize(Message $message, array $options = [])
+    public function marshal(Message $message, Document $document = null)
     {
-        return $this->doSerialize($message, $options);
+        $document = $document ?: new Document();
+        return $document->setData($this->doMarshal($message));
     }
 
     /**
      * @param Message $message
-     * @param array $options
      * @return array
      */
-    private function doSerialize(Message $message, array $options)
+    private function doMarshal(Message $message)
     {
         $schema = $message::schema();
         $message->validate();
 
         $payload = [];
-        $includeAllFields = isset($options['includeAllFields']) && true === $options['includeAllFields'];
 
         foreach ($schema->getFields() as $field) {
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {
-                if ($includeAllFields || $message->hasClearedField($fieldName)) {
+                if ($message->hasClearedField($fieldName)) {
                     $payload[$fieldName] = null;
                 }
                 continue;
@@ -53,21 +58,21 @@ class PhpArraySerializer extends AbstractSerializer
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $payload[$fieldName] = $this->encodeValue($value, $field, $options);
+                    $payload[$fieldName] = $this->encodeValue($value, $field);
                     break;
 
                 case FieldRule::A_SET:
                 case FieldRule::A_LIST:
                     $payload[$fieldName] = [];
                     foreach ($value as $v) {
-                        $payload[$fieldName][] = $this->encodeValue($v, $field, $options);
+                        $payload[$fieldName][] = $this->encodeValue($v, $field);
                     }
                     break;
 
                 case FieldRule::A_MAP:
                     $payload[$fieldName] = [];
                     foreach ($value as $k => $v) {
-                        $payload[$fieldName][$k] = $this->encodeValue($v, $field, $options);
+                        $payload[$fieldName][$k] = $this->encodeValue($v, $field);
                     }
                     break;
 
@@ -80,10 +85,22 @@ class PhpArraySerializer extends AbstractSerializer
     }
 
     /**
-     * {@inheritdoc}
+     * @param Document $document
      * @return Message
      */
-    public function deserialize($data, array $options = [])
+    public function unmarshal(Document $document)
+    {
+        return $this->doUnmarshal($document->getData());
+    }
+
+    /**
+     * @param array $data
+     * @return Message
+     *
+     * @throws \Exception
+     * @throws GdbotsPbjException
+     */
+    private function doUnmarshal(array $data)
     {
         Assertion::keyIsset(
             $data,
@@ -96,19 +113,6 @@ class PhpArraySerializer extends AbstractSerializer
             )
         );
 
-        return $this->doDeserialize($data, $options);
-    }
-
-    /**
-     * @param array $data
-     * @param array $options
-     * @return Message
-     *
-     * @throws \Exception
-     * @throws GdbotsPbjException
-     */
-    private function doDeserialize(array $data, array $options)
-    {
         $message = $this->createMessage((string) $data[Schema::PBJ_FIELD_NAME]);
         $schema = $message::schema();
 
@@ -126,7 +130,7 @@ class PhpArraySerializer extends AbstractSerializer
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field, $options));
+                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field));
                     break;
 
                 case FieldRule::A_SET:
@@ -134,7 +138,7 @@ class PhpArraySerializer extends AbstractSerializer
                     Assertion::isArray($value, sprintf('Field [%s] must be an array.', $fieldName), $fieldName);
                     $values = [];
                     foreach ($value as $v) {
-                        $values[] = $this->decodeValue($v, $field, $options);
+                        $values[] = $this->decodeValue($v, $field);
                     }
 
                     if ($field->isASet()) {
@@ -151,7 +155,7 @@ class PhpArraySerializer extends AbstractSerializer
                         $fieldName
                     );
                     foreach ($value as $k => $v) {
-                        $message->addToMap($fieldName, $k, $this->decodeValue($v, $field, $options));
+                        $message->addToMap($fieldName, $k, $this->decodeValue($v, $field));
                     }
                     break;
 
@@ -166,12 +170,11 @@ class PhpArraySerializer extends AbstractSerializer
     /**
      * @param mixed $value
      * @param Field $field
-     * @param array $options
      * @return mixed
      *
      * @throws EncodeValueFailed
      */
-    private function encodeValue($value, Field $field, array $options)
+    private function encodeValue($value, Field $field)
     {
         $type = $field->getType();
         if ($type->encodesToScalar()) {
@@ -179,7 +182,14 @@ class PhpArraySerializer extends AbstractSerializer
         }
 
         if ($value instanceof Message) {
-            return $this->doSerialize($value, $options);
+            return $this->doMarshal($value);
+        }
+
+        /**
+         * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-geo-point-type.html#_lat_lon_as_array_5
+         */
+        if ($value instanceof GeoPoint) {
+            return [$value->getLongitude(), $value->getLatitude()];
         }
 
         if ($value instanceof ToArray) {
@@ -192,12 +202,11 @@ class PhpArraySerializer extends AbstractSerializer
     /**
      * @param mixed $value
      * @param Field $field
-     * @param array $options
      * @return mixed
      *
      * @throws DecodeValueFailed
      */
-    private function decodeValue($value, Field $field, array $options)
+    private function decodeValue($value, Field $field)
     {
         $type = $field->getType();
         if ($type->encodesToScalar()) {
@@ -205,11 +214,11 @@ class PhpArraySerializer extends AbstractSerializer
         }
 
         if ($type->isMessage()) {
-            return $this->deserialize($value, $options);
+            return $this->doUnmarshal($value);
         }
 
         if ($type->getTypeName() === TypeName::GEO_POINT()) {
-            return GeoPoint::fromArray($value);
+            return new GeoPoint($value[1], $value[0]);
         }
 
         if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
@@ -217,5 +226,28 @@ class PhpArraySerializer extends AbstractSerializer
         }
 
         throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
+    }
+
+    /**
+     * @param string $schemaId
+     * @return Message
+     *
+     * @throws GdbotsPbjException
+     * @throws InvalidResolvedSchema
+     */
+    private function createMessage($schemaId)
+    {
+        $schemaId = SchemaId::fromString($schemaId);
+        $className = MessageResolver::resolveSchemaId($schemaId);
+
+        /** @var Message $message */
+        $message = new $className();
+        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+
+        if ($message::schema()->getCurieWithMajorRev() !== $schemaId->getCurieWithMajorRev()) {
+            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
+        }
+
+        return $message;
     }
 }
