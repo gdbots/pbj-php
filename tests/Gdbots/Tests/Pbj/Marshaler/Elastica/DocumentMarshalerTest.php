@@ -37,6 +37,9 @@ class DocumentMarshalerTest extends \PHPUnit_Framework_TestCase
     {
         $message = $this->createEmailMessage();
         $document = $this->marshaler->marshal($message);
+        $document
+            ->setId($message->getMessageId())
+            ->setTimestamp($message->getMicrotimeSent()->toString());
 
         $this->assertInstanceOf('Elastica\Document', $document);
 
@@ -44,7 +47,7 @@ class DocumentMarshalerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($message->equals($message2));
 
-        echo json_encode($document->toArray(), JSON_PRETTY_PRINT);
-        echo json_encode($message2, JSON_PRETTY_PRINT);
+        //echo json_encode($document->toArray(), JSON_PRETTY_PRINT);
+        //echo json_encode($message2, JSON_PRETTY_PRINT);
     }
 }

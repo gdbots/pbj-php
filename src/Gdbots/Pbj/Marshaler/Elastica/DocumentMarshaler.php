@@ -26,6 +26,9 @@ class DocumentMarshaler
      * @param Message $message
      * @param Document $document
      * @return Document
+     *
+     * @throws \Exception
+     * @throws GdbotsPbjException
      */
     public function marshal(Message $message, Document $document = null)
     {
@@ -87,6 +90,9 @@ class DocumentMarshaler
     /**
      * @param Document $document
      * @return Message
+     *
+     * @throws \Exception
+     * @throws GdbotsPbjException
      */
     public function unmarshal(Document $document)
     {
