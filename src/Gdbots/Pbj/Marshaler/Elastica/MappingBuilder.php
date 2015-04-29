@@ -4,9 +4,7 @@ namespace Gdbots\Pbj\Marshaler\Elastica;
 
 use Elastica\Type\Mapping;
 use Gdbots\Common\Util\StringUtils;
-use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
-use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\Schema;
@@ -18,37 +16,44 @@ class MappingBuilder
      * @var array
      */
     protected $types = [
-        'big-int' => 'long',
-        'binary' => 'binary',
-        'blob' => 'binary',
-        'boolean' => 'boolean',
-        'date' => 'dateOptionalTime',
-        'date-time' => 'dateOptionalTime',
-        'decimal' => 'double',
-        'float' => 'float',
-        'geo-point' => 'geo_point',
-        'identifier' => 'string',
-        'int' => 'long',
-        'int-enum' => 'integer',
-        'medium-blob' => 'binary',
-        'medium-int' => 'integer',
-        'medium-text' => 'string',
-        'message' => 'nested',
-        'message-ref' => 'object',
-        'microtime' => 'long',
-        'signed-big-int' => 'long',
-        'signed-int' => 'integer',
-        'signed-medium-int' => 'long',
-        'signed-small-int' => 'short',
-        'signed-tiny-int' => 'byte',
-        'small-int' => 'integer',
-        'string' => 'string',
-        'string-enum' => 'string',
-        'text' => 'string',
-        'time-uuid' => 'string',
-        'timestamp' => 'dateOptionalTime',
-        'tiny-int' => 'short',
-        'uuid' => 'string'
+        'big-int'           => ['type' => 'long'],
+        'binary'            => ['type' => 'binary'],
+        'blob'              => ['type' => 'binary'],
+        'boolean'           => ['type' => 'boolean'],
+        'date'              => ['type' => 'dateOptionalTime'],
+        'date-time'         => ['type' => 'dateOptionalTime'],
+        'decimal'           => ['type' => 'double'],
+        'float'             => ['type' => 'float'],
+        'geo-point'         => ['type' => 'geo_point'],
+        'identifier'        => ['type' => 'string', 'index' => 'not_analyzed'],
+        'int'               => ['type' => 'long'],
+        'int-enum'          => ['type' => 'integer'],
+        'medium-blob'       => ['type' => 'binary'],
+        'medium-int'        => ['type' => 'integer'],
+        'medium-text'       => ['type' => 'string'],
+        'message'           => ['type' => 'nested'],
+        'message-ref'       => [
+            'type' => 'object',
+            'properties' => [
+                    'curie' => ['type' => 'string', 'index' => 'not_analyzed'],
+                    'id'    => ['type' => 'string', 'index' => 'not_analyzed'],
+                    'tag'   => ['type' => 'string', 'index' => 'not_analyzed'],
+            ]
+        ],
+        'microtime'         => ['type' => 'long'],
+        'signed-big-int'    => ['type' => 'long'],
+        'signed-int'        => ['type' => 'integer'],
+        'signed-medium-int' => ['type' => 'long'],
+        'signed-small-int'  => ['type' => 'short'],
+        'signed-tiny-int'   => ['type' => 'byte'],
+        'small-int'         => ['type' => 'integer'],
+        'string'            => ['type' => 'string'],
+        'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed'],
+        'text'              => ['type' => 'string'],
+        'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed'],
+        'timestamp'         => ['type' => 'dateOptionalTime'],
+        'tiny-int'          => ['type' => 'short'],
+        'uuid'              => ['type' => 'string', 'index' => 'not_analyzed'],
     ];
 
     /**
@@ -74,10 +79,7 @@ class MappingBuilder
             $type = $field->getType();
 
             if ($fieldName === Schema::PBJ_FIELD_NAME) {
-                $map[$fieldName] = [
-                    'type' => $this->types[$type->getTypeValue()],
-                    'index' => 'not_analyzed',
-                ];
+                $map[$fieldName] = ['type' => 'string', 'index' => 'not_analyzed'];
                 continue;
             }
 
@@ -86,7 +88,7 @@ class MappingBuilder
             if (is_callable([$this, $method])) {
                 $map[$fieldName] = $this->$method($field, $root);
             } else {
-                $map[$fieldName] = ['type' => $this->types[$type->getTypeValue()]];
+                $map[$fieldName] = $this->types[$type->getTypeValue()];
             }
         }
 
@@ -94,6 +96,9 @@ class MappingBuilder
     }
 
     /**
+     * todo: review, should be default include_in_parent to true?
+     * @link http://www.elastic.co/guide/en/elasticsearch/reference/1.4/mapping-nested-type.html
+     *
      * @param Field $field
      * @return array
      */
@@ -105,13 +110,10 @@ class MappingBuilder
         $class = $field->getClassName();
         if (class_exists($class)) {
             $schema = $class::schema();
-            return [
-                'type' => $this->types[$type->getTypeValue()],
-                'properties' => $this->mapSchema($schema)
-            ];
+            return ['type' => 'nested', 'properties' => $this->mapSchema($schema)];
         }
 
-        return ['type' => $this->types[$type->getTypeValue()]];
+        return $this->types[$type->getTypeValue()];
     }
 
     /**
@@ -125,16 +127,18 @@ class MappingBuilder
         switch ($field->getFormat()->getValue()) {
             case Format::DATE:
             case Format::DATE_TIME:
-                return ['type' => $this->types['date-time']];
+                return $this->types['date-time'];
 
             case Format::DATED_SLUG:
             case Format::SLUG:
+            case Format::EMAIL:
             case Format::HASHTAG:
+            case Format::HOSTNAME:
+            case Format::IPV6:
             case Format::UUID:
-                return [
-                    'type' => 'string',
-                    'index' => 'not_analyzed',
-                ];
+            case Format::URI:
+            case Format::URL:
+                return ['type' => 'string', 'index' => 'not_analyzed'];
 
             case Format::IPV4:
                 return ['type' => 'ip'];
