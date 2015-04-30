@@ -4,6 +4,7 @@ namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
+use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
@@ -68,7 +69,10 @@ final class EmailMessage extends AbstractMessage
                     ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
                     ->withDefault(Provider::GMAIL())
                     ->build(),
-                Fb::create(self::LABELS_FIELD_NAME, T\StringType::create())->asASet()->build(),
+                Fb::create(self::LABELS_FIELD_NAME, T\StringType::create())
+                    ->format(Format::HASHTAG())
+                    ->asASet()
+                    ->build(),
                 Fb::create(self::NESTED_FIELD_NAME, T\MessageType::create())
                     ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
                     ->build(),

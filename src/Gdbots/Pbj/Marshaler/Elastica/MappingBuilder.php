@@ -117,8 +117,6 @@ class MappingBuilder
     }
 
     /**
-     * todo: autoset most likely/useful analyzers?
-     *
      * @param Field $field
      * @return array
      */
@@ -131,14 +129,32 @@ class MappingBuilder
 
             case Format::DATED_SLUG:
             case Format::SLUG:
+
+            /** todo: setup custom analyzer for email as well for reverse string? */
             case Format::EMAIL:
-            case Format::HASHTAG:
             case Format::HOSTNAME:
             case Format::IPV6:
             case Format::UUID:
             case Format::URI:
             case Format::URL:
                 return ['type' => 'string', 'index' => 'not_analyzed'];
+
+            /**
+             * Using hashtag format with a string requires (by default) a custom analyzer
+             * in elastic search so the search can run off of the lower cased version
+             * of the hashtag and the original can remain as is (#WhatEVERCaS3_ITIS)
+             *
+             * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
+             * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
+             */
+            case Format::HASHTAG:
+                return [
+                    'type' => 'string',
+                    'index' => 'not_analyzed',
+                    'fields' => [
+                        'keyword' => ['type' => 'string', 'index' => 'analyzer_keyword']
+                    ]
+                ];
 
             case Format::IPV4:
                 return ['type' => 'ip'];
