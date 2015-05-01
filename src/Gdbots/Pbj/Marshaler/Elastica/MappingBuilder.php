@@ -20,8 +20,8 @@ class MappingBuilder
         'binary'            => ['type' => 'binary'],
         'blob'              => ['type' => 'binary'],
         'boolean'           => ['type' => 'boolean'],
-        'date'              => ['type' => 'dateOptionalTime'],
-        'date-time'         => ['type' => 'dateOptionalTime'],
+        'date'              => ['type' => 'date'],
+        'date-time'         => ['type' => 'date'],
         'decimal'           => ['type' => 'double'],
         'float'             => ['type' => 'float'],
         'geo-point'         => ['type' => 'geo_point'],
@@ -51,7 +51,7 @@ class MappingBuilder
         'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed'],
         'text'              => ['type' => 'string'],
         'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed'],
-        'timestamp'         => ['type' => 'dateOptionalTime'],
+        'timestamp'         => ['type' => 'date'],
         'tiny-int'          => ['type' => 'short'],
         'uuid'              => ['type' => 'string', 'index' => 'not_analyzed'],
     ];
@@ -148,13 +148,7 @@ class MappingBuilder
              * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
              */
             case Format::HASHTAG:
-                return [
-                    'type' => 'string',
-                    'index' => 'not_analyzed',
-                    'fields' => [
-                        'keyword' => ['type' => 'string', 'index' => 'analyzer_keyword']
-                    ]
-                ];
+                return ['type' => 'string', 'index' => 'analyzer_keyword'];
 
             case Format::IPV4:
                 return ['type' => 'ip'];
