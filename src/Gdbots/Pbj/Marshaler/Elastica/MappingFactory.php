@@ -9,7 +9,7 @@ use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\Schema;
 
-class MappingBuilder
+class MappingFactory
 {
     /**
      * Map of pbj type -> elastica mapping types.
@@ -57,10 +57,28 @@ class MappingBuilder
     ];
 
     /**
+     * Returns the custom analyzers that an index will need to when indexing some
+     * pbj fields/types when certain options are used (urls, hashtag format, etc.)
+     *
+     * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
+     *
+     * @return array
+     */
+    public static function getCustomAnalyzers()
+    {
+        return [
+            'pbj_keyword_analyzer' => [
+                'tokenizer' => 'keyword',
+                'filter' => 'lowercase',
+            ]
+        ];
+    }
+
+    /**
      * @param Schema $schema
      * @return Mapping
      */
-    public function build(Schema $schema)
+    public function create(Schema $schema)
     {
         return new Mapping(null, $this->mapSchema($schema));
     }
@@ -104,16 +122,22 @@ class MappingBuilder
      */
     protected function mapMessage(Field $field)
     {
-        $type = $field->getType();
-
         /** @var Message $class */
         $class = $field->getClassName();
         if (class_exists($class)) {
             $schema = $class::schema();
-            return ['type' => 'nested', 'properties' => $this->mapSchema($schema)];
+            return ['type' => 'nested', 'properties' => $this->mapSchema($schema, false)];
         }
 
-        return $this->types[$type->getTypeValue()];
+        return [
+            'type' => 'nested',
+            'properties' => [
+                Schema::PBJ_FIELD_NAME => [
+                    'type' => 'string',
+                    'index' => 'not_analyzed'
+                ]
+            ]
+        ];
     }
 
     /**
@@ -148,7 +172,7 @@ class MappingBuilder
              * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
              */
             case Format::HASHTAG:
-                return ['type' => 'string', 'index' => 'analyzer_keyword'];
+                return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer'];
 
             case Format::IPV4:
                 return ['type' => 'ip'];
