@@ -15,17 +15,17 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 final class EmailMessage extends AbstractMessage
 {
     const MESSAGE_ID_FIELD_NAME = 'id';
-    const FROM_NAME_FIELD_NAME  = 'from_name';
+    const FROM_NAME_FIELD_NAME = 'from_name';
     const FROM_EMAIL_FIELD_NAME = 'from_email';
-    const SUBJECT_FIELD_NAME    = 'subject';
-    const BODY_FIELD_NAME       = 'body';
-    const PRIORITY_FIELD_NAME   = 'priority';
-    const SENT_FIELD_NAME       = 'sent';
-    const DATE_SENT_FIELD_NAME  = 'date_sent';
+    const SUBJECT_FIELD_NAME = 'subject';
+    const BODY_FIELD_NAME = 'body';
+    const PRIORITY_FIELD_NAME = 'priority';
+    const SENT_FIELD_NAME = 'sent';
+    const DATE_SENT_FIELD_NAME = 'date_sent';
     const MICROTIME_SENT_FIELD_NAME = 'microtime_sent';
-    const PROVIDER_FIELD_NAME   = 'provider';
-    const LABELS_FIELD_NAME     = 'labels';
-    const NESTED_FIELD_NAME     = 'nested';
+    const PROVIDER_FIELD_NAME = 'provider';
+    const LABELS_FIELD_NAME = 'labels';
+    const NESTED_FIELD_NAME = 'nested';
     const ENUM_IN_SET_FIELD_NAME = 'enum_in_set';
     const ENUM_IN_LIST_FIELD_NAME = 'enum_in_list';
     const ANY_OF_MESSAGE_FIELD_NAME = 'any_of_message';
@@ -36,59 +36,59 @@ final class EmailMessage extends AbstractMessage
     protected static function defineSchema()
     {
         $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:email-message:1-0-0', __CLASS__,
-            [
-                Fb::create(self::MESSAGE_ID_FIELD_NAME, T\TimeUuidType::create())
-                    //->useTypeDefault(false)
-                    ->required()
-                    ->build(),
-                Fb::create(self::FROM_NAME_FIELD_NAME, T\StringType::create())
-                    ->build(),
-                Fb::create(self::FROM_EMAIL_FIELD_NAME, T\StringType::create())
-                    ->required()
-                    ->format('email')
-                    ->build(),
-                Fb::create(self::SUBJECT_FIELD_NAME, T\StringType::create())
-                    ->withDefault(function (EmailMessage $message = null) {
-                        // closure func default spice or gtfo and use named automagic defaults?
-                        if (!$message) {
-                            return null;
-                        }
-                        return implode(',', $message->getLabels()) . ' test';
-                    })
-                    ->build(),
-                Fb::create(self::BODY_FIELD_NAME, T\StringType::create())->build(),
-                Fb::create(self::PRIORITY_FIELD_NAME, T\IntEnumType::create())
-                    ->required()
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
-                    ->withDefault(Priority::NORMAL)
-                    ->build(),
-                Fb::create(self::SENT_FIELD_NAME, T\BooleanType::create())->build(),
-                Fb::create(self::DATE_SENT_FIELD_NAME, T\DateTimeType::create())->build(),
-                Fb::create(self::MICROTIME_SENT_FIELD_NAME, T\MicrotimeType::create())->build(),
-                Fb::create(self::PROVIDER_FIELD_NAME, T\StringEnumType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
-                    ->withDefault(Provider::GMAIL())
-                    ->build(),
-                Fb::create(self::LABELS_FIELD_NAME, T\StringType::create())
-                    ->format(Format::HASHTAG())
-                    ->asASet()
-                    ->build(),
-                Fb::create(self::NESTED_FIELD_NAME, T\MessageType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
-                    ->build(),
-                Fb::create(self::ENUM_IN_SET_FIELD_NAME, T\StringEnumType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
-                    ->asASet()
-                    ->build(),
-                Fb::create(self::ENUM_IN_LIST_FIELD_NAME, T\StringEnumType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
-                    ->asAList()
-                    ->build(),
-                Fb::create(self::ANY_OF_MESSAGE_FIELD_NAME, T\MessageType::create())
-                    ->className('Gdbots\Pbj\Message')
-                    ->asAList()
-                    ->build(),
-            ]
+                [
+                        Fb::create(self::MESSAGE_ID_FIELD_NAME, T\TimeUuidType::create())
+                                //->useTypeDefault(false)
+                                ->required()
+                                ->build(),
+                        Fb::create(self::FROM_NAME_FIELD_NAME, T\StringType::create())
+                                ->build(),
+                        Fb::create(self::FROM_EMAIL_FIELD_NAME, T\StringType::create())
+                                ->required()
+                                ->format('email')
+                                ->build(),
+                        Fb::create(self::SUBJECT_FIELD_NAME, T\StringType::create())
+                                ->withDefault(function (EmailMessage $message = null) {
+                                    // closure func default spice or gtfo and use named automagic defaults?
+                                    if (!$message) {
+                                        return null;
+                                    }
+                                    return implode(',', $message->getLabels()) . ' test';
+                                })
+                                ->build(),
+                        Fb::create(self::BODY_FIELD_NAME, T\StringType::create())->build(),
+                        Fb::create(self::PRIORITY_FIELD_NAME, T\IntEnumType::create())
+                                ->required()
+                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
+                                ->withDefault(Priority::NORMAL)
+                                ->build(),
+                        Fb::create(self::SENT_FIELD_NAME, T\BooleanType::create())->build(),
+                        Fb::create(self::DATE_SENT_FIELD_NAME, T\DateTimeType::create())->build(),
+                        Fb::create(self::MICROTIME_SENT_FIELD_NAME, T\MicrotimeType::create())->build(),
+                        Fb::create(self::PROVIDER_FIELD_NAME, T\StringEnumType::create())
+                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                                ->withDefault(Provider::GMAIL())
+                                ->build(),
+                        Fb::create(self::LABELS_FIELD_NAME, T\StringType::create())
+                                ->format(Format::HASHTAG())
+                                ->asASet()
+                                ->build(),
+                        Fb::create(self::NESTED_FIELD_NAME, T\MessageType::create())
+                                ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                                ->build(),
+                        Fb::create(self::ENUM_IN_SET_FIELD_NAME, T\StringEnumType::create())
+                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                                ->asASet()
+                                ->build(),
+                        Fb::create(self::ENUM_IN_LIST_FIELD_NAME, T\StringEnumType::create())
+                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                                ->asAList()
+                                ->build(),
+                        Fb::create(self::ANY_OF_MESSAGE_FIELD_NAME, T\MessageType::create())
+                                ->className('Gdbots\Pbj\Message')
+                                ->asAList()
+                                ->build(),
+                ]
         );
 
         MessageResolver::registerSchema($schema);
@@ -251,7 +251,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getLabels()
     {
-        return $this->get(self::LABELS_FIELD_NAME) ?: [];
+        return $this->get(self::LABELS_FIELD_NAME) ? : [];
     }
 
     /**
