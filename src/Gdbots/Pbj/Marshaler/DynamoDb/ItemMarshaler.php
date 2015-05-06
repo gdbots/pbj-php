@@ -144,6 +144,19 @@ class ItemMarshaler
     {
         $type = $field->getType();
 
+        /*
+         * A MessageRefType is the only object/map value that can be
+         * used in a set.  In this case of DynamoDb, we can store it as
+         * a list of maps.
+         */
+        if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
+            $list = [];
+            foreach ($value as $v) {
+                $list[] = $this->encodeMessageRef($v);
+            }
+            return ['L' => $list];
+        }
+
         if ($type->isBinary()) {
             $dynamoType = Type::BINARY_SET;
         } elseif ($type->isString()) {

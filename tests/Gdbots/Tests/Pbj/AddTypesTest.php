@@ -8,6 +8,7 @@ use Gdbots\Common\Microtime;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Pbj\Marshaler\DynamoDb\ItemMarshaler;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
@@ -262,5 +263,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
         }
 
         //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+        $marshaler = new ItemMarshaler();
+        echo json_encode($marshaler->marshal($shouldWork), JSON_PRETTY_PRINT);
     }
 }

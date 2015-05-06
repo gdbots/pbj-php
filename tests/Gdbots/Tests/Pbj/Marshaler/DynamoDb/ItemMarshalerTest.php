@@ -38,6 +38,6 @@ class ItemMarshalerTest extends \PHPUnit_Framework_TestCase
         $message = $this->createEmailMessage();
         $result = $this->marshaler->marshal($message);
 
-        echo json_encode($result, JSON_PRETTY_PRINT);
+        //echo json_encode($result, JSON_PRETTY_PRINT);
     }
 }

@@ -46,4 +46,12 @@ final class BooleanType extends AbstractType
     {
         return true;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function allowedInSet()
+    {
+        return false;
+    }
 }
