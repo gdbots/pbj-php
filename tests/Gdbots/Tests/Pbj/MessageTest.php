@@ -4,8 +4,6 @@ namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Common\Enum;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
-use Gdbots\Pbj\Serializer\JsonSerializer;
-use Gdbots\Pbj\Serializer\Serializer;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
@@ -14,31 +12,7 @@ use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class MessageTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var Serializer */
-    protected $serializer;
-
-    /**
-     * @return Serializer
-     */
-    protected function getSerializer()
-    {
-        if (null === $this->serializer) {
-            $this->serializer = new JsonSerializer();
-        }
-        return $this->serializer;
-    }
-
-    /**
-     * @return EmailMessage
-     */
-    private function createEmailMessage()
-    {
-        $json = file_get_contents(__DIR__ . '/Fixtures/email-message.json');
-        // auto registers the schema with the MessageResolver
-        // only done for tests or dynamic messages.
-        EmailMessage::schema();
-        return $this->getSerializer()->deserialize($json);
-    }
+    use FixtureLoader;
 
     public function testCreateMessageFromArray()
     {

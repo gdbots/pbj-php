@@ -14,9 +14,13 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
     /** @var MappingFactory */
     protected $factory;
 
+    /** @var string */
+    private $indexName;
+
     public function setup()
     {
         $this->factory = new MappingFactory();
+        $this->indexName = getenv('ELASTICA_INDEX') ?: 'pbj_tests';
     }
 
     public function testCreate()
@@ -25,7 +29,7 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
         $mapping = $this->factory->create($schema);
         $mapping->setType(
             new Type(
-                new Index(new Client(), 'pbj_test'),
+                new Index(new Client(), $this->indexName),
                 'pbj_test_type'
             )
         );
@@ -39,7 +43,7 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
         $mapping = $this->factory->create($schema);
         $mapping->setType(
             new Type(
-                new Index(new Client(), 'pbj_test'),
+                new Index(new Client(), $this->indexName),
                 'pbj_test_type'
             )
         );
