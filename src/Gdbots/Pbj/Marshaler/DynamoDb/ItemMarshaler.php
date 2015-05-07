@@ -81,10 +81,11 @@ class ItemMarshaler
                     break;
 
                 case FieldRule::A_MAP:
-                    $payload[$fieldName] = [];
+                    $map = [];
                     foreach ($value as $k => $v) {
-                        $payload[$fieldName][$k] = $this->encodeValue($v, $field);
+                        $map[$k] = $this->encodeValue($v, $field);
                     }
+                    $payload[$fieldName] = ['M' => $map];
                     break;
 
                 default:
