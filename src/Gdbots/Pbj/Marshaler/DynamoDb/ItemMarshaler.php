@@ -13,6 +13,7 @@ use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Message;
+use Gdbots\Pbj\MessageCurie;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
@@ -36,15 +37,6 @@ class ItemMarshaler
      * @throws GdbotsPbjException
      */
     public function marshal(Message $message)
-    {
-        return $this->doMarshal($message);
-    }
-
-    /**
-     * @param Message $message
-     * @return array
-     */
-    private function doMarshal(Message $message)
     {
         $schema = $message::schema();
         $message->validate();
@@ -97,6 +89,95 @@ class ItemMarshaler
     }
 
     /**
+     * Pass the Item of a result.  $result['Item']
+     * @param array $data
+     * @return Message
+     *
+     * @throws \Exception
+     * @throws GdbotsPbjException
+     */
+    public function unmarshal(array $data)
+    {
+        return $this->doUnmarshal(['M' => $data]);
+    }
+
+    /**
+     * @param array $data
+     * @return Message
+     *
+     * @throws \Exception
+     * @throws GdbotsPbjException
+     */
+    private function doUnmarshal(array $data)
+    {
+        Assertion::keyIsset(
+            $data['M'],
+            Schema::PBJ_FIELD_NAME,
+            sprintf(
+                '[%s::%s] Array provided must contain the [%s] key.',
+                get_called_class(),
+                __FUNCTION__,
+                Schema::PBJ_FIELD_NAME
+            )
+        );
+
+        $message = $this->createMessage((string) $data['M'][Schema::PBJ_FIELD_NAME]['S']);
+        $schema = $message::schema();
+
+        foreach ($data['M'] as $fieldName => $dynamoValue) {
+            if (!$schema->hasField($fieldName)) {
+                continue;
+            }
+
+            $dynamoType = key($dynamoValue);
+            $value = current($dynamoValue);
+
+            if ('NULL' === $dynamoType) {
+                $message->clear($fieldName);
+                continue;
+            }
+
+            $field = $schema->getField($fieldName);
+            switch ($field->getRule()->getValue()) {
+                case FieldRule::A_SINGLE_VALUE:
+                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field));
+                    break;
+
+                case FieldRule::A_SET:
+                case FieldRule::A_LIST:
+                    $values = [];
+                    if ('L' === $dynamoType) {
+                        foreach ($value as $v) {
+                            $values[] = $this->decodeValue(isset($v['M']) ? $v['M'] : current($v), $field);
+                        }
+                    } else {
+                        foreach ($value as $v) {
+                            $values[] = $this->decodeValue($v, $field);
+                        }
+                    }
+
+                    if ($field->isASet()) {
+                        $message->addToSet($fieldName, $values);
+                    } else {
+                        $message->addToList($fieldName, $values);
+                    }
+                    break;
+
+                case FieldRule::A_MAP:
+                    foreach ($value as $k => $v) {
+                        $message->addToMap($fieldName, $k, $this->decodeValue(current($v), $field));
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
+    }
+
+    /**
      * @param mixed $value
      * @param Field $field
      * @return mixed
@@ -120,7 +201,7 @@ class ItemMarshaler
         }
 
         if ($value instanceof Message) {
-            return ['M' => $this->doMarshal($value)];
+            return ['M' => $this->marshal($value)];
         }
 
         if ($value instanceof GeoPoint) {
@@ -233,15 +314,19 @@ class ItemMarshaler
         }
 
         if ($type->isMessage()) {
-            return $this->doUnmarshal($value);
+            return $this->unmarshal($value);
         }
 
         if ($type->getTypeName() === TypeName::GEO_POINT()) {
-            return new GeoPoint($value[1], $value[0]);
+            return new GeoPoint($value['coordinates']['L'][1]['N'], $value['coordinates']['L'][0]['N']);
         }
 
         if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
-            return MessageRef::fromArray($value);
+            return new MessageRef(
+                MessageCurie::fromString($value['curie']['S']),
+                $value['id']['S'],
+                isset($value['tag']['NULL']) ? null : $value['tag']['S']
+            );
         }
 
         throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');

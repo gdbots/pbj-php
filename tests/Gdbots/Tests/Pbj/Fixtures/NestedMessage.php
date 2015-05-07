@@ -5,6 +5,7 @@ namespace Gdbots\Tests\Pbj\Fixtures;
 use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
@@ -14,6 +15,7 @@ final class NestedMessage extends AbstractMessage
     const TEST1_FIELD_NAME = 'test1';
     const TEST2_FIELD_NAME = 'test2';
     const LOCATION_FIELD_NAME = 'location';
+    const REFS_FIELD_NAME = 'refs';
 
     /**
      * @return Schema
@@ -24,6 +26,7 @@ final class NestedMessage extends AbstractMessage
             Fb::create(self::TEST1_FIELD_NAME, T\StringType::create())->build(),
             Fb::create(self::TEST2_FIELD_NAME, T\IntType::create())->asASet()->build(),
             Fb::create(self::LOCATION_FIELD_NAME, T\GeoPointType::create())->build(),
+            Fb::create(self::REFS_FIELD_NAME, T\MessageRefType::create())->asASet()->build(),
         ]);
 
         MessageResolver::registerSchema($schema);
@@ -88,5 +91,22 @@ final class NestedMessage extends AbstractMessage
     public function setLocation(GeoPoint $location)
     {
         return $this->setSingleValue(self::LOCATION_FIELD_NAME, $location);
+    }
+
+    /**
+     * @return MessageRef[]
+     */
+    public function getRefs()
+    {
+        return $this->get(self::LOCATION_FIELD_NAME);
+    }
+
+    /**
+     * @param MessageRef $ref
+     * @return self
+     */
+    public function addRef(MessageRef $ref)
+    {
+        return $this->addToSet(self::REFS_FIELD_NAME, [$ref]);
     }
 }

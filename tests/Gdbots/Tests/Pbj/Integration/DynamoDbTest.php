@@ -126,5 +126,8 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertSame($result['Item']['id']['S'], $this->message->getMessageId()->toString());
+        $message = $this->marshaler->unmarshal($result['Item']);
+
+        echo json_encode($message, JSON_PRETTY_PRINT);
     }
 }

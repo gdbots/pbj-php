@@ -5,6 +5,8 @@ namespace Gdbots\Tests\Pbj;
 use Gdbots\Pbj\Serializer\JsonSerializer;
 use Gdbots\Pbj\Serializer\Serializer;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
+use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 trait FixtureLoader
 {
@@ -31,6 +33,8 @@ trait FixtureLoader
         // auto registers the schema with the MessageResolver
         // only done for tests or dynamic messages.
         EmailMessage::schema();
+        NestedMessage::schema();
+        MapsMessage::schema();
         return $this->getSerializer()->deserialize($json);
     }
 }
