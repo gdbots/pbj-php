@@ -6,9 +6,9 @@
     <env name="AWS_SECRET" value=""/>
     <env name="DYNAMODB_TABLE" value="pbj_tests"/>
 
-    <env name="ELASTICA_HOST" value=""/>
-    <env name="ELASTICA_PORT" value="9200"/>
-    <env name="ELASTICA_INDEX" value="pbj_tests"/>
+    <env name="ELASTIC_HOST" value=""/>
+    <env name="ELASTIC_PORT" value="9200"/>
+    <env name="ELASTIC_INDEX" value="pbj_tests"/>
   </php>
 
   <testsuites>

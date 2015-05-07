@@ -10,65 +10,65 @@ use Aws\DynamoDb\Exception\ResourceNotFoundException;
 use Gdbots\Pbj\Marshaler\DynamoDb\ItemMarshaler;
 use Gdbots\Tests\Pbj\FixtureLoader;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
-use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
-use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class DynamoDbTest extends \PHPUnit_Framework_TestCase
 {
     use FixtureLoader;
 
     /** @var DynamoDbClient */
-    private $client;
-
-    /** @var ItemMarshaler */
-    private $marshaler;
-
-    /** @var EmailMessage */
-    private $message;
+    protected static $client;
 
     /** @var string */
-    private $tableName;
+    protected static $tableName;
 
-    public function setup()
+    /** @var ItemMarshaler */
+    protected $marshaler;
+
+    /** @var EmailMessage */
+    protected $message;
+
+    public static function setUpBeforeClass()
     {
-        EmailMessage::schema();
-        NestedMessage::schema();
-        MapsMessage::schema();
-
         $key = getenv('AWS_KEY');
         $secret = getenv('AWS_SECRET');
-        $this->tableName = getenv('DYNAMODB_TABLE') ?: 'pbj_tests';
+        self::$tableName = getenv('DYNAMODB_TABLE') ?: 'pbj_tests';
 
         if (empty($key) || empty($secret)) {
-            $this->markTestSkipped('AWS_KEY or AWS_SECRET was not supplied, skipping integration test.');
             return;
         }
 
-        $this->client = DynamoDbClient::factory([
+        self::$client = DynamoDbClient::factory([
             'key'    => $key,
             'secret' => $secret,
             'region' => Region::US_WEST_2
         ]);
-        $this->createTable();
 
-        $this->marshaler = new ItemMarshaler();
-        $this->message = $this->createEmailMessage();
+        self::createTable();
+    }
+
+    public static function tearDownAfterClass()
+    {
+        if (null === self::$client) {
+            return;
+        }
+
+        self::deleteTable();
     }
 
     /**
-     * Creates the DynamoDb table
+     * Create the dynamodb table before tests run.
      */
-    private function createTable()
+    protected static function createTable()
     {
         try {
-            $this->client->describeTable(['TableName' => $this->tableName]);
+            self::$client->describeTable(['TableName' => self::$tableName]);
             return;
         } catch (ResourceNotFoundException $e)  {
             // table doesn't exist, create it below
         }
 
-        $this->client->createTable([
-            'TableName' => $this->tableName,
+        self::$client->createTable([
+            'TableName' => self::$tableName,
             'AttributeDefinitions' => [
                 ['AttributeName' => 'id', 'AttributeType' => Type::STRING],
             ],
@@ -81,26 +81,35 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
 
-        $this->client->waitUntil('TableExists', ['TableName' => $this->tableName]);
+        self::$client->waitUntil('TableExists', ['TableName' => self::$tableName]);
     }
 
     /**
      * Delete the test table after tests complete.
      */
-    private function deleteTable()
+    protected static function deleteTable()
     {
-        $this->client->deleteTable($this->tableName);
-        $this->client->waitUntil('TableNotExists', ['TableName' => $this->tableName]);
+        self::$client->deleteTable(['TableName' => self::$tableName]);
+        self::$client->waitUntil('TableNotExists', ['TableName' => self::$tableName]);
+    }
+
+    public function setup()
+    {
+        if (null === self::$client) {
+            $this->markTestSkipped('AWS_KEY or AWS_SECRET was not supplied, skipping integration test.');
+            return;
+        }
+
+        $this->marshaler = new ItemMarshaler();
+        $this->message = $this->createEmailMessage();
     }
 
     public function testPutItem()
     {
-        $item = $this->marshaler->marshal($this->message);
-        //echo json_encode($item, JSON_PRETTY_PRINT);
-
         try {
-            $this->client->putItem([
-                'TableName' => $this->tableName,
+            $item = $this->marshaler->marshal($this->message);
+            self::$client->putItem([
+                'TableName' => self::$tableName,
                 'Item' => $item
             ]);
         } catch (\Exception $e) {
@@ -109,14 +118,11 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /**
-     * @depends testPutItem
-     */
     public function testGetItem()
     {
         try {
-            $result = $this->client->getItem([
-                'TableName' => $this->tableName,
+            $result = self::$client->getItem([
+                'TableName' => self::$tableName,
                 'ConsistentRead' => true,
                 'Key' => ['id' => ['S' => $this->message->getMessageId()->toString()]]
             ]);
@@ -128,6 +134,18 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($result['Item']['id']['S'], $this->message->getMessageId()->toString());
         $message = $this->marshaler->unmarshal($result['Item']);
 
-        echo json_encode($message, JSON_PRETTY_PRINT);
+        foreach ($this->message->schema()->getFields() as $field) {
+            $expected = $this->message->get($field->getName());
+            $actual = $message->get($field->getName());
+
+            if ($field->isASet()) {
+                sort($expected);
+                sort($actual);
+            }
+
+            $this->assertSame(json_encode($expected), json_encode($actual));
+        }
+
+        //echo json_encode($message, JSON_PRETTY_PRINT);
     }
 }
