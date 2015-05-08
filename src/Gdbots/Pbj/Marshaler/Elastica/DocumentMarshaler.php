@@ -20,7 +20,7 @@ use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
 
-class DocumentMarshaler
+final class DocumentMarshaler
 {
     /**
      * @param Message $message

@@ -27,7 +27,7 @@ use Gdbots\Pbj\SchemaId;
  *
  * @link http://blogs.aws.amazon.com/php/post/Tx3QE1CEXG8QG1Z/DynamoDB-JSON-and-Array-Marshaling-for-PHP
  */
-class ItemMarshaler
+final class ItemMarshaler
 {
     /**
      * @param Message $message
