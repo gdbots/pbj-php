@@ -8,7 +8,7 @@
     "php": ">=5.4",
     "ext-bcmath": "*",
     "beberlei/assert": "~2.1",
-    "gdbots/common-php": "~0.1.1",
+    "gdbots/common": "~0.1.2",
     "symfony/yaml": "~2.6"
   },
   "require-dev": {

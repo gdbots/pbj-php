@@ -2,10 +2,13 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
-## v0.2.2
+## v0.2.3
 * issue #12: Added [ItemMarshaler] for DynamoDb items for "aws/aws-sdk-php" library.
 * issue #11: Added [DocumentMarshaler] and [MappingFactory] for "ruflin/elastica" library.
 * [BooleanType] Modified to not be `allowedInSet`.
+
+
+## v0.2.2
 * Rename composer package to `gdbots/pbj`.
 
 
