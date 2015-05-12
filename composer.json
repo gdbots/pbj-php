@@ -1,5 +1,5 @@
 {
-  "name": "gdbots/pbj-php",
+  "name": "gdbots/pbj",
   "homepage": "https://github.com/gdbots/pbj-php",
   "description": "Protobuf inspired message tools for php and json.",
   "type": "library",
@@ -23,5 +23,8 @@
     "psr-0": {
       "Gdbots\\Pbj\\": "src/"
     }
+  },
+  "replace": {
+    "gdbots/pbj-php": "self.version"
   }
 }
