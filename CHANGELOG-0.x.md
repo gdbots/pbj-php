@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.2.2
+* Rename composer package to `gdbots/pbj`.
+
+
 ## v0.2.1
 * issue #8: [EntityMixin] Make the type for `_id` an `IdentifierType` and use a random uuid as default.
 * issue #8: [Entity] Changed entity id field name from `id` to `_id` and removed `setEntityId` from interface.
