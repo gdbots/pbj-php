@@ -3,6 +3,8 @@ This changelog references the relevant changes done in 0.x versions.
 
 
 ## v0.2.3
+* issue #13: Adding `isInSet`, `isInList`, `isInMap` to [Message] and implemented in [AbstractMessage].
+* issue #13: For convenience, added `getFromListAt` and `getFromMap` to [Message] and implemented in [AbstractMessage].
 * issue #12: Added [ItemMarshaler] for DynamoDb items for "aws/aws-sdk-php" library.
 * issue #11: Added [DocumentMarshaler] and [MappingFactory] for "ruflin/elastica" library.
 * [BooleanType] Modified to not be `allowedInSet`.

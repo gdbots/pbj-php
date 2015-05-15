@@ -50,6 +50,24 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($message->getLabels(), ['chicken', 'donuts']);
     }
 
+    public function testisInSet()
+    {
+        $message = EmailMessage::create()
+            ->addLabel('abc')
+            ->addToSet(
+                EmailMessage::ENUM_IN_SET_FIELD_NAME,
+                [
+                    Provider::AOL(),
+                    Provider::GMAIL(),
+                ]
+            );
+
+        $this->assertTrue($message->isInSet(EmailMessage::LABELS_FIELD_NAME, 'abc'));
+        $this->assertFalse($message->isInSet(EmailMessage::LABELS_FIELD_NAME, 'idontexist'));
+        $this->assertTrue($message->isInSet(EmailMessage::ENUM_IN_SET_FIELD_NAME, Provider::AOL()));
+        $this->assertFalse($message->isInSet(EmailMessage::ENUM_IN_SET_FIELD_NAME, Provider::HOTMAIL()));
+    }
+
     public function testEnumInSet()
     {
         $message = EmailMessage::create()
@@ -74,6 +92,25 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($result, ['aol', 'gmail']);
     }
 
+    public function testisInList()
+    {
+        $message = $this->createEmailMessage();
+
+        /** @var MapsMessage $messageInList */
+        $messageInList = $message->get(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME)[0];
+        $messageNotInList = clone $messageInList;
+        $messageNotInList->addToAMap('String', 'key', 'val');
+
+        $this->assertTrue($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, $messageInList));
+        $this->assertFalse($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, $messageNotInList));
+        $this->assertFalse($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, 'notinlist'));
+        $this->assertFalse($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, NestedMessage::create()));
+        $this->assertTrue($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, 'aol'));
+        $this->assertTrue($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, Provider::AOL()));
+        $this->assertFalse($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, 'notinlist'));
+        $this->assertFalse($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, Provider::HOTMAIL()));
+    }
+
     public function testEnumInList()
     {
         $message = EmailMessage::create()
@@ -96,6 +133,19 @@ class MessageTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(4, $result);
         $this->assertSame($result, ['aol', 'aol', 'gmail', 'gmail']);
+    }
+
+    public function testisInMap()
+    {
+        $message = MapsMessage::create();
+        $message->addToAMap('String', 'string1', 'val1');
+
+        $this->assertTrue($message->isInMap('String', 'string1'));
+        $this->assertFalse($message->isInMap('String', 'notinmap'));
+        $this->assertFalse($message->isInMap('Microtime', 'notinmap'));
+
+        $message->clear('String');
+        $this->assertFalse($message->isInMap('String', 'string1'));
     }
 
     public function testNestedMessage()

@@ -51,7 +51,7 @@ interface Message
 
     /**
      * Freezes the message, making it immutable.  The message must be valid
-     * before it can be frozen so this may throw an exception is some required
+     * before it can be frozen so this may throw an exception if some required
      * fields have not been populated.
      *
      * @return static
@@ -164,6 +164,15 @@ interface Message
     public function setSingleValue($fieldName, $value);
 
     /**
+     * Returns true if the provided value is in the set of values.
+     *
+     * @param string $fieldName
+     * @param mixed $value
+     * @return bool
+     */
+    public function isInSet($fieldName, $value);
+
+    /**
      * Adds an array of unique values to an unsorted set of values.
      *
      * @param string $fieldName
@@ -186,6 +195,26 @@ interface Message
     public function removeFromSet($fieldName, array $values);
 
     /**
+     * Returns true if the provided value is in the list of values.
+     * This is a NOT a strict comparison, it uses "==".
+     * @link http://php.net/manual/en/function.in-array.php
+     *
+     * @param string $fieldName
+     * @param mixed $value
+     * @return bool
+     */
+    public function isInList($fieldName, $value);
+
+    /**
+     * Returns an item in a list or null if it doesn't exist.
+     *
+     * @param string $fieldName
+     * @param int $index
+     * @return mixed
+     */
+    public function getFromListAt($fieldName, $index);
+
+    /**
      * Adds an array of values to an unsorted list/array (not unique).
      *
      * @param string $fieldName
@@ -206,6 +235,24 @@ interface Message
      * @throws GdbotsPbjException
      */
     public function removeFromListAt($fieldName, $index);
+
+    /**
+     * Returns true if the map contains the provided key.
+     *
+     * @param string $fieldName
+     * @param string $key
+     * @return bool
+     */
+    public function isInMap($fieldName, $key);
+
+    /**
+     * Returns the value of a key in a map or null if it doesn't exist.
+     *
+     * @param string $fieldName
+     * @param string $key
+     * @return mixed
+     */
+    public function getFromMap($fieldName, $key);
 
     /**
      * Adds a key/value pair to a map.

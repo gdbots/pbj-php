@@ -53,8 +53,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     private $isReplay;
 
     /**
-     * Nothing fancy on new messages... we let the serializers or application
-     * code get fancy.
+     * Nothing fancy on new messages... we let the serializers or application code get fancy.
      */
     final public function __construct() {}
 
@@ -452,6 +451,28 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     */
+    final public function isInSet($fieldName, $value)
+    {
+        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
+            return false;
+        }
+
+        if (is_scalar($value) || (is_object($value) && method_exists($value, '__toString'))) {
+            $key = trim((string) $value);
+        } else {
+            return false;
+        }
+
+        if (0 === strlen($key)) {
+            return false;
+        }
+
+        return isset($this->data[$fieldName][strtolower($key)]);
+    }
+
+    /**
+     * {@inheritdoc}
      * @return static
      */
     final public function addToSet($fieldName, array $values)
@@ -503,6 +524,33 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     */
+    final public function isInList($fieldName, $value)
+    {
+        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
+            return false;
+        }
+
+        return in_array($value, $this->data[$fieldName]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getFromListAt($fieldName, $index)
+    {
+        $index = (int) $index;
+        if (empty($this->data[$fieldName])
+            || !is_array($this->data[$fieldName])
+            || !isset($this->data[$fieldName][$index])
+        ) {
+            return null;
+        }
+        return $this->data[$fieldName][$index];
+    }
+
+    /**
+     * {@inheritdoc}
      * @return static
      */
     final public function addToList($fieldName, array $values)
@@ -545,6 +593,28 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         // todo: review, does this need to be optimized?
         $this->data[$fieldName] = array_values($this->data[$fieldName]);
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function isInMap($fieldName, $key)
+    {
+        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName]) || !is_string($key)) {
+            return false;
+        }
+        return isset($this->data[$fieldName][$key]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function getFromMap($fieldName, $key)
+    {
+        if (!$this->isInMap($fieldName, $key)) {
+            return null;
+        }
+        return $this->data[$fieldName][$key];
     }
 
     /**
