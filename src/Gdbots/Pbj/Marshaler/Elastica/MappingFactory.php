@@ -2,7 +2,6 @@
 
 namespace Gdbots\Pbj\Marshaler\Elastica;
 
-use Elastica\Type\Mapping;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
@@ -76,11 +75,11 @@ class MappingFactory
 
     /**
      * @param Schema $schema
-     * @return Mapping
+     * @return array the properties for the Elastica Mapping object.
      */
     public function create(Schema $schema)
     {
-        return new Mapping(null, $this->mapSchema($schema));
+        return $this->mapSchema($schema);
     }
 
     /**

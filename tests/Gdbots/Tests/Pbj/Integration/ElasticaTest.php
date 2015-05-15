@@ -4,6 +4,7 @@ namespace Gdbots\Tests\Pbj\Integration;
 
 use Elastica\Client;
 use Elastica\Index;
+use Elastica\Type\Mapping;
 use Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
 use Gdbots\Pbj\Marshaler\Elastica\MappingFactory;
 use Gdbots\Tests\Pbj\FixtureLoader;
@@ -53,8 +54,9 @@ class ElasticaTest extends \PHPUnit_Framework_TestCase
     {
         self::$index->create(['analysis' => ['analyzer' => MappingFactory::getCustomAnalyzers()]], true);
         $type = self::$index->getType('message');
-        $mapping = (new MappingFactory())->create(EmailMessage::schema());
-        $mapping->setType($type)->send();
+        $properties = (new MappingFactory())->create(EmailMessage::schema());
+        $mapping = new Mapping($type, $properties);
+        $mapping->send();
     }
 
     /**
