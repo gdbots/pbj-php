@@ -4,12 +4,6 @@ namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
 
-/**
- * @method bool has(string $fieldName)
- * @method mixed get(string $fieldName)
- * @method static setSingleValue(string $fieldName, mixed $value)
- * @method static clear(string $fieldName)
- */
 trait MicrotimeTrait
 {
     /**

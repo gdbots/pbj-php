@@ -12,21 +12,16 @@ use Gdbots\Pbj\Type as T;
 
 final class NestedMessage extends AbstractMessage
 {
-    const TEST1_FIELD_NAME = 'test1';
-    const TEST2_FIELD_NAME = 'test2';
-    const LOCATION_FIELD_NAME = 'location';
-    const REFS_FIELD_NAME = 'refs';
-
     /**
      * @return Schema
      */
     protected static function defineSchema()
     {
         $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0', __CLASS__, [
-            Fb::create(self::TEST1_FIELD_NAME, T\StringType::create())->build(),
-            Fb::create(self::TEST2_FIELD_NAME, T\IntType::create())->asASet()->build(),
-            Fb::create(self::LOCATION_FIELD_NAME, T\GeoPointType::create())->build(),
-            Fb::create(self::REFS_FIELD_NAME, T\MessageRefType::create())->asASet()->build(),
+            Fb::create('test1', T\StringType::create())->build(),
+            Fb::create('test2', T\IntType::create())->asASet()->build(),
+            Fb::create('location', T\GeoPointType::create())->build(),
+            Fb::create('refs', T\MessageRefType::create())->asASet()->build(),
         ]);
 
         MessageResolver::registerSchema($schema);
@@ -38,7 +33,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function getTest1()
     {
-        return $this->get(self::TEST1_FIELD_NAME);
+        return $this->get('test1');
     }
 
     /**
@@ -47,7 +42,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function setTest1($test1)
     {
-        return $this->setSingleValue(self::TEST1_FIELD_NAME, $test1);
+        return $this->setSingleValue('test1', $test1);
     }
 
     /**
@@ -55,7 +50,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function getTest2()
     {
-        return $this->get(self::TEST2_FIELD_NAME) ?: [];
+        return $this->get('test2') ?: [];
     }
 
     /**
@@ -64,7 +59,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function addTest2($test2)
     {
-        return $this->addToSet(self::TEST2_FIELD_NAME, [$test2]);
+        return $this->addToSet('test2', [$test2]);
     }
 
     /**
@@ -73,7 +68,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function removeTest2($test2)
     {
-        return $this->removeFromSet(self::TEST2_FIELD_NAME, [$test2]);
+        return $this->removeFromSet('test2', [$test2]);
     }
 
     /**
@@ -81,7 +76,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function getLocation()
     {
-        return $this->get(self::LOCATION_FIELD_NAME);
+        return $this->get('location');
     }
 
     /**
@@ -90,7 +85,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function setLocation(GeoPoint $location)
     {
-        return $this->setSingleValue(self::LOCATION_FIELD_NAME, $location);
+        return $this->setSingleValue('location', $location);
     }
 
     /**
@@ -98,7 +93,7 @@ final class NestedMessage extends AbstractMessage
      */
     public function getRefs()
     {
-        return $this->get(self::LOCATION_FIELD_NAME);
+        return $this->get('location');
     }
 
     /**
@@ -107,6 +102,6 @@ final class NestedMessage extends AbstractMessage
      */
     public function addRef(MessageRef $ref)
     {
-        return $this->addToSet(self::REFS_FIELD_NAME, [$ref]);
+        return $this->addToSet('refs', [$ref]);
     }
 }

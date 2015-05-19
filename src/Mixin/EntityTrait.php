@@ -5,15 +5,7 @@ namespace Gdbots\Pbj\Mixin;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\MessageRef;
-use Gdbots\Pbj\Schema;
 
-/**
- * @method Schema schema()
- * @method bool has(string $fieldName)
- * @method mixed get(string $fieldName)
- * @method static setSingleValue(string $fieldName, mixed $value)
- * @method static clear(string $fieldName)
- */
 trait EntityTrait
 {
     /**

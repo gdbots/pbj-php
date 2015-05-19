@@ -11,6 +11,8 @@ This changelog references the relevant changes done in 0.x versions.
 * Removed interface and abstract class implementation from mixins.  Mixins must only provide fields and a trait for convenience.
   It is up to the concrete message to implement interfaces and use those traits.  Compiler/generator will handle this eventually.
 * Now using psr4 for less nesting of directories.
+* Removed docblocks for expected Message methods to prevent IDE confusion when resolving methods, returning static and using static methods.
+  This means that traits will appear to be calling non-existent functions but they will exist, once added to a class implementing Message.
 
 
 ## v0.2.2

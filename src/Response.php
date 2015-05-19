@@ -7,11 +7,6 @@ use Gdbots\Identifiers\UuidIdentifier;
 
 interface Response extends Message
 {
-    const RESPONSE_ID_FIELD_NAME = 'response_id';
-    const MICROTIME_FIELD_NAME = 'microtime';
-    const REQUEST_REF_FIELD_NAME = 'request_ref';
-    const CORRELATOR_FIELD_NAME = 'correlator';
-
     /**
      * @param string $tag
      * @return MessageRef

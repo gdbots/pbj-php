@@ -55,24 +55,24 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $message = EmailMessage::create()
             ->addLabel('abc')
             ->addToSet(
-                EmailMessage::ENUM_IN_SET_FIELD_NAME,
+                'enum_in_set',
                 [
                     Provider::AOL(),
                     Provider::GMAIL(),
                 ]
             );
 
-        $this->assertTrue($message->isInSet(EmailMessage::LABELS_FIELD_NAME, 'abc'));
-        $this->assertFalse($message->isInSet(EmailMessage::LABELS_FIELD_NAME, 'idontexist'));
-        $this->assertTrue($message->isInSet(EmailMessage::ENUM_IN_SET_FIELD_NAME, Provider::AOL()));
-        $this->assertFalse($message->isInSet(EmailMessage::ENUM_IN_SET_FIELD_NAME, Provider::HOTMAIL()));
+        $this->assertTrue($message->isInSet('labels', 'abc'));
+        $this->assertFalse($message->isInSet('labels', 'idontexist'));
+        $this->assertTrue($message->isInSet('enum_in_set', Provider::AOL()));
+        $this->assertFalse($message->isInSet('enum_in_set', Provider::HOTMAIL()));
     }
 
     public function testEnumInSet()
     {
         $message = EmailMessage::create()
             ->addToSet(
-                EmailMessage::ENUM_IN_SET_FIELD_NAME,
+                'enum_in_set',
                 [
                     Provider::AOL(),
                     Provider::AOL(),
@@ -85,7 +85,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
             function (Enum $enum) {
                 return $enum->getValue();
             },
-            $message->get(EmailMessage::ENUM_IN_SET_FIELD_NAME) ?: []
+            $message->get('enum_in_set') ?: []
         );
 
         $this->assertCount(2, $result);
@@ -97,25 +97,25 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $message = $this->createEmailMessage();
 
         /** @var MapsMessage $messageInList */
-        $messageInList = $message->get(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME)[0];
+        $messageInList = $message->get('any_of_message')[0];
         $messageNotInList = clone $messageInList;
         $messageNotInList->addToAMap('String', 'key', 'val');
 
-        $this->assertTrue($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, $messageInList));
-        $this->assertFalse($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, $messageNotInList));
-        $this->assertFalse($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, 'notinlist'));
-        $this->assertFalse($message->isInList(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME, NestedMessage::create()));
-        $this->assertTrue($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, 'aol'));
-        $this->assertTrue($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, Provider::AOL()));
-        $this->assertFalse($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, 'notinlist'));
-        $this->assertFalse($message->isInList(EmailMessage::ENUM_IN_LIST_FIELD_NAME, Provider::HOTMAIL()));
+        $this->assertTrue($message->isInList('any_of_message', $messageInList));
+        $this->assertFalse($message->isInList('any_of_message', $messageNotInList));
+        $this->assertFalse($message->isInList('any_of_message', 'notinlist'));
+        $this->assertFalse($message->isInList('any_of_message', NestedMessage::create()));
+        $this->assertTrue($message->isInList('enum_in_list', 'aol'));
+        $this->assertTrue($message->isInList('enum_in_list', Provider::AOL()));
+        $this->assertFalse($message->isInList('enum_in_list', 'notinlist'));
+        $this->assertFalse($message->isInList('enum_in_list', Provider::HOTMAIL()));
     }
 
     public function testEnumInList()
     {
         $message = EmailMessage::create()
             ->addToList(
-                EmailMessage::ENUM_IN_LIST_FIELD_NAME,
+                'enum_in_list',
                 [
                     Provider::AOL(),
                     Provider::AOL(),
@@ -128,7 +128,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
             function (Enum $enum) {
                 return $enum->getValue();
             },
-            $message->get(EmailMessage::ENUM_IN_LIST_FIELD_NAME)
+            $message->get('enum_in_list')
         );
 
         $this->assertCount(4, $result);
@@ -166,14 +166,14 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     {
         $message = EmailMessage::create()
             ->addToList(
-                EmailMessage::ANY_OF_MESSAGE_FIELD_NAME,
+                'any_of_message',
                 [
                     MapsMessage::create()->addToMap('String', 'test:field:name', 'value1'),
                     NestedMessage::create()->setTest1('value1')
                 ]
         );
 
-        $this->assertCount(2, $message->get(EmailMessage::ANY_OF_MESSAGE_FIELD_NAME));
+        $this->assertCount(2, $message->get('any_of_message'));
     }
 
     public function testFreeze()

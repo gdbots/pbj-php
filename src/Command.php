@@ -7,10 +7,6 @@ use Gdbots\Identifiers\TimeUuidIdentifier;
 
 interface Command extends Message
 {
-    const COMMAND_ID_FIELD_NAME = 'command_id';
-    const MICROTIME_FIELD_NAME = 'microtime';
-    const CORRELATOR_FIELD_NAME = 'correlator';
-
     /**
      * @param string $tag
      * @return MessageRef

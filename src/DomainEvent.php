@@ -7,10 +7,6 @@ use Gdbots\Identifiers\TimeUuidIdentifier;
 
 interface DomainEvent extends Message
 {
-    const EVENT_ID_FIELD_NAME = 'event_id';
-    const MICROTIME_FIELD_NAME = 'microtime';
-    const CORRELATOR_FIELD_NAME = 'correlator';
-
     /**
      * @param string $tag
      * @return MessageRef

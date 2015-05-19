@@ -14,81 +14,65 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 
 final class EmailMessage extends AbstractMessage
 {
-    const MESSAGE_ID_FIELD_NAME = 'id';
-    const FROM_NAME_FIELD_NAME = 'from_name';
-    const FROM_EMAIL_FIELD_NAME = 'from_email';
-    const SUBJECT_FIELD_NAME = 'subject';
-    const BODY_FIELD_NAME = 'body';
-    const PRIORITY_FIELD_NAME = 'priority';
-    const SENT_FIELD_NAME = 'sent';
-    const DATE_SENT_FIELD_NAME = 'date_sent';
-    const MICROTIME_SENT_FIELD_NAME = 'microtime_sent';
-    const PROVIDER_FIELD_NAME = 'provider';
-    const LABELS_FIELD_NAME = 'labels';
-    const NESTED_FIELD_NAME = 'nested';
-    const ENUM_IN_SET_FIELD_NAME = 'enum_in_set';
-    const ENUM_IN_LIST_FIELD_NAME = 'enum_in_list';
-    const ANY_OF_MESSAGE_FIELD_NAME = 'any_of_message';
-
     /**
      * @return Schema
      */
     protected static function defineSchema()
     {
         $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:email-message:1-0-0', __CLASS__,
-                [
-                        Fb::create(self::MESSAGE_ID_FIELD_NAME, T\TimeUuidType::create())
-                                //->useTypeDefault(false)
-                                ->required()
-                                ->build(),
-                        Fb::create(self::FROM_NAME_FIELD_NAME, T\StringType::create())
-                                ->build(),
-                        Fb::create(self::FROM_EMAIL_FIELD_NAME, T\StringType::create())
-                                ->required()
-                                ->format('email')
-                                ->build(),
-                        Fb::create(self::SUBJECT_FIELD_NAME, T\StringType::create())
-                                ->withDefault(function (EmailMessage $message = null) {
-                                    // closure func default spice or gtfo and use named automagic defaults?
-                                    if (!$message) {
-                                        return null;
-                                    }
-                                    return implode(',', $message->getLabels()) . ' test';
-                                })
-                                ->build(),
-                        Fb::create(self::BODY_FIELD_NAME, T\StringType::create())->build(),
-                        Fb::create(self::PRIORITY_FIELD_NAME, T\IntEnumType::create())
-                                ->required()
-                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
-                                ->withDefault(Priority::NORMAL)
-                                ->build(),
-                        Fb::create(self::SENT_FIELD_NAME, T\BooleanType::create())->build(),
-                        Fb::create(self::DATE_SENT_FIELD_NAME, T\DateTimeType::create())->build(),
-                        Fb::create(self::MICROTIME_SENT_FIELD_NAME, T\MicrotimeType::create())->build(),
-                        Fb::create(self::PROVIDER_FIELD_NAME, T\StringEnumType::create())
-                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
-                                ->withDefault(Provider::GMAIL())
-                                ->build(),
-                        Fb::create(self::LABELS_FIELD_NAME, T\StringType::create())
-                                ->format(Format::HASHTAG())
-                                ->asASet()
-                                ->build(),
-                        Fb::create(self::NESTED_FIELD_NAME, T\MessageType::create())
-                                ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
-                                ->build(),
-                        Fb::create(self::ENUM_IN_SET_FIELD_NAME, T\StringEnumType::create())
-                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
-                                ->asASet()
-                                ->build(),
-                        Fb::create(self::ENUM_IN_LIST_FIELD_NAME, T\StringEnumType::create())
-                                ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
-                                ->asAList()
-                                ->build(),
-                        Fb::create(self::ANY_OF_MESSAGE_FIELD_NAME, T\MessageType::create())
-                                ->className('Gdbots\Pbj\Message')
-                                ->asAList()
-                                ->build(),
-                ]
+            [
+                Fb::create('id', T\TimeUuidType::create())
+                    //->useTypeDefault(false)
+                    ->required()
+                    ->build(),
+                Fb::create('from_name', T\StringType::create())
+                    ->build(),
+                Fb::create('from_email', T\StringType::create())
+                    ->required()
+                    ->format('email')
+                    ->build(),
+                Fb::create('subject', T\StringType::create())
+                    ->withDefault(function (EmailMessage $message = null) {
+                        // closure func default spice or gtfo and use named automagic defaults?
+                        if (!$message) {
+                            return null;
+                        }
+                        return implode(',', $message->getLabels()) . ' test';
+                    })
+                    ->build(),
+                Fb::create('body', T\StringType::create())->build(),
+                Fb::create('priority', T\IntEnumType::create())
+                    ->required()
+                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
+                    ->withDefault(Priority::NORMAL)
+                    ->build(),
+                Fb::create('sent', T\BooleanType::create())->build(),
+                Fb::create('date_sent', T\DateTimeType::create())->build(),
+                Fb::create('microtime_sent', T\MicrotimeType::create())->build(),
+                Fb::create('provider', T\StringEnumType::create())
+                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                    ->withDefault(Provider::GMAIL())
+                    ->build(),
+                Fb::create('labels', T\StringType::create())
+                    ->format(Format::HASHTAG())
+                    ->asASet()
+                    ->build(),
+                Fb::create('nested', T\MessageType::create())
+                    ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                    ->build(),
+                Fb::create('enum_in_set', T\StringEnumType::create())
+                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                    ->asASet()
+                    ->build(),
+                Fb::create('enum_in_list', T\StringEnumType::create())
+                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                    ->asAList()
+                    ->build(),
+                Fb::create('any_of_message', T\MessageType::create())
+                    ->className('Gdbots\Pbj\Message')
+                    ->asAList()
+                    ->build(),
+            ]
         );
 
         MessageResolver::registerSchema($schema);
@@ -100,7 +84,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getMessageId()
     {
-        return $this->get(self::MESSAGE_ID_FIELD_NAME);
+        return $this->get('id');
     }
 
     /**
@@ -109,7 +93,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setMessageId(UuidIdentifier $id)
     {
-        return $this->setSingleValue(self::MESSAGE_ID_FIELD_NAME, $id);
+        return $this->setSingleValue('id', $id);
     }
 
     /**
@@ -117,7 +101,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getFromName()
     {
-        return $this->get(self::FROM_NAME_FIELD_NAME);
+        return $this->get('from_name');
     }
 
     /**
@@ -126,7 +110,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setFromName($fromName)
     {
-        return $this->setSingleValue(self::FROM_NAME_FIELD_NAME, $fromName);
+        return $this->setSingleValue('from_name', $fromName);
     }
 
     /**
@@ -134,7 +118,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getFromEmail()
     {
-        return $this->get(self::FROM_EMAIL_FIELD_NAME);
+        return $this->get('from_email');
     }
 
     /**
@@ -143,7 +127,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setFromEmail($email)
     {
-        return $this->setSingleValue(self::FROM_EMAIL_FIELD_NAME, $email);
+        return $this->setSingleValue('from_email', $email);
     }
 
     /**
@@ -151,7 +135,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getSubject()
     {
-        return $this->get(self::SUBJECT_FIELD_NAME);
+        return $this->get('subject');
     }
 
     /**
@@ -160,7 +144,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setSubject($subject)
     {
-        return $this->setSingleValue(self::SUBJECT_FIELD_NAME, $subject);
+        return $this->setSingleValue('subject', $subject);
     }
 
     /**
@@ -168,7 +152,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getBody()
     {
-        return $this->get(self::BODY_FIELD_NAME);
+        return $this->get('body');
     }
 
     /**
@@ -177,7 +161,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setBody($body)
     {
-        return $this->setSingleValue(self::BODY_FIELD_NAME, $body);
+        return $this->setSingleValue('body', $body);
     }
 
     /**
@@ -185,7 +169,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getPriority()
     {
-        return $this->get(self::PRIORITY_FIELD_NAME);
+        return $this->get('priority');
     }
 
     /**
@@ -194,7 +178,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setPriority(Priority $priority)
     {
-        return $this->setSingleValue(self::PRIORITY_FIELD_NAME, $priority);
+        return $this->setSingleValue('priority', $priority);
     }
 
     /**
@@ -202,7 +186,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function wasSent()
     {
-        return $this->get(self::SENT_FIELD_NAME);
+        return $this->get('sent');
     }
 
     /**
@@ -210,7 +194,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function markAsSent()
     {
-        return $this->setSingleValue(self::SENT_FIELD_NAME, true);
+        return $this->setSingleValue('sent', true);
     }
 
     /**
@@ -218,7 +202,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getDateSent()
     {
-        return $this->get(self::DATE_SENT_FIELD_NAME);
+        return $this->get('date_sent');
     }
 
     /**
@@ -226,7 +210,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getMicrotimeSent()
     {
-        return $this->get(self::MICROTIME_SENT_FIELD_NAME);
+        return $this->get('microtime_sent');
     }
 
     /**
@@ -234,7 +218,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getProvider()
     {
-        return $this->get(self::PROVIDER_FIELD_NAME);
+        return $this->get('provider');
     }
 
     /**
@@ -243,7 +227,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function setProvider(Provider $provider)
     {
-        return $this->setSingleValue(self::PROVIDER_FIELD_NAME, $provider);
+        return $this->setSingleValue('provider', $provider);
     }
 
     /**
@@ -251,7 +235,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getLabels()
     {
-        return $this->get(self::LABELS_FIELD_NAME) ? : [];
+        return $this->get('labels') ? : [];
     }
 
     /**
@@ -260,7 +244,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function addLabel($label)
     {
-        return $this->addToSet(self::LABELS_FIELD_NAME, [$label]);
+        return $this->addToSet('labels', [$label]);
     }
 
     /**
@@ -269,7 +253,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function removeLabel($label)
     {
-        return $this->removeFromSet(self::LABELS_FIELD_NAME, [$label]);
+        return $this->removeFromSet('labels', [$label]);
     }
 
     /**
@@ -277,7 +261,7 @@ final class EmailMessage extends AbstractMessage
      */
     public function getNested()
     {
-        return $this->get(self::NESTED_FIELD_NAME);
+        return $this->get('nested');
     }
 
     /**
@@ -286,6 +270,6 @@ final class EmailMessage extends AbstractMessage
      */
     public function setNested(NestedMessage $nested)
     {
-        return $this->setSingleValue(self::NESTED_FIELD_NAME, $nested);
+        return $this->setSingleValue('nested', $nested);
     }
 }

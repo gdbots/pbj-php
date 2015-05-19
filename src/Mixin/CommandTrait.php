@@ -4,16 +4,8 @@ namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\MessageRef;
-use Gdbots\Pbj\Schema;
 
 // todo: attempts/retries transient fields?  or transient fields bag?
-/**
- * @method Schema schema()
- * @method bool has(string $fieldName)
- * @method mixed get(string $fieldName)
- * @method static setSingleValue(string $fieldName, mixed $value)
- * @method static clear(string $fieldName)
- */
 trait CommandTrait
 {
     use CorrelatorTrait;
