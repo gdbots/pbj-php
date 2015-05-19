@@ -22,8 +22,13 @@
     }
   },
   "autoload": {
-    "psr-0": {
+    "psr-4": {
       "Gdbots\\Pbj\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Gdbots\\Tests\\Pbj\\": "tests/"
     }
   },
   "replace": {

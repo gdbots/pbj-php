@@ -11,7 +11,7 @@ use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
  * @return EmailMessage
  */
 function createEmailMessage() {
-    $json = file_get_contents(__DIR__ . '/Gdbots/Tests/Pbj/Fixtures/email-message.json');
+    $json = file_get_contents(__DIR__ . '/Fixtures/email-message.json');
     return (new JsonSerializer())->deserialize($json);
 }
 

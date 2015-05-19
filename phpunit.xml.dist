@@ -13,7 +13,7 @@
 
   <testsuites>
     <testsuite name="Gdbots">
-      <directory>tests/Gdbots/Tests</directory>
+      <directory>tests/</directory>
     </testsuite>
   </testsuites>
 
