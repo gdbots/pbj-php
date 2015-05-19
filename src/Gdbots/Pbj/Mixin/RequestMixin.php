@@ -23,13 +23,13 @@ final class RequestMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            Fb::create(Request::REQUEST_ID_FIELD_NAME, T\UuidType::create())
+            Fb::create('request_id', T\UuidType::create())
                 ->required()
                 ->build(),
-            Fb::create(Request::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
+            Fb::create('microtime', T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(Request::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
+            Fb::create('correlator', T\MessageRefType::create())
                 ->build(),
         ];
     }

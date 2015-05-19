@@ -24,21 +24,21 @@ final class EntityMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            Fb::create(Entity::ENTITY_ID_FIELD_NAME, T\IdentifierType::create())
+            Fb::create('_id', T\IdentifierType::create())
                 ->required()
                 ->className('Gdbots\Identifiers\UuidIdentifier')
                 ->withDefault(function () {
                     return UuidIdentifier::generate();
                 })
                 ->build(),
-            Fb::create(Entity::ETAG_FIELD_NAME, T\StringType::create())
+            Fb::create('etag', T\StringType::create())
                 ->pattern('/^[A-Za-z0-9_\-]+$/')
                 ->maxLength(100)
                 ->build(),
-            Fb::create(Entity::CREATED_AT_FIELD_NAME, T\MicrotimeType::create())
+            Fb::create('created_at', T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(Entity::UPDATED_AT_FIELD_NAME, T\MicrotimeType::create())
+            Fb::create('updated_at', T\MicrotimeType::create())
                 ->useTypeDefault(false)
                 ->build(),
         ];

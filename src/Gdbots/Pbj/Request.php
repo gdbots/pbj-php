@@ -1,15 +1,13 @@
 <?php
 
-namespace Gdbots\Pbj\Mixin;
+namespace Gdbots\Pbj;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\TimeUuidIdentifier;
-use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
+use Gdbots\Identifiers\UuidIdentifier;
 
-interface Command extends Message
+interface Request extends Message
 {
-    const COMMAND_ID_FIELD_NAME = 'command_id';
+    const REQUEST_ID_FIELD_NAME = 'request_id';
     const MICROTIME_FIELD_NAME = 'microtime';
     const CORRELATOR_FIELD_NAME = 'correlator';
 
@@ -20,15 +18,30 @@ interface Command extends Message
     public function generateMessageRef($tag = null);
 
     /**
-     * @return TimeUuidIdentifier
+     * @return bool
      */
-    public function getCommandId();
+    public function hasRequestId();
 
     /**
-     * @param TimeUuidIdentifier $commandId
+     * @return UuidIdentifier
+     */
+    public function getRequestId();
+
+    /**
+     * @param UuidIdentifier $requestId
      * @return static
      */
-    public function setCommandId(TimeUuidIdentifier $commandId);
+    public function setRequestId(UuidIdentifier $requestId);
+
+    /**
+     * @return static
+     */
+    public function clearRequestId();
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime();
 
     /**
      * @return Microtime
@@ -40,6 +53,11 @@ interface Command extends Message
      * @return static
      */
     public function setMicrotime(Microtime $microtime);
+
+    /**
+     * @return static
+     */
+    public function clearMicrotime();
 
     /**
      * @return bool

@@ -1,11 +1,9 @@
 <?php
 
-namespace Gdbots\Pbj\Mixin;
+namespace Gdbots\Pbj;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\Identifier;
-use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
 
 interface Entity extends Message
 {
@@ -31,12 +29,15 @@ interface Entity extends Message
     public function getEntityId();
 
     /**
-     * Implement on concrete message to enforce proper type hint.
-     *
      * @param Identifier $entityId
      * @return static
      */
-    //public function setEntityId(Identifier $entityId);
+    public function setEntityId(Identifier $entityId);
+
+    /**
+     * @return static
+     */
+    public function clearEntityId();
 
     /**
      * @return bool
@@ -60,6 +61,11 @@ interface Entity extends Message
     public function clearEtag();
 
     /**
+     * @return bool
+     */
+    public function hasCreatedAt();
+
+    /**
      * @return Microtime
      */
     public function getCreatedAt();
@@ -69,6 +75,11 @@ interface Entity extends Message
      * @return static
      */
     public function setCreatedAt(Microtime $createdAt);
+
+    /**
+     * @return static
+     */
+    public function clearCreatedAt();
 
     /**
      * @return bool

@@ -23,13 +23,13 @@ final class EventMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            Fb::create(Event::EVENT_ID_FIELD_NAME, T\TimeUuidType::create())
+            Fb::create('event_id', T\TimeUuidType::create())
                 ->required()
                 ->build(),
-            Fb::create(Event::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
+            Fb::create('microtime', T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(Event::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
+            Fb::create('correlator', T\MessageRefType::create())
                 ->build(),
         ];
     }

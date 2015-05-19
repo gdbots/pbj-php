@@ -23,13 +23,13 @@ final class CommandMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            Fb::create(Command::COMMAND_ID_FIELD_NAME, T\TimeUuidType::create())
+            Fb::create('command_id', T\TimeUuidType::create())
                 ->required()
                 ->build(),
-            Fb::create(Command::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
+            Fb::create('microtime', T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(Command::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
+            Fb::create('correlator', T\MessageRefType::create())
                 ->build(),
         ];
     }

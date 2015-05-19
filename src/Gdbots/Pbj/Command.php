@@ -1,15 +1,13 @@
 <?php
 
-namespace Gdbots\Pbj\Mixin;
+namespace Gdbots\Pbj;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
-use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
 
-interface Event extends Message
+interface Command extends Message
 {
-    const EVENT_ID_FIELD_NAME = 'event_id';
+    const COMMAND_ID_FIELD_NAME = 'command_id';
     const MICROTIME_FIELD_NAME = 'microtime';
     const CORRELATOR_FIELD_NAME = 'correlator';
 
@@ -20,15 +18,30 @@ interface Event extends Message
     public function generateMessageRef($tag = null);
 
     /**
-     * @return TimeUuidIdentifier
+     * @return bool
      */
-    public function getEventId();
+    public function hasCommandId();
 
     /**
-     * @param TimeUuidIdentifier $eventId
+     * @return TimeUuidIdentifier
+     */
+    public function getCommandId();
+
+    /**
+     * @param TimeUuidIdentifier $commandId
      * @return static
      */
-    public function setEventId(TimeUuidIdentifier $eventId);
+    public function setCommandId(TimeUuidIdentifier $commandId);
+
+    /**
+     * @return static
+     */
+    public function clearCommandId();
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime();
 
     /**
      * @return Microtime
@@ -40,6 +53,11 @@ interface Event extends Message
      * @return static
      */
     public function setMicrotime(Microtime $microtime);
+
+    /**
+     * @return static
+     */
+    public function clearMicrotime();
 
     /**
      * @return bool

@@ -23,15 +23,15 @@ final class ResponseMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            Fb::create(Response::RESPONSE_ID_FIELD_NAME, T\UuidType::create())
+            Fb::create('response_id', T\UuidType::create())
                 ->required()
                 ->build(),
-            Fb::create(Response::MICROTIME_FIELD_NAME, T\MicrotimeType::create())
+            Fb::create('microtime', T\MicrotimeType::create())
                 ->required()
                 ->build(),
-            Fb::create(Response::REQUEST_REF_FIELD_NAME, T\MessageRefType::create())
+            Fb::create('request_ref', T\MessageRefType::create())
                 ->build(),
-            Fb::create(Response::CORRELATOR_FIELD_NAME, T\MessageRefType::create())
+            Fb::create('correlator', T\MessageRefType::create())
                 ->build(),
         ];
     }

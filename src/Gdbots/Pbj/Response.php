@@ -1,11 +1,9 @@
 <?php
 
-namespace Gdbots\Pbj\Mixin;
+namespace Gdbots\Pbj;
 
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
-use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
 
 interface Response extends Message
 {
@@ -21,6 +19,11 @@ interface Response extends Message
     public function generateMessageRef($tag = null);
 
     /**
+     * @return bool
+     */
+    public function hasResponseId();
+
+    /**
      * @return UuidIdentifier
      */
     public function getResponseId();
@@ -32,6 +35,16 @@ interface Response extends Message
     public function setResponseId(UuidIdentifier $responseId);
 
     /**
+     * @return static
+     */
+    public function clearResponseId();
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime();
+
+    /**
      * @return Microtime
      */
     public function getMicrotime();
@@ -41,6 +54,11 @@ interface Response extends Message
      * @return static
      */
     public function setMicrotime(Microtime $microtime);
+
+    /**
+     * @return static
+     */
+    public function clearMicrotime();
 
     /**
      * @return bool
