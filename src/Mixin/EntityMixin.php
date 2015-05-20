@@ -2,7 +2,6 @@
 
 namespace Gdbots\Pbj\Mixin;
 
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMixin;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\SchemaId;
@@ -24,12 +23,8 @@ final class EntityMixin extends AbstractMixin
     public function getFields()
     {
         return [
-            Fb::create('_id', T\IdentifierType::create())
+            Fb::create('_id', T\UuidType::create())
                 ->required()
-                ->className('Gdbots\Identifiers\UuidIdentifier')
-                ->withDefault(function () {
-                    return UuidIdentifier::generate();
-                })
                 ->build(),
             Fb::create('etag', T\StringType::create())
                 ->pattern('/^[A-Za-z0-9_\-]+$/')
