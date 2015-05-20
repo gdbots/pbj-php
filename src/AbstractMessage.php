@@ -176,7 +176,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
-    public function generateEtag()
+    final public function generateEtag()
     {
         return md5(json_encode($this));
     }
