@@ -40,6 +40,13 @@ interface Message
     public function toArray();
 
     /**
+     * Generates an md5 hash of the json representation of the current message.
+     *
+     * @return string
+     */
+    public function generateEtag();
+
+    /**
      * Verifies all required fields have been populated.
      *
      * @return static

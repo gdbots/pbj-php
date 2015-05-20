@@ -5,7 +5,7 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\UuidIdentifier;
 
-interface Response extends Message
+interface DomainResponse extends Message
 {
     /**
      * @param string $tag

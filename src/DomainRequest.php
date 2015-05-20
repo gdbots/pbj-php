@@ -3,9 +3,9 @@
 namespace Gdbots\Pbj;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\TimeUuidIdentifier;
+use Gdbots\Identifiers\UuidIdentifier;
 
-interface Command extends Message
+interface DomainRequest extends Message
 {
     /**
      * @param string $tag
@@ -16,23 +16,23 @@ interface Command extends Message
     /**
      * @return bool
      */
-    public function hasCommandId();
+    public function hasRequestId();
 
     /**
-     * @return TimeUuidIdentifier
+     * @return UuidIdentifier
      */
-    public function getCommandId();
+    public function getRequestId();
 
     /**
-     * @param TimeUuidIdentifier $commandId
+     * @param UuidIdentifier $requestId
      * @return static
      */
-    public function setCommandId(TimeUuidIdentifier $commandId);
+    public function setRequestId(UuidIdentifier $requestId);
 
     /**
      * @return static
      */
-    public function clearCommandId();
+    public function clearRequestId();
 
     /**
      * @return bool

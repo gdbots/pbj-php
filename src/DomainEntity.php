@@ -5,7 +5,7 @@ namespace Gdbots\Pbj;
 use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\Identifier;
 
-interface Entity extends Message
+interface DomainEntity extends Message
 {
     /**
      * @param string $tag
