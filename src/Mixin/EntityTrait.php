@@ -3,7 +3,7 @@
 namespace Gdbots\Pbj\Mixin;
 
 use Gdbots\Common\Microtime;
-use Gdbots\Identifiers\UuidIdentifier;
+use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\MessageRef;
 
 trait EntityTrait
@@ -26,11 +26,20 @@ trait EntityTrait
     }
 
     /**
-     * @return UuidIdentifier
+     * @return Identifier
      */
     public function getEntityId()
     {
         return $this->get('_id');
+    }
+
+    /**
+     * @param Identifier $entityId
+     * @return static
+     */
+    public function setEntityId(Identifier $entityId)
+    {
+        return $this->setSingleValue('_id', $entityId);
     }
 
     /**

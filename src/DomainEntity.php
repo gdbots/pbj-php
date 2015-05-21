@@ -24,12 +24,10 @@ interface DomainEntity extends Message
     public function getEntityId();
 
     /**
-     * Set on child interface to ensure proper typehint.
-     *
      * @param Identifier $entityId
      * @return static
      */
-    //public function setEntityId(Identifier $entityId);
+    public function setEntityId(Identifier $entityId);
 
     /**
      * @return static
