@@ -34,15 +34,6 @@ trait EntityTrait
     }
 
     /**
-     * @param UuidIdentifier $entityId
-     * @return static
-     */
-    public function setEntityId(UuidIdentifier $entityId)
-    {
-        return $this->setSingleValue('_id', $entityId);
-    }
-
-    /**
      * @return static
      */
     public function clearEntityId()
