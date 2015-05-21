@@ -42,9 +42,10 @@ interface Message
     /**
      * Generates an md5 hash of the json representation of the current message.
      *
+     * @param string[] $ignoredFields
      * @return string
      */
-    public function generateEtag();
+    public function generateEtag(array $ignoredFields = []);
 
     /**
      * Verifies all required fields have been populated.
