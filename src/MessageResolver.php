@@ -2,7 +2,9 @@
 
 namespace Gdbots\Pbj;
 
+use Gdbots\Pbj\Exception\MoreThanOneMessageForMixin;
 use Gdbots\Pbj\Exception\NoMessageForCurie;
+use Gdbots\Pbj\Exception\NoMessageForMixin;
 use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 
 final class MessageResolver
@@ -113,5 +115,55 @@ final class MessageResolver
             return;
         }
         self::$messages = array_merge(self::$messages, $map);
+    }
+
+    /**
+     * Return the one schema expected to be using the provided mixin.
+     *
+     * @param Mixin $mixin
+     * @return Schema
+     *
+     * @throws MoreThanOneMessageForMixin
+     * @throws NoMessageForMixin
+     */
+    public static function findOneUsingMixin(Mixin $mixin)
+    {
+        $schemas = self::findAllUsingMixin($mixin);
+        if (1 !== count($schemas)) {
+            throw new MoreThanOneMessageForMixin($mixin, $schemas);
+        }
+
+        return current($schemas);
+    }
+
+    /**
+     * Returns an array of Schemas expected to be using the provided mixin.
+     *
+     * todo: memoize for performance
+     * todo: write unit tests for MessageResolver
+     *
+     * @param Mixin $mixin
+     * @return Schema[]
+     *
+     * @throws NoMessageForMixin
+     */
+    public static function findAllUsingMixin(Mixin $mixin)
+    {
+        $mixinId = $mixin->getId()->getCurieWithMajorRev();
+
+        /** @var Message $class */
+        $schemas = [];
+        foreach (self::$messages as $class) {
+            $schema = $class::schema();
+            if ($schema->hasMixin($mixinId)) {
+                $schemas[] = $schema;
+            }
+        }
+
+        if (empty($schemas)) {
+            throw new NoMessageForMixin($mixin);
+        }
+
+        return $schemas;
     }
 }

@@ -14,6 +14,7 @@ This changelog references the relevant changes done in 0.x versions.
 * Removed docblocks for expected Message methods to prevent IDE confusion when resolving methods, returning static and using static methods.
   This means that traits will appear to be calling non-existent functions but they will exist, once added to a class implementing Message.
 * [Message] now provides `generateEtag` for creating an md5 hash of the current message payload.
+* [MessageResolver] Added `findOneUsingMixin` and `findAllUsingMixin` static methods for finding schemas by mixins.
 
 
 ## v0.2.2
