@@ -15,44 +15,44 @@ class MappingFactory
      * @var array
      */
     protected $types = [
-        'big-int'           => ['type' => 'long'],
+        'big-int'           => ['type' => 'long', 'include_in_all' => false],
         'binary'            => ['type' => 'binary'],
         'blob'              => ['type' => 'binary'],
-        'boolean'           => ['type' => 'boolean'],
-        'date'              => ['type' => 'date'],
-        'date-time'         => ['type' => 'date'],
-        'decimal'           => ['type' => 'double'],
-        'float'             => ['type' => 'float'],
-        'geo-point'         => ['type' => 'geo_point'],
-        'identifier'        => ['type' => 'string', 'index' => 'not_analyzed'],
-        'int'               => ['type' => 'long'],
-        'int-enum'          => ['type' => 'integer'],
+        'boolean'           => ['type' => 'boolean', 'include_in_all' => false],
+        'date'              => ['type' => 'date', 'include_in_all' => false],
+        'date-time'         => ['type' => 'date', 'include_in_all' => false],
+        'decimal'           => ['type' => 'double', 'include_in_all' => false],
+        'float'             => ['type' => 'float', 'include_in_all' => false],
+        'geo-point'         => ['type' => 'geo_point', 'include_in_all' => false],
+        'identifier'        => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'int'               => ['type' => 'long', 'include_in_all' => false],
+        'int-enum'          => ['type' => 'integer', 'include_in_all' => false],
         'medium-blob'       => ['type' => 'binary'],
-        'medium-int'        => ['type' => 'integer'],
+        'medium-int'        => ['type' => 'integer', 'include_in_all' => false],
         'medium-text'       => ['type' => 'string'],
         'message'           => ['type' => 'nested'],
         'message-ref'       => [
             'type' => 'object',
             'properties' => [
-                    'curie' => ['type' => 'string', 'index' => 'not_analyzed'],
-                    'id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                    'tag'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                    'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                    'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                    'tag'   => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
             ]
         ],
-        'microtime'         => ['type' => 'long'],
-        'signed-big-int'    => ['type' => 'long'],
-        'signed-int'        => ['type' => 'integer'],
-        'signed-medium-int' => ['type' => 'long'],
-        'signed-small-int'  => ['type' => 'short'],
-        'signed-tiny-int'   => ['type' => 'byte'],
-        'small-int'         => ['type' => 'integer'],
+        'microtime'         => ['type' => 'long', 'include_in_all' => false],
+        'signed-big-int'    => ['type' => 'long', 'include_in_all' => false],
+        'signed-int'        => ['type' => 'integer', 'include_in_all' => false],
+        'signed-medium-int' => ['type' => 'long', 'include_in_all' => false],
+        'signed-small-int'  => ['type' => 'short', 'include_in_all' => false],
+        'signed-tiny-int'   => ['type' => 'byte', 'include_in_all' => false],
+        'small-int'         => ['type' => 'integer', 'include_in_all' => false],
         'string'            => ['type' => 'string'],
-        'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed'],
+        'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
         'text'              => ['type' => 'string'],
-        'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed'],
-        'timestamp'         => ['type' => 'date'],
-        'tiny-int'          => ['type' => 'short'],
-        'uuid'              => ['type' => 'string', 'index' => 'not_analyzed'],
+        'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'timestamp'         => ['type' => 'date', 'include_in_all' => false],
+        'tiny-int'          => ['type' => 'short', 'include_in_all' => false],
+        'uuid'              => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
     ];
 
     /**
@@ -96,7 +96,7 @@ class MappingFactory
             $type = $field->getType();
 
             if ($fieldName === Schema::PBJ_FIELD_NAME) {
-                $map[$fieldName] = ['type' => 'string', 'index' => 'not_analyzed'];
+                $map[$fieldName] = ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
                 continue;
             }
 
@@ -133,7 +133,8 @@ class MappingFactory
             'properties' => [
                 Schema::PBJ_FIELD_NAME => [
                     'type' => 'string',
-                    'index' => 'not_analyzed'
+                    'index' => 'not_analyzed',
+                    'include_in_all' => false
                 ]
             ]
         ];
@@ -160,7 +161,7 @@ class MappingFactory
             case Format::UUID:
             case Format::URI:
             case Format::URL:
-                return ['type' => 'string', 'index' => 'not_analyzed'];
+                return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
 
             /**
              * Using hashtag format with a string requires (by default) a custom analyzer
@@ -171,14 +172,14 @@ class MappingFactory
              * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
              */
             case Format::HASHTAG:
-                return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer'];
+                return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer', 'include_in_all' => false];
 
             case Format::IPV4:
-                return ['type' => 'ip'];
+                return ['type' => 'ip', 'include_in_all' => false];
 
             default:
                 if ($field->getPattern()) {
-                    return ['type' => 'string', 'index' => 'not_analyzed'];
+                    return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
                 }
                 return ['type' => 'string'];
         }
