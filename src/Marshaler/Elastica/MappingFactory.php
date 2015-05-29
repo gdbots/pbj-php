@@ -113,7 +113,7 @@ class MappingFactory
     }
 
     /**
-     * todo: review, should be default include_in_parent to true?
+     * todo: review, should we default include_in_parent to true?
      * @link http://www.elastic.co/guide/en/elasticsearch/reference/1.4/mapping-nested-type.html
      *
      * @param Field $field
@@ -177,6 +177,9 @@ class MappingFactory
                 return ['type' => 'ip'];
 
             default:
+                if ($field->getPattern()) {
+                    return ['type' => 'string', 'index' => 'not_analyzed'];
+                }
                 return ['type' => 'string'];
         }
     }
