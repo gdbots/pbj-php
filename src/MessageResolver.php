@@ -24,6 +24,15 @@ final class MessageResolver
     private static $resolved = [];
 
     /**
+     * An array of resolved lookups by mixin, keyed by the mixin id with major rev
+     * and optionally a package and category (for faster lookups)
+     * @see SchemaId::getCurieWithMajorRev
+     *
+     * @var Schema[]
+     */
+    private static $resolvedMixins = [];
+
+    /**
      * Returns the fully qualified php class name to be used for the provided schema id.
      *
      * @param SchemaId $schemaId
@@ -121,14 +130,16 @@ final class MessageResolver
      * Return the one schema expected to be using the provided mixin.
      *
      * @param Mixin $mixin
+     * @param string $inPackage
+     * @param string $inCategory
      * @return Schema
      *
      * @throws MoreThanOneMessageForMixin
      * @throws NoMessageForMixin
      */
-    public static function findOneUsingMixin(Mixin $mixin)
+    public static function findOneUsingMixin(Mixin $mixin, $inPackage = null, $inCategory = null)
     {
-        $schemas = self::findAllUsingMixin($mixin);
+        $schemas = self::findAllUsingMixin($mixin, $inPackage, $inCategory);
         if (1 !== count($schemas)) {
             throw new MoreThanOneMessageForMixin($mixin, $schemas);
         }
@@ -138,26 +149,43 @@ final class MessageResolver
 
     /**
      * Returns an array of Schemas expected to be using the provided mixin.
-     *
-     * todo: memoize for performance
      * todo: write unit tests for MessageResolver
      *
      * @param Mixin $mixin
+     * @param string $inPackage
+     * @param string $inCategory
      * @return Schema[]
      *
      * @throws NoMessageForMixin
      */
-    public static function findAllUsingMixin(Mixin $mixin)
+    public static function findAllUsingMixin(Mixin $mixin, $inPackage = null, $inCategory = null)
     {
         $mixinId = $mixin->getId()->getCurieWithMajorRev();
+        $key = sprintf('%s%s%s', $mixinId, $inPackage, $inCategory);
 
-        /** @var Message $class */
-        $schemas = [];
-        foreach (self::$messages as $class) {
-            $schema = $class::schema();
-            if ($schema->hasMixin($mixinId)) {
-                $schemas[] = $schema;
+        if (!isset(self::$resolvedMixins[$key])) {
+            $filtered = !empty($inPackage) || !empty($inCategory);
+            /** @var Message $class */
+            $schemas = [];
+            foreach (self::$messages as $id => $class) {
+                if ($filtered) {
+                    list($vendor, $package, $category, $message) = explode(':', $id);
+                    if (!empty($inPackage) && $package != $inPackage) {
+                        continue;
+                    }
+                    if (!empty($inCategory) && $category != $inCategory) {
+                        continue;
+                    }
+                }
+
+                $schema = $class::schema();
+                if ($schema->hasMixin($mixinId)) {
+                    $schemas[] = $schema;
+                }
             }
+            self::$resolvedMixins[$key] = $schemas;
+        } else {
+            $schemas = self::$resolvedMixins[$key];
         }
 
         if (empty($schemas)) {
