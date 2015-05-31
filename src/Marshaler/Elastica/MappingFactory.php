@@ -2,6 +2,8 @@
 
 namespace Gdbots\Pbj\Marshaler\Elastica;
 
+use Elastica\Type\Mapping;
+use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
@@ -15,44 +17,45 @@ class MappingFactory
      * @var array
      */
     protected $types = [
-        'big-int'           => ['type' => 'long'],
+        'big-int'           => ['type' => 'long', 'include_in_all' => false],
         'binary'            => ['type' => 'binary'],
         'blob'              => ['type' => 'binary'],
-        'boolean'           => ['type' => 'boolean'],
-        'date'              => ['type' => 'date'],
-        'date-time'         => ['type' => 'date'],
-        'decimal'           => ['type' => 'double'],
-        'float'             => ['type' => 'float'],
-        'geo-point'         => ['type' => 'geo_point'],
-        'identifier'        => ['type' => 'string', 'index' => 'not_analyzed'],
-        'int'               => ['type' => 'long'],
-        'int-enum'          => ['type' => 'integer'],
+        'boolean'           => ['type' => 'boolean', 'include_in_all' => false],
+        'date'              => ['type' => 'date', 'include_in_all' => false],
+        'date-time'         => ['type' => 'date', 'include_in_all' => false],
+        'decimal'           => ['type' => 'double', 'include_in_all' => false],
+        'float'             => ['type' => 'float', 'include_in_all' => false],
+        'geo-point'         => ['type' => 'geo_point', 'include_in_all' => false],
+        'identifier'        => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'int'               => ['type' => 'long', 'include_in_all' => false],
+        'int-enum'          => ['type' => 'integer', 'include_in_all' => false],
         'medium-blob'       => ['type' => 'binary'],
-        'medium-int'        => ['type' => 'integer'],
+        'medium-int'        => ['type' => 'integer', 'include_in_all' => false],
         'medium-text'       => ['type' => 'string'],
         'message'           => ['type' => 'nested'],
+        // todo: review performance of message ref as nested by default
         'message-ref'       => [
-            'type' => 'object',
+            'type' => 'nested',
             'properties' => [
-                    'curie' => ['type' => 'string', 'index' => 'not_analyzed'],
-                    'id'    => ['type' => 'string', 'index' => 'not_analyzed'],
-                    'tag'   => ['type' => 'string', 'index' => 'not_analyzed'],
+                    'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                    'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                    'tag'   => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
             ]
         ],
-        'microtime'         => ['type' => 'long'],
-        'signed-big-int'    => ['type' => 'long'],
-        'signed-int'        => ['type' => 'integer'],
-        'signed-medium-int' => ['type' => 'long'],
-        'signed-small-int'  => ['type' => 'short'],
-        'signed-tiny-int'   => ['type' => 'byte'],
-        'small-int'         => ['type' => 'integer'],
+        'microtime'         => ['type' => 'long', 'include_in_all' => false],
+        'signed-big-int'    => ['type' => 'long', 'include_in_all' => false],
+        'signed-int'        => ['type' => 'integer', 'include_in_all' => false],
+        'signed-medium-int' => ['type' => 'long', 'include_in_all' => false],
+        'signed-small-int'  => ['type' => 'short', 'include_in_all' => false],
+        'signed-tiny-int'   => ['type' => 'byte', 'include_in_all' => false],
+        'small-int'         => ['type' => 'integer', 'include_in_all' => false],
         'string'            => ['type' => 'string'],
-        'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed'],
+        'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
         'text'              => ['type' => 'string'],
-        'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed'],
-        'timestamp'         => ['type' => 'date'],
-        'tiny-int'          => ['type' => 'short'],
-        'uuid'              => ['type' => 'string', 'index' => 'not_analyzed'],
+        'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'timestamp'         => ['type' => 'date', 'include_in_all' => false],
+        'tiny-int'          => ['type' => 'short', 'include_in_all' => false],
+        'uuid'              => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
     ];
 
     /**
@@ -75,37 +78,66 @@ class MappingFactory
 
     /**
      * @param Schema $schema
-     * @return array the properties for the Elastica Mapping object.
+     * @return Mapping
      */
     public function create(Schema $schema)
     {
-        return $this->mapSchema($schema);
+        $rootObject = new \stdClass();
+        $rootObject->dynamic_templates = [];
+        $mapping = new Mapping(null, $this->mapSchema($schema, $rootObject));
+        foreach (get_object_vars($rootObject) as $k => $v) {
+            if (!empty($v)) {
+                $mapping->setParam($k, $v);
+            }
+        }
+        return $mapping;
     }
 
     /**
      * @param Schema $schema
-     * @param bool $root
+     * @param \stdClass $rootObject
+     * @param string $path
      * @return array
      */
-    protected function mapSchema(Schema $schema, $root = true)
+    protected function mapSchema(Schema $schema, \stdClass $rootObject, $path = null)
     {
         $map = [];
 
         foreach ($schema->getFields() as $field) {
             $fieldName = $field->getName();
             $type = $field->getType();
+            $fieldPath = empty($path) ? $fieldName : $path . '.' . $fieldName;
 
             if ($fieldName === Schema::PBJ_FIELD_NAME) {
-                $map[$fieldName] = ['type' => 'string', 'index' => 'not_analyzed'];
+                $map[$fieldName] = ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
                 continue;
             }
 
             $method = 'map' . ucfirst(StringUtils::toCamelFromSlug($type->getTypeValue()));
 
-            if (is_callable([$this, $method])) {
-                $map[$fieldName] = $this->$method($field, $root);
+            if ($field->isAMap()) {
+                $templateName = str_replace('-', '_', SlugUtils::create($fieldPath . '-template'));
+                if (is_callable([$this, $method])) {
+                    $rootObject->dynamic_templates[] = [
+                        $templateName => [
+                            'path_match' => $fieldPath . '.*',
+                            'mapping' => $this->$method($field, $rootObject, $path),
+                        ]
+                    ];
+                } else {
+                    $rootObject->dynamic_templates[] = [
+                        $templateName => [
+                            'path_match' => $fieldPath . '.*',
+                            'mapping' => $this->types[$type->getTypeValue()]
+                        ]
+                    ];
+                }
             } else {
-                $map[$fieldName] = $this->types[$type->getTypeValue()];
+                if (is_callable([$this, $method])) {
+                    $map[$fieldName] = $this->$method($field, $rootObject, $path);
+                } else {
+                    $map[$fieldName] = $this->types[$type->getTypeValue()];
+                }
             }
         }
 
@@ -113,27 +145,31 @@ class MappingFactory
     }
 
     /**
-     * todo: review, should be default include_in_parent to true?
+     * todo: review, should we default include_in_parent to true?
      * @link http://www.elastic.co/guide/en/elasticsearch/reference/1.4/mapping-nested-type.html
      *
      * @param Field $field
+     * @param \stdClass $rootObject
+     * @param string $path
      * @return array
      */
-    protected function mapMessage(Field $field)
+    protected function mapMessage(Field $field, \stdClass $rootObject, $path = null)
     {
         /** @var Message $class */
         $class = $field->getClassName();
         if (class_exists($class)) {
             $schema = $class::schema();
-            return ['type' => 'nested', 'properties' => $this->mapSchema($schema, false)];
+            return ['type' => 'nested', 'properties' => $this->mapSchema($schema, $rootObject, $path)];
         }
 
+        // todo: review, dynamic template to disable indexing by default on nested messages where type is not known until runtime?
         return [
             'type' => 'nested',
             'properties' => [
                 Schema::PBJ_FIELD_NAME => [
                     'type' => 'string',
-                    'index' => 'not_analyzed'
+                    'index' => 'not_analyzed',
+                    'include_in_all' => false
                 ]
             ]
         ];
@@ -141,9 +177,11 @@ class MappingFactory
 
     /**
      * @param Field $field
+     * @param \stdClass $rootObject
+     * @param string $path
      * @return array
      */
-    protected function mapString(Field $field)
+    protected function mapString(Field $field, \stdClass $rootObject, $path = null)
     {
         switch ($field->getFormat()->getValue()) {
             case Format::DATE:
@@ -160,7 +198,7 @@ class MappingFactory
             case Format::UUID:
             case Format::URI:
             case Format::URL:
-                return ['type' => 'string', 'index' => 'not_analyzed'];
+                return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
 
             /**
              * Using hashtag format with a string requires (by default) a custom analyzer
@@ -171,12 +209,15 @@ class MappingFactory
              * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
              */
             case Format::HASHTAG:
-                return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer'];
+                return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer', 'include_in_all' => false];
 
             case Format::IPV4:
-                return ['type' => 'ip'];
+                return ['type' => 'ip', 'include_in_all' => false];
 
             default:
+                if ($field->getPattern()) {
+                    return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
+                }
                 return ['type' => 'string'];
         }
     }
