@@ -121,7 +121,7 @@ class MappingFactory
                     $rootObject->dynamic_templates[] = [
                         $templateName => [
                             'path_match' => $fieldPath . '.*',
-                            'mapping' => $this->$method($field, $rootObject, $path),
+                            'mapping' => $this->$method($field, $rootObject, $fieldPath),
                         ]
                     ];
                 } else {
@@ -134,7 +134,7 @@ class MappingFactory
                 }
             } else {
                 if (is_callable([$this, $method])) {
-                    $map[$fieldName] = $this->$method($field, $rootObject, $path);
+                    $map[$fieldName] = $this->$method($field, $rootObject, $fieldPath);
                 } else {
                     $map[$fieldName] = $this->types[$type->getTypeValue()];
                 }
