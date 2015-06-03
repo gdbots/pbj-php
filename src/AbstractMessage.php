@@ -642,7 +642,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
-        Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);
 
         if (null === $value) {
             return $this->removeFromMap($fieldName, $key);
@@ -664,7 +663,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
-        Assertion::string($key, sprintf('Field [%s] key must be a string.', $fieldName), $fieldName);
 
         unset($this->data[$fieldName][$key]);
 
