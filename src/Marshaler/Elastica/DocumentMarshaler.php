@@ -88,15 +88,18 @@ final class DocumentMarshaler
     }
 
     /**
-     * @param Document $document
+     * @param Document|array $documentOrSource Document object or source array
      * @return Message
      *
      * @throws \Exception
      * @throws GdbotsPbjException
      */
-    public function unmarshal(Document $document)
+    public function unmarshal($documentOrSource)
     {
-        return $this->doUnmarshal($document->getData());
+        if ($documentOrSource instanceof Document) {
+            return $this->doUnmarshal($documentOrSource->getData());
+        }
+        return $this->doUnmarshal($documentOrSource);
     }
 
     /**
