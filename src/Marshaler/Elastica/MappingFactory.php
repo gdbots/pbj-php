@@ -197,8 +197,10 @@ class MappingFactory
             case Format::IPV6:
             case Format::UUID:
             case Format::URI:
-            case Format::URL:
                 return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
+
+            case Format::URL:
+                return ['type' => 'string', 'index' => 'no', 'include_in_all' => false];
 
             /**
              * Using hashtag format with a string requires (by default) a custom analyzer
