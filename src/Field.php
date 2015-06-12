@@ -21,7 +21,7 @@ final class Field implements ToArray, \JsonSerializable
      *
      * @constant string
      */
-    const VALID_NAME_PATTERN = '/^[a-zA-Z_]{1}[a-zA-Z0-9_]+$/';
+    const VALID_NAME_PATTERN = '/^[a-zA-Z_]{1}[a-zA-Z0-9_]*$/';
 
     /** @var string */
     private $name;
