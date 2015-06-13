@@ -175,14 +175,19 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     /**
      * {@inheritdoc}
+     * todo: review performance
      */
     final public function generateEtag(array $ignoredFields = [])
     {
+        if (null === self::$serializer) {
+            self::$serializer = new PhpArraySerializer();
+        }
+        $array = self::$serializer->serialize($this, ['includeAllFields' => true]);
+
         if (empty($ignoredFields)) {
-            return md5(json_encode($this));
+            return md5(json_encode($array));
         }
 
-        $array = $this->toArray();
         foreach ($ignoredFields as $field) {
             unset($array[$field]);
         }
