@@ -13,6 +13,14 @@ use Gdbots\Pbj\Schema;
 class MappingFactory
 {
     /**
+     * During the creation of a mapping any string types that are indexed will
+     * use the "standard" analyzer unless something else is specified.
+     * @link https://www.elastic.co/guide/en/elasticsearch/guide/current/custom-analyzers.html
+     * @var string
+     */
+    protected $defaultAnalyzer = null;
+
+    /**
      * Map of pbj type -> elastica mapping types.
      * @var array
      */
@@ -78,10 +86,12 @@ class MappingFactory
 
     /**
      * @param Schema $schema
+     * @param string $defaultAnalyzer
      * @return Mapping
      */
-    public function create(Schema $schema)
+    public function create(Schema $schema, $defaultAnalyzer = null)
     {
+        $this->defaultAnalyzer = $defaultAnalyzer;
         $rootObject = new \stdClass();
         $rootObject->dynamic_templates = [];
         $mapping = new Mapping(null, $this->mapSchema($schema, $rootObject));
@@ -128,7 +138,12 @@ class MappingFactory
                     $rootObject->dynamic_templates[] = [
                         $templateName => [
                             'path_match' => $fieldPath . '.*',
-                            'mapping' => $this->types[$type->getTypeValue()]
+                            'mapping' => $this->applyAnalyzer(
+                                $this->types[$type->getTypeValue()],
+                                $field,
+                                $rootObject,
+                                $path
+                            )
                         ]
                     ];
                 }
@@ -136,7 +151,12 @@ class MappingFactory
                 if (is_callable([$this, $method])) {
                     $map[$fieldName] = $this->$method($field, $rootObject, $fieldPath);
                 } else {
-                    $map[$fieldName] = $this->types[$type->getTypeValue()];
+                    $map[$fieldName] = $this->applyAnalyzer(
+                        $this->types[$type->getTypeValue()],
+                        $field,
+                        $rootObject,
+                        $path
+                    );
                 }
             }
         }
@@ -220,7 +240,39 @@ class MappingFactory
                 if ($field->getPattern()) {
                     return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
                 }
-                return ['type' => 'string'];
+                return $this->applyAnalyzer(['type' => 'string'], $field, $rootObject, $path);
         }
+    }
+
+    /**
+     * Modify the analyzer for a property prior to adding it to the document mapping.
+     * This is only applied to "string" types.
+     *
+     * @param array $mapping
+     * @param Field $field
+     * @param \stdClass $rootObject
+     * @param null $path
+     * @return array
+     */
+    protected function applyAnalyzer(array $mapping, Field $field, \stdClass $rootObject, $path = null)
+    {
+        if (null === $this->defaultAnalyzer) {
+            return $mapping;
+        }
+
+        if (!isset($mapping['type']) || 'string' != $mapping['type']) {
+            return $mapping;
+        }
+
+        if (isset($mapping['index']) && 'analyzed' != $mapping['index']) {
+            return $mapping;
+        }
+
+        if (isset($mapping['analyzer'])) {
+            return $mapping;
+        }
+
+        $mapping['analyzer'] = $this->defaultAnalyzer;
+        return $mapping;
     }
 }
