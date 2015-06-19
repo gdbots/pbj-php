@@ -48,7 +48,7 @@ final class ItemMarshaler
 
             if (!$message->has($fieldName)) {
                 if ($message->hasClearedField($fieldName)) {
-                    $payload[$fieldName] = array('NULL' => true);
+                    $payload[$fieldName] = ['NULL' => true];
                 }
                 continue;
             }
@@ -189,9 +189,19 @@ final class ItemMarshaler
         $type = $field->getType();
         if ($type->encodesToScalar()) {
             if ($type->isBinary()) {
-                return [Type::BINARY => $type->encode($value, $field)];
+                $value = $type->encode($value, $field);
+                if (empty($value)) {
+                    return ['NULL' => true];
+                } else {
+                    return [Type::BINARY => $value];
+                }
             } elseif ($type->isString()) {
-                return [Type::STRING => $type->encode($value, $field)];
+                $value = $type->encode($value, $field);
+                if (empty($value)) {
+                    return ['NULL' => true];
+                } else {
+                    return [Type::STRING => $value];
+                }
             } elseif ($type->isNumeric()) {
                 return [Type::NUMBER => (string) $type->encode($value, $field)];
             } elseif ($type->isBoolean()) {
