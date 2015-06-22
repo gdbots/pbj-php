@@ -2,6 +2,21 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.0
+* issue #13: Adding `isInSet`, `isInList`, `isInMap` to [Message] and implemented in [AbstractMessage].
+* issue #13: For convenience, added `getFromListAt` and `getFromMap` to [Message] and implemented in [AbstractMessage].
+* issue #12: Added [ItemMarshaler] for DynamoDb items for "aws/aws-sdk-php" library.
+* issue #11: Added [DocumentMarshaler] and [MappingFactory] for "ruflin/elastica" library.
+* [BooleanType] Modified to not be `allowedInSet`.
+* Removed interface and abstract class implementation from mixins.  Mixins must only provide fields and a trait for convenience.
+  It is up to the concrete message to implement interfaces and use those traits.  Compiler/generator will handle this eventually.
+* Now using psr4 for less nesting of directories.
+* Removed docblocks for expected Message methods to prevent IDE confusion when resolving methods, returning static and using static methods.
+  This means that traits will appear to be calling non-existent functions but they will exist, once added to a class implementing Message.
+* [Message] now provides `generateEtag` for creating an md5 hash of the current message payload.
+* [MessageResolver] Added `findOneUsingMixin` and `findAllUsingMixin` static methods for finding schemas by mixins.
+
+
 ## v0.2.2
 * Rename composer package to `gdbots/pbj`.
 

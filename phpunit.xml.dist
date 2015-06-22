@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="./tests/bootstrap.php" colors="true">
+  <php>
+    <!-- required for integration tests -->
+    <env name="AWS_KEY" value=""/>
+    <env name="AWS_SECRET" value=""/>
+    <env name="DYNAMODB_TABLE" value="pbj_tests"/>
+
+    <env name="ELASTIC_HOST" value=""/>
+    <env name="ELASTIC_PORT" value="9200"/>
+    <env name="ELASTIC_INDEX" value="pbj_tests"/>
+  </php>
 
   <testsuites>
     <testsuite name="Gdbots">
-      <directory>tests/Gdbots/Tests</directory>
+      <directory>tests/</directory>
     </testsuite>
   </testsuites>
 
