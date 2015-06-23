@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.1
+* [AssertionFailed] Make exception message more helpful by including the field name.
+* [MessageRef] Catch empty id and use 'null' if provided value is empty.  temp fix for YamlSerializer::deserialize issue.
+
+
 ## v0.3.0
 * issue #13: Adding `isInSet`, `isInList`, `isInMap` to [Message] and implemented in [AbstractMessage].
 * issue #13: For convenience, added `getFromListAt` and `getFromMap` to [Message] and implemented in [AbstractMessage].

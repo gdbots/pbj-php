@@ -28,6 +28,8 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     private $tag;
 
     /**
+     * todo: review random failures from YamlSerializer on $id when no tag is present.
+     *
      * @param MessageCurie $curie
      * @param string $id
      * @param string $tag The tag will be automatically fixed to a slug-formatted-string.
@@ -36,8 +38,8 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public function __construct(MessageCurie $curie, $id, $tag = null)
     {
         $this->curie = $curie;
-        $this->id = (string) $id;
-        Assertion::regex($this->id, '/^[A-Za-z0-9:_\-]+$/');
+        $this->id = trim((string) $id) ?: 'null';
+        Assertion::regex($this->id, '/^[A-Za-z0-9:_\-]+$/', null, 'MessageRef.id');
 
         if (null !== $tag) {
             $this->tag = SlugUtils::create($tag) ?: null;
@@ -54,8 +56,9 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public static function fromArray(array $data = [])
     {
         if (isset($data['curie'])) {
+            $id = isset($data['id']) ? $data['id'] : 'null';
             $tag = isset($data['tag']) ? $data['tag'] : null;
-            return new self(MessageCurie::fromString($data['curie']), $data['id'], $tag);
+            return new self(MessageCurie::fromString($data['curie']), $id, $tag);
         }
         throw new InvalidArgumentException('Payload must be a MessageRef type.');
     }
@@ -117,6 +120,14 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     public function getCurie()
     {
         return $this->curie;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasId()
+    {
+        return 'null' != $this->id;
     }
 
     /**
