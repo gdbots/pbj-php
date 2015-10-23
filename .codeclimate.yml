@@ -12,6 +12,7 @@ engines:
     config:
       file_extensions: 'php'
       rulesets: 'unusedcode'
+
 ratings:
   paths:
     - '**.php'
