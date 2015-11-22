@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.3.2
+* issue #16: [DateType] Convert DateType to UTC as well to ensure comparisons are consistent.
+
+
 ## v0.3.1
 * [AssertionFailed] Make exception message more helpful by including the field name.
 * [MessageRef] Catch empty id and use 'null' if provided value is empty.  temp fix for YamlSerializer::deserialize issue.

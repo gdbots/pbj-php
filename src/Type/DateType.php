@@ -9,6 +9,9 @@ use Gdbots\Pbj\Field;
 // todo: use DateTimeImmutable?
 final class DateType extends AbstractType
 {
+    /** @var \DateTimeZone */
+    private $utc;
+
     /**
      * {@inheritdoc}
      */
@@ -39,10 +42,11 @@ final class DateType extends AbstractType
         }
 
         if ($value instanceof \DateTime) {
-            return $value;
+            // ensures we're always in UTC and have no time parts.
+            $value = $value->format('Y-m-d');
         }
 
-        $date = \DateTime::createFromFormat('!Y-m-d', $value);
+        $date = \DateTime::createFromFormat('!Y-m-d', $value, $this->getUtcTimeZone());
         if ($date instanceof \DateTime) {
             return $date;
         }
@@ -76,5 +80,17 @@ final class DateType extends AbstractType
     public function allowedInSet()
     {
         return false;
+    }
+
+    /**
+     * @return \DateTimeZone
+     */
+    private function getUtcTimeZone()
+    {
+        if (null === $this->utc) {
+            $this->utc = new \DateTimeZone('UTC');
+        }
+
+        return $this->utc;
     }
 }

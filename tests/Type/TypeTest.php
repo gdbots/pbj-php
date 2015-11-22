@@ -8,11 +8,37 @@ use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\FieldBuilder;
 use Gdbots\Pbj\Type\BinaryType;
 use Gdbots\Pbj\Type\DateTimeType;
+use Gdbots\Pbj\Type\DateType;
 use Gdbots\Pbj\Type\Type;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class TypeTest extends \PHPUnit_Framework_TestCase
 {
+    public function testDateType()
+    {
+        $utcDate = new \DateTime('2014-12-25', new \DateTimeZone('UTC'));
+        $notUtcDate = new \DateTime('2014-12-25', new \DateTimeZone('America/Los_Angeles'));
+
+        $field = FieldBuilder::create('date', DateType::create())->build();
+        /** @var DateType $type */
+        $type = $field->getType();
+
+        $this->assertSame(
+            $type->encode($utcDate, $field),
+            $type->encode($notUtcDate, $field)
+        );
+
+        $this->assertSame(
+            $type->decode($utcDate->format('Y-m-d'), $field)->format('c'),
+            $type->decode($notUtcDate->format('Y-m-d'), $field)->format('c')
+        );
+
+        $this->assertSame(
+            $type->decode($utcDate, $field)->format('c'),
+            $type->decode($notUtcDate, $field)->format('c')
+        );
+    }
+
     public function testDateTimeType()
     {
         $expected = '2014-12-25T12:13:14.123456+00:00';
