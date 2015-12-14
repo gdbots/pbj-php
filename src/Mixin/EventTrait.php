@@ -2,14 +2,13 @@
 
 namespace Gdbots\Pbj\Mixin;
 
+use Gdbots\Common\Microtime;
 use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\MessageRef;
 
 trait EventTrait
 {
     use MessageTrait;
-    use CorrelatorTrait;
-    use MicrotimeTrait;
 
     /**
      * @param string $tag
@@ -51,5 +50,71 @@ trait EventTrait
     public function clearEventId()
     {
         return $this->clear('event_id');
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasMicrotime()
+    {
+        return $this->has('microtime');
+    }
+
+    /**
+     * @return Microtime
+     */
+    public function getMicrotime()
+    {
+        return $this->get('microtime');
+    }
+
+    /**
+     * @param Microtime $microtime
+     * @return static
+     */
+    public function setMicrotime(Microtime $microtime)
+    {
+        return $this->setSingleValue('microtime', $microtime);
+    }
+
+    /**
+     * @return static
+     */
+    public function clearMicrotime()
+    {
+        return $this->clear('microtime');
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasCorrelator()
+    {
+        return $this->has('correlator');
+    }
+
+    /**
+     * @return MessageRef
+     */
+    public function getCorrelator()
+    {
+        return $this->get('correlator');
+    }
+
+    /**
+     * @param MessageRef $correlator
+     * @return static
+     */
+    public function setCorrelator(MessageRef $correlator)
+    {
+        return $this->setSingleValue('correlator', $correlator);
+    }
+
+    /**
+     * @return static
+     */
+    public function clearCorrelator()
+    {
+        return $this->clear('correlator');
     }
 }

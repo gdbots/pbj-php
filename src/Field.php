@@ -83,6 +83,9 @@ final class Field implements ToArray, \JsonSerializable
     /** @var \Closure */
     private $assertion;
 
+    /** @var bool */
+    private $overridable = false;
+
     /**
      * @param string $name
      * @param Type $type
@@ -100,7 +103,8 @@ final class Field implements ToArray, \JsonSerializable
      * @param bool $useTypeDefault
      * @param null|string $className
      * @param null|array $anyOfClassNames
-     * @param callable|null $assertion
+     * @param \Closure|null $assertion
+     * @param bool $overridable
      */
     public function __construct(
         $name,
@@ -119,7 +123,8 @@ final class Field implements ToArray, \JsonSerializable
         $useTypeDefault = true,
         $className = null,
         array $anyOfClassNames = null,
-        \Closure $assertion = null
+        \Closure $assertion = null,
+        $overridable = false
     ) {
         Assertion::betweenLength($name, 1, 127);
         Assertion::regex($name, self::VALID_NAME_PATTERN,
@@ -127,6 +132,7 @@ final class Field implements ToArray, \JsonSerializable
         );
         Assertion::boolean($required);
         Assertion::boolean($useTypeDefault);
+        Assertion::boolean($overridable);
 
         /*
          * a message type allows for interfaces to be used
@@ -153,6 +159,7 @@ final class Field implements ToArray, \JsonSerializable
         $this->className = $className;
         $this->anyOfClassNames = $anyOfClassNames;
         $this->assertion = $assertion;
+        $this->overridable = $overridable;
 
         $this->applyFieldRule($rule);
         $this->applyStringOptions($minLength, $maxLength, $pattern, $format);
@@ -499,6 +506,14 @@ final class Field implements ToArray, \JsonSerializable
     }
 
     /**
+     * @return bool
+     */
+    public function isOverridable()
+    {
+        return $this->overridable;
+    }
+
+    /**
      * @param mixed $value
      * @throws AssertionFailed
      * @throws \Exception
@@ -540,7 +555,8 @@ final class Field implements ToArray, \JsonSerializable
             'use_type_default' => $this->useTypeDefault,
             'class_name'    => $this->className,
             'any_of_class_names' => $this->anyOfClassNames,
-            'has_assertion' => null !== $this->assertion
+            'has_assertion' => null !== $this->assertion,
+            'overridable'   => $this->overridable,
         ];
     }
 
@@ -554,14 +570,14 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * Returns true if this field is likely compatible with the
-     * provided field.  Can be used by merging operations.
+     * provided field during a mergeFrom operation.
      *
-     * todo: implement/test isCompatible
+     * todo: implement/test isCompatibleForMerge
      *
      * @param Field $other
      * @return bool
      */
-    public function isCompatible(Field $other)
+    public function isCompatibleForMerge(Field $other)
     {
         if ($this->name !== $other->name) {
             return false;
@@ -580,6 +596,38 @@ final class Field implements ToArray, \JsonSerializable
         }
 
         if (!array_intersect($this->anyOfClassNames, $other->anyOfClassNames)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if the provided field can be used as an
+     * override to this field.
+     *
+     * @param Field $other
+     * @return bool
+     */
+    public function isCompatibleForOverride(Field $other)
+    {
+        if (!$this->overridable) {
+            return false;
+        }
+
+        if ($this->name !== $other->name) {
+            return false;
+        }
+
+        if ($this->type !== $other->type) {
+            return false;
+        }
+
+        if ($this->rule !== $other->rule) {
+            return false;
+        }
+
+        if ($this->required !== $other->required) {
             return false;
         }
 

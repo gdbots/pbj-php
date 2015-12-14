@@ -75,4 +75,20 @@ interface DomainCommand extends Message
      * @return static
      */
     public function clearCorrelator();
+
+    /**
+     * @return int
+     */
+    public function getRetries();
+
+    /**
+     * @param int $retries
+     * @return static
+     */
+    public function setRetries($retries = 0);
+
+    /**
+     * @return static
+     */
+    public function clearRetries();
 }

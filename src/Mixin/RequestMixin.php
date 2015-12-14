@@ -14,7 +14,7 @@ final class RequestMixin extends AbstractMixin
      */
     public function getId()
     {
-        return SchemaId::fromString('pbj:gdbots:pbj:mixin:request:1-0-0');
+        return SchemaId::fromString('pbj:gdbots:pbj:mixin:request:1-0-1');
     }
 
     /**
@@ -30,6 +30,8 @@ final class RequestMixin extends AbstractMixin
                 ->required()
                 ->build(),
             Fb::create('correlator', T\MessageRefType::create())
+                ->build(),
+            Fb::create('retries', T\TinyIntType::create())
                 ->build(),
         ];
     }
