@@ -16,19 +16,19 @@
     "aws/aws-sdk-php": "~2.8",
     "ruflin/elastica": "~1.4.3"
   },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "0.3.x-dev"
-    }
-  },
   "autoload": {
     "psr-4": {
-      "Gdbots\\Pbj\\": "src/"
+      "Gdbots\\Pbj\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Gdbots\\Tests\\Pbj\\": "tests/"
+      "Gdbots\\Tests\\Pbj\\": "tests"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.4.x-dev"
     }
   },
   "replace": {
