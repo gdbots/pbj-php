@@ -22,6 +22,7 @@ class FieldOverrideNotCompatible extends SchemaException
     {
         $this->schema = $schema;
         $this->existingField = $this->schema->getField($fieldName);
+        $this->overrideField = $overrideField;
         parent::__construct(
             sprintf(
                 'Field [%s] override for [%s] is not compatible. Name, Type, Rule and Required must match.',
