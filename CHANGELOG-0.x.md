@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.4.0
+* issue #16: Create MessageTrait with base methods for all mixins/traits.
+
+
 ## v0.3.2
 * issue #16: [DateType] Convert DateType to UTC as well to ensure comparisons are consistent.
 

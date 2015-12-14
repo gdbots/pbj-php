@@ -8,6 +8,7 @@ use Gdbots\Pbj\MessageRef;
 // todo: attempts/retries transient fields?  or transient fields bag?
 trait CommandTrait
 {
+    use MessageTrait;
     use CorrelatorTrait;
     use MicrotimeTrait;
 

@@ -8,6 +8,8 @@ use Gdbots\Pbj\MessageRef;
 
 trait EntityTrait
 {
+    use MessageTrait;
+
     /**
      * @param string $tag
      * @return MessageRef

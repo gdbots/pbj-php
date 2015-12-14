@@ -6,6 +6,8 @@ use Gdbots\Pbj\MessageRef;
 
 trait CorrelatorTrait
 {
+    use MessageTrait;
+
     /**
      * @return bool
      */

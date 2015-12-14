@@ -7,6 +7,7 @@ use Gdbots\Pbj\MessageRef;
 
 trait RequestTrait
 {
+    use MessageTrait;
     use CorrelatorTrait;
     use MicrotimeTrait;
 

@@ -6,6 +6,8 @@ use Gdbots\Common\Microtime;
 
 trait MicrotimeTrait
 {
+    use MessageTrait;
+
     /**
      * @return bool
      */
