@@ -20,11 +20,6 @@ trait EntityTrait
     }
 
     /**
-     * @return array
-     */
-    abstract public function getUriTemplateVars();
-
-    /**
      * @return bool
      */
     public function hasEntityId()

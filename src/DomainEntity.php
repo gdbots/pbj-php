@@ -8,17 +8,6 @@ use Gdbots\Identifiers\Identifier;
 interface DomainEntity extends Message
 {
     /**
-     * @param string $tag
-     * @return MessageRef
-     */
-    public function generateMessageRef($tag = null);
-
-    /**
-     * @return array
-     */
-    public function getUriTemplateVars();
-
-    /**
      * @return bool
      */
     public function hasEntityId();

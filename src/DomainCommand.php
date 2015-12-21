@@ -8,12 +8,6 @@ use Gdbots\Identifiers\TimeUuidIdentifier;
 interface DomainCommand extends Message
 {
     /**
-     * @param string $tag
-     * @return MessageRef
-     */
-    public function generateMessageRef($tag = null);
-
-    /**
      * @return bool
      */
     public function hasCommandId();

@@ -20,6 +20,17 @@ trait RequestTrait
     }
 
     /**
+     * @return array
+     */
+    public function getUriTemplateVars()
+    {
+        return [
+            'request_id' => $this->getRequestId()->toString(),
+            'microtime' => $this->getMicrotime()->toString(),
+        ];
+    }
+
+    /**
      * @return bool
      */
     public function hasRequestId()

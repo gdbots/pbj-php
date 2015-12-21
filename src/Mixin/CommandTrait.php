@@ -20,6 +20,17 @@ trait CommandTrait
     }
 
     /**
+     * @return array
+     */
+    public function getUriTemplateVars()
+    {
+        return [
+            'command_id' => $this->getCommandId()->toString(),
+            'microtime' => $this->getMicrotime()->toString(),
+        ];
+    }
+
+    /**
      * @return bool
      */
     public function hasCommandId()

@@ -20,6 +20,17 @@ trait ResponseTrait
     }
 
     /**
+     * @return array
+     */
+    public function getUriTemplateVars()
+    {
+        return [
+            'response_id' => $this->getResponseId()->toString(),
+            'microtime' => $this->getMicrotime()->toString(),
+        ];
+    }
+
+    /**
      * @return bool
      */
     public function hasResponseId()

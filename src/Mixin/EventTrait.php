@@ -20,6 +20,17 @@ trait EventTrait
     }
 
     /**
+     * @return array
+     */
+    public function getUriTemplateVars()
+    {
+        return [
+            'event_id' => $this->getEventId()->toString(),
+            'microtime' => $this->getMicrotime()->toString(),
+        ];
+    }
+
+    /**
      * @return bool
      */
     public function hasEventId()
