@@ -14,6 +14,11 @@ interface DomainEntity extends Message
     public function generateMessageRef($tag = null);
 
     /**
+     * @return array
+     */
+    public function getUriTemplateVars();
+
+    /**
      * @return bool
      */
     public function hasEntityId();
