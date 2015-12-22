@@ -2,6 +2,14 @@
 This changelog references the relevant changes done in 0.x versions.
 
 
+## v0.4.0
+* issue #18: Create MessageTrait with base methods for all mixins/traits.
+* issue #19: [Field,FieldBuilder,Schema] Allow mixin fields to be declared overridable.
+* Eliminated use of `CorrelatorTrait` and `MicrotimeTrait` as it doesn't align with the compiler strategy.
+* issue #20: Add `retries` field to commands and request mixins.
+* Moved `generateMessageRef` and `getUriTemplateVars` down to `Message` interface.
+
+
 ## v0.3.2
 * issue #16: [DateType] Convert DateType to UTC as well to ensure comparisons are consistent.
 

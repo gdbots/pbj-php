@@ -26,9 +26,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /** @var YamlSerializer */
     private static $yamlSerializer;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $data = [];
 
     /**
@@ -119,6 +117,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         if (null === self::$serializer) {
             self::$serializer = new PhpArraySerializer();
         }
+
+        if (!isset($data[Schema::PBJ_FIELD_NAME])) {
+            $data[Schema::PBJ_FIELD_NAME] = static::schema()->getId()->toString();
+        }
+
         $message = self::$serializer->deserialize($data);
         return $message;
     }
@@ -195,6 +198,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
+     * todo: recursively validate nested messages?
      * {@inheritdoc}
      * @return static
      */

@@ -29,6 +29,22 @@ final class NestedMessage extends AbstractMessage
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function generateMessageRef($tag = null)
+    {
+        return new MessageRef(static::schema()->getCurie(), null, $tag);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUriTemplateVars()
+    {
+        return [];
+    }
+
+    /**
      * @return string
      */
     public function getTest1()

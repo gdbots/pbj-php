@@ -6,6 +6,7 @@ use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
+use Gdbots\Pbj\Exception\FieldOverrideNotCompatible;
 use Gdbots\Pbj\Exception\MixinAlreadyAdded;
 use Gdbots\Pbj\Exception\MixinNotDefined;
 
@@ -33,14 +34,6 @@ final class Schema implements ToArray, \JsonSerializable
 
     /** @var array */
     private $mixinIds = [];
-
-    /**
-     * Fields added by mixins that are okay to be overridden
-     * by the schema of the message itself.
-     *
-     * @var array
-     */
-    private $overridable = [];
 
     /**
      * @param SchemaId|string $id
@@ -123,18 +116,23 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @param Field $field
      * @throws FieldAlreadyDefined
+     * @throws FieldOverrideNotCompatible
      */
     private function addField(Field $field)
     {
         $fieldName = $field->getName();
+        if ($this->hasField($fieldName)) {
+            $existingField = $this->getField($fieldName);
+            if (!$existingField->isOverridable()) {
+                throw new FieldAlreadyDefined($this, $fieldName);
+            }
 
-        if ($this->hasField($fieldName) && !isset($this->overridable[$fieldName])) {
-            throw new FieldAlreadyDefined($this, $fieldName);
+            if (!$existingField->isCompatibleForOverride($field)) {
+                throw new FieldOverrideNotCompatible($this, $fieldName, $field);
+            }
         }
 
-        unset($this->overridable[$fieldName]);
         $this->fields[$fieldName] = $field;
-
         if ($field->isRequired()) {
             $this->requiredFields[$fieldName] = $field;
         }
@@ -142,7 +140,6 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param Mixin $mixin
-     * @throws FieldAlreadyDefined
      * @throws MixinAlreadyAdded
      */
     private function addMixin(Mixin $mixin)
@@ -154,18 +151,7 @@ final class Schema implements ToArray, \JsonSerializable
 
         $this->mixins[$id->getCurieWithMajorRev()] = $mixin;
         foreach ($mixin->getFields() as $field) {
-            $fieldName = $field->getName();
-
-            // a mixin cannot override the field of another mixin
-            if ($this->hasField($fieldName)) {
-                throw new FieldAlreadyDefined($this, $fieldName);
-            }
-
-            $this->overridable[$fieldName] = true;
-            $this->fields[$fieldName] = $field;
-            if ($field->isRequired()) {
-                $this->requiredFields[$fieldName] = $field;
-            }
+            $this->addField($field);
         }
     }
 

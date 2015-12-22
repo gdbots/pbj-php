@@ -48,6 +48,24 @@ interface Message
     public function generateEtag(array $ignoredFields = []);
 
     /**
+     * Generates a reference to this message with an optional tag.
+     *
+     * @param string $tag
+     * @return MessageRef
+     */
+    public function generateMessageRef($tag = null);
+
+    /**
+     * Returns an array that can be used in a uri template to generate
+     * a uri/url for this message.
+     * @link https://tools.ietf.org/html/rfc6570
+     * @link https://github.com/gdbots/uri-template-php
+     *
+     * @return array
+     */
+    public function getUriTemplateVars();
+
+    /**
      * Verifies all required fields have been populated.
      *
      * @return static

@@ -20,7 +20,7 @@ class FieldAlreadyDefined extends SchemaException
         $this->field = $this->schema->getField($fieldName);
         parent::__construct(
             sprintf(
-                'Field [%s] is already defined on message [%s].',
+                'Field [%s] is already defined on message [%s] and is not overridable.',
                 $this->field->getName(),
                 $this->schema->getClassName()
             )

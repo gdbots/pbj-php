@@ -8,12 +8,6 @@ use Gdbots\Identifiers\UuidIdentifier;
 interface DomainRequest extends Message
 {
     /**
-     * @param string $tag
-     * @return MessageRef
-     */
-    public function generateMessageRef($tag = null);
-
-    /**
      * @return bool
      */
     public function hasRequestId();
@@ -75,4 +69,20 @@ interface DomainRequest extends Message
      * @return static
      */
     public function clearCorrelator();
+
+    /**
+     * @return int
+     */
+    public function getRetries();
+
+    /**
+     * @param int $retries
+     * @return static
+     */
+    public function setRetries($retries = 0);
+
+    /**
+     * @return static
+     */
+    public function clearRetries();
 }

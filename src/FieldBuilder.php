@@ -58,6 +58,9 @@ final class FieldBuilder
     /** @var \Closure */
     private $assertion;
 
+    /** @var bool */
+    private $overridable = false;
+
     /**
      * @param string $name
      * @param Type $type
@@ -266,6 +269,16 @@ final class FieldBuilder
     }
 
     /**
+     * @param bool $overridable
+     * @return self
+     */
+    public function overridable($overridable)
+    {
+        $this->overridable = (bool) $overridable;
+        return $this;
+    }
+
+    /**
      * @return Field
      */
     public function build()
@@ -291,7 +304,8 @@ final class FieldBuilder
             $this->useTypeDefault,
             $this->className,
             $this->anyOfClassNames,
-            $this->assertion
+            $this->assertion,
+            $this->overridable
         );
     }
 }

@@ -6,6 +6,7 @@ use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
@@ -77,6 +78,22 @@ final class EmailMessage extends AbstractMessage
 
         MessageResolver::registerSchema($schema);
         return $schema;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function generateMessageRef($tag = null)
+    {
+        return new MessageRef(static::schema()->getCurie(), $this->getMessageId(), $tag);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUriTemplateVars()
+    {
+        return ['id' => $this->getMessageId()->toString()];
     }
 
     /**
