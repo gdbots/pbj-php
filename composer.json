@@ -9,7 +9,7 @@
     "ext-bcmath": "*",
     "beberlei/assert": "~2.1",
     "gdbots/common": "~0.1.2",
-    "symfony/yaml": "~3.0"
+    "symfony/yaml": "~2.6|~3.0"
   },
   "require-dev": {
     "phpunit/phpunit": "~4.3",
