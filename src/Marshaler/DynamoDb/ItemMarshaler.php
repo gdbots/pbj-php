@@ -2,7 +2,6 @@
 
 namespace Gdbots\Pbj\Marshaler\DynamoDb;
 
-use Aws\DynamoDb\Enum\Type;
 use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
@@ -29,6 +28,19 @@ use Gdbots\Pbj\SchemaId;
  */
 final class ItemMarshaler
 {
+    const TYPE_S = 'S';
+    const TYPE_N = 'N';
+    const TYPE_B = 'B';
+    const TYPE_SS = 'SS';
+    const TYPE_NS = 'NS';
+    const TYPE_BS = 'BS';
+    const TYPE_STRING = 'S';
+    const TYPE_NUMBER = 'N';
+    const TYPE_BINARY = 'B';
+    const TYPE_STRING_SET = 'SS';
+    const TYPE_NUMBER_SET = 'NS';
+    const TYPE_BINARY_SET = 'BS';
+
     /**
      * @param Message $message
      * @return array
@@ -193,17 +205,17 @@ final class ItemMarshaler
                 if (empty($value)) {
                     return ['NULL' => true];
                 } else {
-                    return [Type::BINARY => $value];
+                    return [self::TYPE_BINARY => $value];
                 }
             } elseif ($type->isString()) {
                 $value = $type->encode($value, $field);
                 if (empty($value)) {
                     return ['NULL' => true];
                 } else {
-                    return [Type::STRING => $value];
+                    return [self::TYPE_STRING => $value];
                 }
             } elseif ($type->isNumeric()) {
-                return [Type::NUMBER => (string) $type->encode($value, $field)];
+                return [self::TYPE_NUMBER => (string) $type->encode($value, $field)];
             } elseif ($type->isBoolean()) {
                 return ['BOOL' => $type->encode($value, $field)];
             }
@@ -250,11 +262,11 @@ final class ItemMarshaler
         }
 
         if ($type->isBinary()) {
-            $dynamoType = Type::BINARY_SET;
+            $dynamoType = self::TYPE_BINARY_SET;
         } elseif ($type->isString()) {
-            $dynamoType = Type::STRING_SET;
+            $dynamoType = self::TYPE_STRING_SET;
         } elseif ($type->isNumeric()) {
-            $dynamoType = Type::NUMBER_SET;
+            $dynamoType = self::TYPE_NUMBER_SET;
         } else {
             throw new EncodeValueFailed(
                 $value,
@@ -283,11 +295,11 @@ final class ItemMarshaler
     {
         return [
             'M' => [
-                'type' => [Type::STRING => 'Point'],
+                'type' => [self::TYPE_STRING => 'Point'],
                 'coordinates' => [
                     'L' => [
-                        [Type::NUMBER => (string) $value->getLongitude()],
-                        [Type::NUMBER => (string) $value->getLatitude()]
+                        [self::TYPE_NUMBER => (string) $value->getLongitude()],
+                        [self::TYPE_NUMBER => (string) $value->getLatitude()]
                     ]
                 ]
             ]
@@ -302,9 +314,9 @@ final class ItemMarshaler
     {
         return [
             'M' => [
-                'curie' => [Type::STRING => $value->getCurie()->toString()],
-                'id'    => [Type::STRING => $value->getId()],
-                'tag'   => $value->hasTag() ? [Type::STRING => $value->getTag()] : ['NULL' => true]
+                'curie' => [self::TYPE_STRING => $value->getCurie()->toString()],
+                'id'    => [self::TYPE_STRING => $value->getId()],
+                'tag'   => $value->hasTag() ? [self::TYPE_STRING => $value->getTag()] : ['NULL' => true]
             ]
         ];
     }
