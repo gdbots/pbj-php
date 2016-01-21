@@ -410,10 +410,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
-    final public function get($fieldName)
+    final public function get($fieldName, $default = null)
     {
         if (!$this->has($fieldName)) {
-            return null;
+            return $default;
         }
 
         $field = static::schema()->getField($fieldName);
@@ -459,6 +459,15 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * @return static
      */
     final public function setSingleValue($fieldName, $value)
+    {
+        return $this->set($fieldName, $value);
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return static
+     */
+    final public function set($fieldName, $value)
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -562,14 +571,14 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
-    final public function getFromListAt($fieldName, $index)
+    final public function getFromListAt($fieldName, $index, $default = null)
     {
         $index = (int) $index;
         if (empty($this->data[$fieldName])
             || !is_array($this->data[$fieldName])
             || !isset($this->data[$fieldName][$index])
         ) {
-            return null;
+            return $default;
         }
         return $this->data[$fieldName][$index];
     }
@@ -634,10 +643,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     /**
      * {@inheritdoc}
      */
-    final public function getFromMap($fieldName, $key)
+    final public function getFromMap($fieldName, $key, $default = null)
     {
         if (!$this->isInMap($fieldName, $key)) {
-            return null;
+            return $default;
         }
         return $this->data[$fieldName][$key];
     }
