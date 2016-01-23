@@ -40,6 +40,22 @@ interface Message
     public function toArray();
 
     /**
+     * Returns a Yaml string version of the message.
+     * Useful for debugging or logging.
+     *
+     * @param array $options
+     * @return string
+     */
+    public function toYaml(array $options = []);
+
+    /**
+     * Returns the message as a human readable string.
+     *
+     * @return string
+     */
+    public function __toString();
+
+    /**
      * Generates an md5 hash of the json representation of the current message.
      *
      * @param string[] $ignoredFields

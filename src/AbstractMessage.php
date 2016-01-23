@@ -138,25 +138,30 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     }
 
     /**
-     * Returns a Yaml string version of the message.
-     * Useful for debugging or logging.
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    final public function __toString()
+    final public function toYaml(array $options = [])
     {
         try {
             if (null === self::$yamlSerializer) {
                 self::$yamlSerializer = new YamlSerializer();
             }
-            return self::$yamlSerializer->serialize($this);
+            return self::$yamlSerializer->serialize($this, $options);
         } catch (\Exception $e) {
             return sprintf(
-                'Failed to render [%s] as a string with error: %s',
+                'Failed to render [%s] as a yaml string with error: %s',
                 self::schema()->toString(),
                 $e->getMessage()
             );
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public function __toString()
+    {
+        return $this->toYaml();
     }
 
     /**
@@ -194,6 +199,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         foreach ($ignoredFields as $field) {
             unset($array[$field]);
         }
+
         return md5(json_encode($array));
     }
 
