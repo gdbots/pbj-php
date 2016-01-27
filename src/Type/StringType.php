@@ -34,8 +34,9 @@ final class StringType extends AbstractStringType
                 Assertion::true(
                     DateUtils::isValidISO8601Date($value),
                     sprintf(
-                        'Field [%s] must be a valid ISO8601 date-time.  Format must match [%s] or [%s].',
+                        'Field [%s] must be a valid ISO8601 date-time.  Format must match one of [%s], [%s] or [%s].',
                         $field->getName(),
+                        DateUtils::ISO8601_ZULU,
                         DateUtils::ISO8601,
                         \DateTime::ISO8601
                     ),

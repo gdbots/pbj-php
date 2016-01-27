@@ -18,17 +18,17 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     {
         /** @var EmailMessage $message */
         $message = $this->createEmailMessage();
-        $message->setPriority(Priority::HIGH());
+        $message->set('priority', Priority::HIGH());
 
-        $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
-        $this->assertTrue(Priority::HIGH() === $message->getPriority());
+        $this->assertTrue($message->get('priority')->equals(Priority::HIGH));
+        $this->assertTrue(Priority::HIGH() === $message->get('priority'));
 
         $json = $this->getSerializer()->serialize($message);
         $message = $this->getSerializer()->deserialize($json);
 
-        $this->assertTrue($message->getPriority()->equals(Priority::HIGH));
-        $this->assertTrue(Priority::HIGH() === $message->getPriority());
-        $this->assertSame($message->getNested()->getLocation()->getLatitude(), 0.5);
+        $this->assertTrue($message->get('priority')->equals(Priority::HIGH));
+        $this->assertTrue(Priority::HIGH() === $message->get('priority'));
+        $this->assertSame($message->get('nested')->get('location')->getLatitude(), 0.5);
 
         //echo json_encode($message, JSON_PRETTY_PRINT);
         //echo json_encode($message->schema(), JSON_PRETTY_PRINT);
@@ -38,22 +38,17 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     public function testUniqueItemsInSet()
     {
         $message = EmailMessage::create()
-            ->addLabel('CHICKEN')
-            ->addLabel('Chicken')
-            ->addLabel('chicken')
-            ->addLabel('DONUTS')
-            ->addLabel('Donuts')
-            ->addLabel('donuts')
+            ->addToSet('labels', ['CHICKEN', 'Chicken', 'chicken', 'DONUTS', 'Donuts', 'donuts'])
         ;
 
-        $this->assertCount(2, $message->getLabels());
-        $this->assertSame($message->getLabels(), ['chicken', 'donuts']);
+        $this->assertCount(2, $message->get('labels'));
+        $this->assertSame($message->get('labels'), ['chicken', 'donuts']);
     }
 
     public function testisInSet()
     {
         $message = EmailMessage::create()
-            ->addLabel('abc')
+            ->addToSet('labels', ['abc'])
             ->addToSet(
                 'enum_in_set',
                 [
@@ -99,7 +94,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         /** @var MapsMessage $messageInList */
         $messageInList = $message->get('any_of_message')[0];
         $messageNotInList = clone $messageInList;
-        $messageNotInList->addToAMap('String', 'key', 'val');
+        $messageNotInList->addToMap('String', 'key', 'val');
 
         $this->assertTrue($message->isInList('any_of_message', $messageInList));
         $this->assertFalse($message->isInList('any_of_message', $messageNotInList));
@@ -138,7 +133,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     public function testisInMap()
     {
         $message = MapsMessage::create();
-        $message->addToAMap('String', 'string1', 'val1');
+        $message->addToMap('String', 'string1', 'val1');
 
         $this->assertTrue($message->isInMap('String', 'string1'));
         $this->assertFalse($message->isInMap('String', 'notinmap'));
@@ -152,14 +147,13 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     {
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create()
-            ->setTest1('val1')
-            ->addTest2(1)
-            ->addTest2(2)
+            ->set('test1', 'val1')
+            ->addToSet('test2', [1, 2])
         ;
 
-        $message->setNested($nestedMessage);
-        $this->assertSame($nestedMessage->getTest2(), [1, 2]);
-        $this->assertSame($message->getNested(), $nestedMessage);
+        $message->set('nested', $nestedMessage);
+        $this->assertSame($nestedMessage->get('test2'), [1, 2]);
+        $this->assertSame($message->get('nested'), $nestedMessage);
     }
 
     public function testAnyOfMessageInList()
@@ -169,7 +163,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
                 'any_of_message',
                 [
                     MapsMessage::create()->addToMap('String', 'test:field:name', 'value1'),
-                    NestedMessage::create()->setTest1('value1')
+                    NestedMessage::create()->set('test1', 'value1')
                 ]
         );
 
@@ -180,7 +174,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     {
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create();
-        $message->setNested($nestedMessage);
+        $message->set('nested', $nestedMessage);
 
         $message->freeze();
         $this->assertTrue($message->isFrozen());
@@ -194,44 +188,44 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     {
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create();
-        $message->setNested($nestedMessage);
+        $message->set('nested', $nestedMessage);
 
         $message->freeze();
-        $message->setFromName('homer');
-        $nestedMessage->setTest1('test1');
+        $message->set('from_name', 'homer');
+        $nestedMessage->set('test1', 'test1');
     }
 
     public function testClone()
     {
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create();
-        $message->setNested($nestedMessage);
+        $message->set('nested', $nestedMessage);
 
-        $nestedMessage->setTest1('original');
+        $nestedMessage->set('test1', 'original');
         $message2 = clone $message;
-        $message2->setFromName('marge')->getNested()->setTest1('clone');
+        $message2->set('from_name', 'marge')->get('nested')->set('test1', 'clone');
 
         $this->assertNotSame($message, $message2);
-        $this->assertNotSame($message->getDateSent(), $message2->getDateSent());
-        $this->assertNotSame($message->getMicrotimeSent(), $message2->getMicrotimeSent());
-        $this->assertNotSame($message->getNested(), $message2->getNested());
-        $this->assertNotSame($message->getNested()->getTest1(), $message2->getNested()->getTest1());
+        $this->assertNotSame($message->get('date_sent'), $message2->get('date_sent'));
+        $this->assertNotSame($message->get('microtime_sent'), $message2->get('microtime_sent'));
+        $this->assertNotSame($message->get('nested'), $message2->get('nested'));
+        $this->assertNotSame($message->get('nested')->get('test1'), $message2->get('nested')->get('test1'));
     }
 
     public function testCloneIsMutableAfterOriginalIsFrozen()
     {
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create();
-        $message->setNested($nestedMessage);
+        $message->set('nested', $nestedMessage);
 
-        $nestedMessage->setTest1('original');
+        $nestedMessage->set('test1', 'original');
         $message->freeze();
 
         $message2 = clone $message;
-        $message2->setFromName('marge')->getNested()->setTest1('clone');
+        $message2->set('from_name', 'marge')->get('nested')->set('test1', 'clone');
 
         try {
-            $message->setFromName('homer')->getNested()->setTest1('original');
+            $message->set('from_name', 'homer')->get('nested')->set('test1', 'original');
             $this->fail('Original message should still be immutable.');
         } catch (FrozenMessageIsImmutable $e) {
         }

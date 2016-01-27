@@ -41,36 +41,36 @@ class TypeTest extends \PHPUnit_Framework_TestCase
 
     public function testDateTimeType()
     {
-        $expected = '2014-12-25T12:13:14.123456+00:00';
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601, $expected);
+        $expected = '2014-12-25T12:13:14.123456Z';
+        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, $expected);
         $field = FieldBuilder::create('date_time', DateTimeType::create())->build();
 
         $encoded = $field->getType()->encode($dateTime, $field);
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601, $encoded);
+        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, $encoded);
         $this->assertSame($expected, $encoded);
 
         $decoded = $field->getType()->decode($encoded, $field);
         $this->assertSame(
-            $dateTime->format(DateUtils::ISO8601),
-            $decoded->format(DateUtils::ISO8601)
+            $dateTime->format(DateUtils::ISO8601_ZULU),
+            $decoded->format(DateUtils::ISO8601_ZULU)
         );
     }
 
     public function testDateTimeTypeUtcConversion()
     {
         $notUtc = '2014-12-25T12:13:14.123456+08:00';
-        $expected = '2014-12-25T04:13:14.123456+00:00';
+        $expected = '2014-12-25T04:13:14.123456Z';
         $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601, $notUtc);
         $field = FieldBuilder::create('date_time', DateTimeType::create())->build();
 
         $encoded = $field->getType()->encode($dateTime, $field);
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601, $encoded);
+        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, $encoded);
         $this->assertSame($expected, $encoded);
 
         $decoded = $field->getType()->decode($encoded, $field);
         $this->assertSame(
-            $dateTime->format(DateUtils::ISO8601),
-            $decoded->format(DateUtils::ISO8601)
+            $dateTime->format(DateUtils::ISO8601_ZULU),
+            $decoded->format(DateUtils::ISO8601_ZULU)
         );
     }
 
@@ -79,10 +79,10 @@ class TypeTest extends \PHPUnit_Framework_TestCase
         $message = NestedMessage::create();
         $geoJson = '{"type":"Point","coordinates":[102.0,0.5]}';
         $point = GeoPoint::fromArray(json_decode($geoJson, true));
-        $message->setLocation($point);
+        $message->set('location', $point);
 
-        $this->assertSame($message->getLocation()->getLatitude(), 0.5);
-        $this->assertSame($message->getLocation()->getLongitude(), 102.0);
+        $this->assertSame($message->get('location')->getLatitude(), 0.5);
+        $this->assertSame($message->get('location')->getLongitude(), 102.0);
         $this->assertSame($message->toArray()['location'], $point->toArray());
     }
 

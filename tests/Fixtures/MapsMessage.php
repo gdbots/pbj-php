@@ -100,34 +100,4 @@ final class MapsMessage extends AbstractMessage
         MessageResolver::registerSchema($schema);
         return $schema;
     }
-
-    /**
-     * @param string $name
-     * @return array
-     */
-    public function getAMap($name)
-    {
-        return $this->get($name) ?: [];
-    }
-
-    /**
-     * @param string $name
-     * @param string $key
-     * @param mixed $value
-     * @return static
-     */
-    public function addToAMap($name, $key, $value)
-    {
-        return $this->addToMap($name, $key, $value);
-    }
-
-    /**
-     * @param string $name
-     * @param string $key
-     * @return static
-     */
-    public function removeFromAMap($name, $key)
-    {
-        return $this->removeFromMap($name, $key);
-    }
 }
