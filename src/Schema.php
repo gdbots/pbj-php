@@ -209,16 +209,21 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * Convenience method to return the name of the method that should
-     * exist on a handler for this messages with this schema.
+     * exist to handle this message.
      *
      * For example, an ImportUserV1 message would be handled by:
-     * SomeHandler::importUserV1(ImportUserV1 $command)
+     * SomeClass::importUserV1(ImportUserV1 $command)
      *
+     * @param bool $withMajorRev
      * @return string
      */
-    public function getHandlerMethodName()
+    public function getHandlerMethodName($withMajorRev = true)
     {
-        return lcfirst($this->classShortName);
+        if (true === $withMajorRev) {
+            return lcfirst($this->classShortName);
+        }
+
+        return lcfirst(str_replace('V'.$this->id->getVersion()->getMajor(), '', $this->classShortName));
     }
 
     /**
