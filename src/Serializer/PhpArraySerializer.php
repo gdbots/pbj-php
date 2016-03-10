@@ -126,7 +126,7 @@ class PhpArraySerializer extends AbstractSerializer
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field, $options));
+                    $message->set($fieldName, $this->decodeValue($value, $field, $options));
                     break;
 
                 case FieldRule::A_SET:
@@ -160,7 +160,7 @@ class PhpArraySerializer extends AbstractSerializer
             }
         }
 
-        return $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
+        return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
     /**

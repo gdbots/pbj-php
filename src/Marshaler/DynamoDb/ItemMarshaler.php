@@ -152,7 +152,7 @@ final class ItemMarshaler
             $field = $schema->getField($fieldName);
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field));
+                    $message->set($fieldName, $this->decodeValue($value, $field));
                     break;
 
                 case FieldRule::A_SET:
@@ -186,7 +186,7 @@ final class ItemMarshaler
             }
         }
 
-        return $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
+        return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
     /**
