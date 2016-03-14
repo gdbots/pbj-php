@@ -4,7 +4,6 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Common\Util\HashtagUtils;
-use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
@@ -44,12 +43,8 @@ final class StringType extends AbstractStringType
                 );
                 break;
 
-            case Format::DATED_SLUG:
-                Assertion::regex($value, SlugUtils::VALID_DATED_SLUG_PATTERN, null, $field->getName());
-                break;
-
             case Format::SLUG:
-                Assertion::regex($value, SlugUtils::VALID_SLUG_PATTERN, null, $field->getName());
+                Assertion::regex($value, '/^([\w\/-]|[\w-][\w\/-]*[\w-])$/', null, $field->getName());
                 break;
 
             case Format::EMAIL:

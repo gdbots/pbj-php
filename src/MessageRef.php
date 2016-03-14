@@ -39,7 +39,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     {
         $this->curie = $curie;
         $this->id = trim((string) $id) ?: 'null';
-        Assertion::regex($this->id, '/^[A-Za-z0-9:_\-]+$/', null, 'MessageRef.id');
+        Assertion::regex($this->id, '/^[\w\/\.:-]+$/', null, 'MessageRef.id');
 
         if (null !== $tag) {
             $this->tag = SlugUtils::create($tag) ?: null;

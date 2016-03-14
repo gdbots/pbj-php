@@ -208,10 +208,8 @@ class MappingFactory
             case Format::DATE_TIME:
                 return $this->types['date-time'];
 
-            case Format::DATED_SLUG:
             case Format::SLUG:
-
-            /** todo: setup custom analyzer for email as well for reverse string? */
+            // todo: setup custom analyzer for email as well for reverse string?
             case Format::EMAIL:
             case Format::HOSTNAME:
             case Format::IPV6:
