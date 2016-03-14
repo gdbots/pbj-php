@@ -15,11 +15,11 @@ use Gdbots\Pbj\Exception\LogicException;
  */
 final class MessageRef implements FromArray, ToArray, \JsonSerializable
 {
-    /** @var MessageCurie */
+    /** @var SchemaCurie */
     private $curie;
 
     /**
-     * Any string matching pattern /^[A-Za-z0-9:_\-]+$/
+     * Any string matching pattern /^[\w\/\.:-]+$/
      * @var string
      */
     private $id;
@@ -30,12 +30,12 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     /**
      * todo: review random failures from YamlSerializer on $id when no tag is present.
      *
-     * @param MessageCurie $curie
+     * @param SchemaCurie $curie
      * @param string $id
      * @param string $tag The tag will be automatically fixed to a slug-formatted-string.
      * @throws \Exception
      */
-    public function __construct(MessageCurie $curie, $id, $tag = null)
+    public function __construct(SchemaCurie $curie, $id, $tag = null)
     {
         $this->curie = $curie;
         $this->id = trim((string) $id) ?: 'null';
@@ -58,7 +58,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         if (isset($data['curie'])) {
             $id = isset($data['id']) ? $data['id'] : 'null';
             $tag = isset($data['tag']) ? $data['tag'] : null;
-            return new self(MessageCurie::fromString($data['curie']), $id, $tag);
+            return new self(SchemaCurie::fromString($data['curie']), $id, $tag);
         }
         throw new InvalidArgumentException('Payload must be a MessageRef type.');
     }
@@ -91,7 +91,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         list($ref, $tag) = explode('#', $string, 2);
         $parts = explode(':', $ref, 5);
         $id = array_pop($parts);
-        $curie = MessageCurie::fromString(implode(':', $parts));
+        $curie = SchemaCurie::fromString(implode(':', $parts));
         return new self($curie, $id, $tag);
     }
 
@@ -115,7 +115,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
-     * @return MessageCurie
+     * @return SchemaCurie
      */
     public function getCurie()
     {

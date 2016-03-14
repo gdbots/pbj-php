@@ -20,11 +20,14 @@ use Gdbots\Pbj\Exception\InvalidSchemaId;
  * Schema Id Format:
  *  pbj:vendor:package:category:message:version
  *
- * Message Curie Format:
+ * Schema Curie Format:
  *  vendor:package:category:message
  *
- * Message Curie With Major Version Format:
+ * Schema Curie Major Format:
  *  vendor:package:category:message:v#
+ *
+ * Schema QName Format:
+ *  vendor:message
  *
  * Formats:
  *  VENDOR:   [a-z0-9-]+
@@ -38,8 +41,7 @@ use Gdbots\Pbj\Exception\InvalidSchemaId;
  *  pbj:acme:users:command:register-user:1-1-0
  *  pbj:acme:api.videos:request:get-video:1-0-0
  *
- * The fully qualified schema identifier corresponds to a json schema implementing
- * the Gdbots PBJ Json Schema.
+ * The fully qualified schema identifier corresponds to a json schema implementing the Gdbots PBJ Json Schema.
  *
  * The schema id must be resolveable to a php class that should be able to read and write
  * messages with payloads that validate using the json schema.  The target class is ideally
@@ -67,7 +69,7 @@ final class SchemaId implements \JsonSerializable
      * The curie is the short name for the schema (without the version) that can be used
      * to reference another message without fully qualifying the version.
      *
-     * @var MessageCurie
+     * @var SchemaCurie
      */
     private $curie;
 
@@ -108,7 +110,8 @@ final class SchemaId implements \JsonSerializable
             $this->message,
             $this->version->toString()
         );
-        $this->curie = MessageCurie::fromSchemaId($this);
+
+        $this->curie = SchemaCurie::fromId($this);
     }
 
     /**
@@ -203,7 +206,7 @@ final class SchemaId implements \JsonSerializable
     }
 
     /**
-     * @return MessageCurie
+     * @return SchemaCurie
      */
     public function getCurie()
     {
@@ -221,8 +224,16 @@ final class SchemaId implements \JsonSerializable
      *
      * @return string
      */
-    public function getCurieWithMajorRev()
+    public function getCurieMajor()
     {
         return $this->curie . ':v' . $this->version->getMajor();
+    }
+
+    /**
+     * @return SchemaQName
+     */
+    public function getQName()
+    {
+        return $this->curie->getQName();
     }
 }

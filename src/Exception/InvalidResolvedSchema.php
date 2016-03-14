@@ -28,9 +28,9 @@ class InvalidResolvedSchema extends SchemaException
                 'Schema id [%s] with curie [%s] was resolved to [%s] but ' .
                 'that message has a curie of [%s].  They must match.',
                 $this->resolvedSchemaId->toString(),
-                $this->resolvedSchemaId->getCurieWithMajorRev(),
+                $this->resolvedSchemaId->getCurieMajor(),
                 $resolvedClassName,
-                $this->schema->getId()->getCurieWithMajorRev()
+                $this->schema->getId()->getCurieMajor()
             )
         );
     }

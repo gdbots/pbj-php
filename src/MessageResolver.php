@@ -26,7 +26,7 @@ final class MessageResolver
     /**
      * An array of resolved lookups by mixin, keyed by the mixin id with major rev
      * and optionally a package and category (for faster lookups)
-     * @see SchemaId::getCurieWithMajorRev
+     * @see SchemaId::getCurieMajor
      *
      * @var Schema[]
      */
@@ -35,13 +35,13 @@ final class MessageResolver
     /**
      * Returns the fully qualified php class name to be used for the provided schema id.
      *
-     * @param SchemaId $schemaId
+     * @param SchemaId $id
      * @return string
      * @throws NoMessageForSchemaId
      */
-    public static function resolveSchemaId(SchemaId $schemaId)
+    public static function resolveId(SchemaId $id)
     {
-        $curieMajor = $schemaId->getCurieWithMajorRev();
+        $curieMajor = $id->getCurieMajor();
         if (isset(self::$resolved[$curieMajor])) {
             return self::$resolved[$curieMajor];
         }
@@ -52,7 +52,7 @@ final class MessageResolver
             return $className;
         }
 
-        $curie = $schemaId->getCurie()->toString();
+        $curie = $id->getCurie()->toString();
         if (isset(self::$messages[$curie])) {
             $className = self::$messages[$curie];
             self::$resolved[$curieMajor] = $className;
@@ -60,17 +60,17 @@ final class MessageResolver
             return $className;
         }
 
-        throw new NoMessageForSchemaId($schemaId);
+        throw new NoMessageForSchemaId($id);
     }
 
     /**
      * Returns the fully qualified php class name to be used for the provided curie.
      *
-     * @param MessageCurie $curie
+     * @param SchemaCurie $curie
      * @return string
      * @throws NoMessageForCurie
      */
-    public static function resolveMessageCurie(MessageCurie $curie)
+    public static function resolveCurie(SchemaCurie $curie)
     {
         $key = $curie->toString();
         if (isset(self::$resolved[$key])) {
@@ -94,12 +94,12 @@ final class MessageResolver
      */
     public static function registerSchema(Schema $schema)
     {
-        self::$messages[$schema->getId()->getCurieWithMajorRev()] = $schema->getClassName();
+        self::$messages[$schema->getId()->getCurieMajor()] = $schema->getClassName();
     }
 
     /**
      * Adds a single schema id and class name.
-     * @see SchemaId::getCurieWithMajorRev
+     * @see SchemaId::getCurieMajor
      *
      * @param SchemaId|string $id
      * @param string $className
@@ -107,7 +107,7 @@ final class MessageResolver
     public static function register($id, $className)
     {
         if ($id instanceof SchemaId) {
-            $id = $id->getCurieWithMajorRev();
+            $id = $id->getCurieMajor();
         }
         self::$messages[(string) $id] = $className;
     }
@@ -160,7 +160,7 @@ final class MessageResolver
      */
     public static function findAllUsingMixin(Mixin $mixin, $inPackage = null, $inCategory = null)
     {
-        $mixinId = $mixin->getId()->getCurieWithMajorRev();
+        $mixinId = $mixin->getId()->getCurieMajor();
         $key = sprintf('%s%s%s', $mixinId, $inPackage, $inCategory);
 
         if (!isset(self::$resolvedMixins[$key])) {

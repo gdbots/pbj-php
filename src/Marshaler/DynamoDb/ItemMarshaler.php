@@ -12,7 +12,7 @@ use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageCurie;
+use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
@@ -345,7 +345,7 @@ final class ItemMarshaler
 
         if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
             return new MessageRef(
-                MessageCurie::fromString($value['curie']['S']),
+                SchemaCurie::fromString($value['curie']['S']),
                 $value['id']['S'],
                 isset($value['tag']['NULL']) ? null : $value['tag']['S']
             );
@@ -364,13 +364,13 @@ final class ItemMarshaler
     private function createMessage($schemaId)
     {
         $schemaId = SchemaId::fromString($schemaId);
-        $className = MessageResolver::resolveSchemaId($schemaId);
+        $className = MessageResolver::resolveId($schemaId);
 
         /** @var Message $message */
         $message = new $className();
         Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
 
-        if ($message::schema()->getCurieWithMajorRev() !== $schemaId->getCurieWithMajorRev()) {
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
             throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
         }
 

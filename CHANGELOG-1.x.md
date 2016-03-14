@@ -10,3 +10,5 @@ __BREAKING CHANGES__
 * issue #22: Add support for AWS 3.x and Elastic 3.x
 * Removed `Format::DATED_SLUG` option, just use `SLUG` and enforce slashes/dated option in your app.
   `Format::SLUG` now enforces this regex `^([\w\/-]|[\w-][\w\/-]*[\w-])$`.
+* Renamed `MessageCurie` to `SchemaCurie` and added `SchemaQName` for the ultra compact reference.
+* `MessageResolver` methods `resolveSchemaId`, `resolveMessageCurie` to `resolveId` and `resolveCurie` respectively.

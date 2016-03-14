@@ -35,10 +35,10 @@ final class Schema implements ToArray, \JsonSerializable
     /** @var Mixin[] */
     private $mixinsByCurie = [];
 
-    /** @var array */
+    /** @var string[] */
     private $mixinIds = [];
 
-    /** @var array */
+    /** @var string[] */
     private $mixinCuries = [];
 
     /**
@@ -92,7 +92,8 @@ final class Schema implements ToArray, \JsonSerializable
     {
         return [
             'id' => $this->id,
-            'curie' => $this->id->getCurie(),
+            'curie' => $this->getCurie(),
+            'qname' => $this->getQName(),
             'class_name' => $this->className,
             'mixins' => array_map(
                 function(Mixin $mixin) {
@@ -158,7 +159,7 @@ final class Schema implements ToArray, \JsonSerializable
             throw new MixinAlreadyAdded($this, $this->mixinsByCurie[$curieStr], $mixin);
         }
 
-        $this->mixins[$id->getCurieWithMajorRev()] = $mixin;
+        $this->mixins[$id->getCurieMajor()] = $mixin;
         $this->mixinsByCurie[$curieStr] = $mixin;
 
         foreach ($mixin->getFields() as $field) {
@@ -175,7 +176,7 @@ final class Schema implements ToArray, \JsonSerializable
     }
 
     /**
-     * @return MessageCurie
+     * @return SchemaCurie
      */
     public function getCurie()
     {
@@ -183,12 +184,20 @@ final class Schema implements ToArray, \JsonSerializable
     }
 
     /**
-     * @see SchemaId::getCurieWithMajorRev
+     * @see SchemaId::getCurieMajor
      * @return string
      */
-    public function getCurieWithMajorRev()
+    public function getCurieMajor()
     {
-        return $this->id->getCurieWithMajorRev();
+        return $this->id->getCurieMajor();
+    }
+
+    /**
+     * @return SchemaQName
+     */
+    public function getQName()
+    {
+        return $this->id->getCurie()->getQName();
     }
 
     /**
@@ -214,12 +223,12 @@ final class Schema implements ToArray, \JsonSerializable
      * For example, an ImportUserV1 message would be handled by:
      * SomeClass::importUserV1(ImportUserV1 $command)
      *
-     * @param bool $withMajorRev
+     * @param bool $withMajor
      * @return string
      */
-    public function getHandlerMethodName($withMajorRev = true)
+    public function getHandlerMethodName($withMajor = true)
     {
-        if (true === $withMajorRev) {
+        if (true === $withMajor) {
             return lcfirst($this->classShortName);
         }
 
@@ -267,7 +276,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * Returns true if the mixin is on this schema.  Id provided can be
      * qualified to major rev or just the curie.
-     * @see SchemaId::getCurieWithMajorRev
+     * @see SchemaId::getCurieMajor
      *
      * @param string $mixinId
      * @return bool
@@ -305,7 +314,7 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * Returns an array of curies with the major rev.
-     * @see SchemaId::getCurieWithMajorRev
+     * @see SchemaId::getCurieMajor
      *
      * @return array
      */

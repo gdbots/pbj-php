@@ -20,7 +20,7 @@ class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
                 'MessageResolver is unable to resolve schema id [%s] ' .
                 'using curie [%s] to a class name.',
                 $schemaId->toString(),
-                $schemaId->getCurieWithMajorRev()
+                $schemaId->getCurieMajor()
             )
         );
     }
@@ -33,4 +33,3 @@ class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
         return $this->schemaId;
     }
 }
-
