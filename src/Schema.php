@@ -93,6 +93,7 @@ final class Schema implements ToArray, \JsonSerializable
         return [
             'id' => $this->id,
             'curie' => $this->getCurie(),
+            'curie_major' => $this->getCurieMajor(),
             'qname' => $this->getQName(),
             'class_name' => $this->className,
             'mixins' => array_map(
