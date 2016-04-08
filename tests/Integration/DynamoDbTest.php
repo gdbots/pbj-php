@@ -2,11 +2,9 @@
 
 namespace Gdbots\Tests\Pbj\Integration;
 
-use Aws\Common\Enum\Region;
+use Aws\Credentials\Credentials;
 use Aws\DynamoDb\DynamoDbClient;
-use Aws\DynamoDb\Enum\KeyType;
-use Aws\DynamoDb\Enum\Type;
-use Aws\DynamoDb\Exception\ResourceNotFoundException;
+use Aws\DynamoDb\Exception\DynamoDbException;
 use Gdbots\Pbj\Marshaler\DynamoDb\ItemMarshaler;
 use Gdbots\Tests\Pbj\FixtureLoader;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
@@ -37,10 +35,10 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
             return;
         }
 
-        self::$client = DynamoDbClient::factory([
-            'key'    => $key,
-            'secret' => $secret,
-            'region' => Region::US_WEST_2
+        self::$client = new DynamoDbClient([
+            'credentials' => new Credentials($key, $secret),
+            'region' => 'us-west-2',
+            'version' => '2012-08-10'
         ]);
 
         self::createTable();
@@ -63,17 +61,17 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
         try {
             self::$client->describeTable(['TableName' => self::$tableName]);
             return;
-        } catch (ResourceNotFoundException $e)  {
+        } catch (DynamoDbException $e)  {
             // table doesn't exist, create it below
         }
 
         self::$client->createTable([
             'TableName' => self::$tableName,
             'AttributeDefinitions' => [
-                ['AttributeName' => 'id', 'AttributeType' => Type::STRING],
+                ['AttributeName' => 'id', 'AttributeType' => 'S'],
             ],
             'KeySchema' => array(
-                ['AttributeName' => 'id', 'KeyType' => KeyType::HASH],
+                ['AttributeName' => 'id', 'KeyType' => 'HASH'],
             ),
             'ProvisionedThroughput' => [
                 'ReadCapacityUnits'  => 5,
@@ -124,14 +122,14 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
             $result = self::$client->getItem([
                 'TableName' => self::$tableName,
                 'ConsistentRead' => true,
-                'Key' => ['id' => ['S' => $this->message->getMessageId()->toString()]]
+                'Key' => ['id' => ['S' => $this->message->get('id')->toString()]]
             ]);
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
             return;
         }
 
-        $this->assertSame($result['Item']['id']['S'], $this->message->getMessageId()->toString());
+        $this->assertSame($result['Item']['id']['S'], $this->message->get('id')->toString());
         $message = $this->marshaler->unmarshal($result['Item']);
 
         foreach ($this->message->schema()->getFields() as $field) {

@@ -21,13 +21,13 @@ abstract class AbstractSerializer implements Serializer
     protected function createMessage($schemaId)
     {
         $schemaId = SchemaId::fromString($schemaId);
-        $className = MessageResolver::resolveSchemaId($schemaId);
+        $className = MessageResolver::resolveId($schemaId);
 
         /** @var Message $message */
         $message = new $className();
         Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
 
-        if ($message::schema()->getCurieWithMajorRev() !== $schemaId->getCurieWithMajorRev()) {
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
             throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
         }
 

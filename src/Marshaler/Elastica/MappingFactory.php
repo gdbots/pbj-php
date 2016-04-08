@@ -177,7 +177,18 @@ class MappingFactory
     {
         /** @var Message $class */
         $class = $field->getClassName();
-        if (class_exists($class)) {
+
+        if (!empty($class) && !class_exists($class)) {
+            /*
+             * gdbots/pbjc compiler generates an interface and a concrete class with
+             * a V# suffix.  v1 would of course generally exist so we have a good chance
+             * of finding a class and thus a schema using this strategy.  we will however
+             * need to get fancier as versions increase and when mixins are used.
+             */
+            $class = $class . 'V1';
+        }
+
+        if (!empty($class) && class_exists($class)) {
             $schema = $class::schema();
             return ['type' => 'nested', 'properties' => $this->mapSchema($schema, $rootObject, $path)];
         }
@@ -208,10 +219,8 @@ class MappingFactory
             case Format::DATE_TIME:
                 return $this->types['date-time'];
 
-            case Format::DATED_SLUG:
             case Format::SLUG:
-
-            /** todo: setup custom analyzer for email as well for reverse string? */
+            // todo: setup custom analyzer for email as well for reverse string?
             case Format::EMAIL:
             case Format::HOSTNAME:
             case Format::IPV6:

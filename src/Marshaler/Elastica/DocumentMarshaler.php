@@ -139,7 +139,7 @@ final class DocumentMarshaler
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->setSingleValue($fieldName, $this->decodeValue($value, $field));
+                    $message->set($fieldName, $this->decodeValue($value, $field));
                     break;
 
                 case FieldRule::A_SET:
@@ -173,7 +173,7 @@ final class DocumentMarshaler
             }
         }
 
-        return $message->setSingleValue(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
+        return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
     /**
@@ -247,13 +247,13 @@ final class DocumentMarshaler
     private function createMessage($schemaId)
     {
         $schemaId = SchemaId::fromString($schemaId);
-        $className = MessageResolver::resolveSchemaId($schemaId);
+        $className = MessageResolver::resolveId($schemaId);
 
         /** @var Message $message */
         $message = new $className();
         Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
 
-        if ($message::schema()->getCurieWithMajorRev() !== $schemaId->getCurieWithMajorRev()) {
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
             throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
         }
 

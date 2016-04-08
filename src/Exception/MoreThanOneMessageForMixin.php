@@ -28,7 +28,7 @@ class MoreThanOneMessageForMixin extends \LogicException implements GdbotsPbjExc
             sprintf(
                 'MessageResolver returned multiple messages using [%s] when one was expected.  ' .
                 'Messages found:' . PHP_EOL . '%s',
-                $mixin->getId()->getCurieWithMajorRev(),
+                $mixin->getId()->getCurieMajor(),
                 implode(PHP_EOL, $ids)
             )
         );

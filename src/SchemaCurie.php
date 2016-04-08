@@ -2,23 +2,23 @@
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\InvalidMessageCurie;
+use Gdbots\Pbj\Exception\InvalidSchemaCurie;
 
 /**
- * Messages can be fully qualified by the schema id (which includes the version)
+ * Schemas can be fully qualified by the schema id (which includes the version)
  * or the short form which is called a CURIE or "compact uri".
  * @link http://en.wikipedia.org/wiki/CURIE
  *
- * Message Curie Format:
+ * Schema Curie Format:
  *  vendor:package:category:message
  *
  * @see SchemaId
  *
  */
-final class MessageCurie implements \JsonSerializable
+final class SchemaCurie implements \JsonSerializable
 {
     /**
-     * Regular expression pattern for matching a valid MessageCurie string.
+     * Regular expression pattern for matching a valid SchemaCurie string.
      * @constant string
      */
     const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+)$/';
@@ -43,6 +43,9 @@ final class MessageCurie implements \JsonSerializable
     /** @var bool */
     private $isMixin = false;
 
+    /** @var SchemaQName */
+    private $qname;
+
     /**
      * @param string $vendor
      * @param string $package
@@ -55,41 +58,31 @@ final class MessageCurie implements \JsonSerializable
         $this->package = $package;
         $this->category = $category ?: null;
         $this->message = $message;
-        $this->curie = sprintf(
-            '%s:%s:%s:%s',
-            $this->vendor,
-            $this->package,
-            $this->category,
-            $this->message
-        );
+        $this->curie = sprintf('%s:%s:%s:%s', $this->vendor, $this->package, $this->category, $this->message);
         $this->isMixin = 'mixin' === $this->category;
+        $this->qname = SchemaQName::fromCurie($this);
     }
 
     /**
-     * @param SchemaId $schemaId
-     * @return MessageCurie
+     * @param SchemaId $id
+     * @return SchemaCurie
      */
-    public static function fromSchemaId(SchemaId $schemaId)
+    public static function fromId(SchemaId $id)
     {
-        $curie = substr(str_replace(':' . $schemaId->getVersion()->toString(), '', $schemaId->toString()), 4);
+        $curie = substr(str_replace(':' . $id->getVersion()->toString(), '', $id->toString()), 4);
 
         if (isset(self::$instances[$curie])) {
             return self::$instances[$curie];
         }
 
-        self::$instances[$curie] = new self(
-            $schemaId->getVendor(),
-            $schemaId->getPackage(),
-            $schemaId->getCategory(),
-            $schemaId->getMessage()
-        );
+        self::$instances[$curie] = new self($id->getVendor(), $id->getPackage(), $id->getCategory(), $id->getMessage());
         return self::$instances[$curie];
     }
 
     /**
      * @param string $curie
-     * @return MessageCurie
-     * @throws InvalidMessageCurie
+     * @return SchemaCurie
+     * @throws InvalidSchemaCurie
      */
     public static function fromString($curie)
     {
@@ -98,11 +91,11 @@ final class MessageCurie implements \JsonSerializable
         }
 
         $okay = strlen($curie) < 146;
-        Assertion::true($okay, 'Message curie cannot be greater than 145 chars.', 'curie');
+        Assertion::true($okay, 'SchemaCurie cannot be greater than 145 chars.', 'curie');
         if (!preg_match(self::VALID_PATTERN, $curie, $matches)) {
-            throw new InvalidMessageCurie(
+            throw new InvalidSchemaCurie(
                 sprintf(
-                    'Message curie [%s] is invalid.  It must match the pattern [%s].',
+                    'SchemaCurie [%s] is invalid.  It must match the pattern [%s].',
                     $curie,
                     self::VALID_PATTERN
                 )
@@ -175,5 +168,13 @@ final class MessageCurie implements \JsonSerializable
     public function isMixin()
     {
         return $this->isMixin;
+    }
+
+    /**
+     * @return SchemaQName
+     */
+    public function getQName()
+    {
+        return $this->qname;
     }
 }

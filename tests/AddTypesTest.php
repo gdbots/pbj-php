@@ -97,10 +97,10 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             $thrown = false;
             try {
                 if (is_array($v)) {
-                    $message->addToAMap($k, 'test1', $v[0]);
-                    $message->addToAMap($k, 'test2', $v[1]);
+                    $message->addToMap($k, 'test1', $v[0]);
+                    $message->addToMap($k, 'test2', $v[1]);
                 } else {
-                    $message->addToAMap($k, 'test1', $v);
+                    $message->addToMap($k, 'test1', $v);
                 }
             } catch (\Exception $e) {
                 $thrown = true;
@@ -145,20 +145,20 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                 $thrown = false;
                 if ($type == $k) {
                     if (is_array($v)) {
-                        $shouldWork->addToAMap($type, 'test1', $v[0]);
-                        $shouldWork->addToAMap($type, 'test2', $v[1]);
+                        $shouldWork->addToMap($type, 'test1', $v[0]);
+                        $shouldWork->addToMap($type, 'test2', $v[1]);
                     } else {
-                        $shouldWork->addToAMap($type, 'test1', $v);
+                        $shouldWork->addToMap($type, 'test1', $v);
                     }
                     continue;
                 }
 
                 try {
                     if (is_array($v)) {
-                        $shouldFail->addToAMap($type, 'test1', $v[0]);
-                        $shouldFail->addToAMap($type, 'test2', $v[1]);
+                        $shouldFail->addToMap($type, 'test1', $v[0]);
+                        $shouldFail->addToMap($type, 'test2', $v[1]);
                     } else {
-                        $shouldFail->addToAMap($type, 'test1', $v);
+                        $shouldFail->addToMap($type, 'test1', $v);
                     }
 
                     switch ($type) {

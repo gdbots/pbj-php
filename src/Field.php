@@ -204,7 +204,10 @@ final class Field implements ToArray, \JsonSerializable
             $this->minLength = NumberUtils::bound($minLength, 0, $this->type->getMaxBytes());
         }
 
-        $this->pattern = $pattern;
+        if (null !== $pattern) {
+            $this->pattern = '/' . trim($pattern, '/') . '/';
+        }
+
         if (null !== $format && in_array($format, Format::values())) {
             $this->format = Format::create($format);
         } else {

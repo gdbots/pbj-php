@@ -2,7 +2,6 @@
 
 namespace Gdbots\Tests\Pbj\Fixtures;
 
-use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\MessageRef;
@@ -42,82 +41,5 @@ final class NestedMessage extends AbstractMessage
     public function getUriTemplateVars()
     {
         return [];
-    }
-
-    /**
-     * @return string
-     */
-    public function getTest1()
-    {
-        return $this->get('test1');
-    }
-
-    /**
-     * @param string $test1
-     * @return self
-     */
-    public function setTest1($test1)
-    {
-        return $this->setSingleValue('test1', $test1);
-    }
-
-    /**
-     * @return array
-     */
-    public function getTest2()
-    {
-        return $this->get('test2') ?: [];
-    }
-
-    /**
-     * @param int $test2
-     * @return self
-     */
-    public function addTest2($test2)
-    {
-        return $this->addToSet('test2', [$test2]);
-    }
-
-    /**
-     * @param int $test2
-     * @return self
-     */
-    public function removeTest2($test2)
-    {
-        return $this->removeFromSet('test2', [$test2]);
-    }
-
-    /**
-     * @return GeoPoint
-     */
-    public function getLocation()
-    {
-        return $this->get('location');
-    }
-
-    /**
-     * @param GeoPoint $location
-     * @return self
-     */
-    public function setLocation(GeoPoint $location)
-    {
-        return $this->setSingleValue('location', $location);
-    }
-
-    /**
-     * @return MessageRef[]
-     */
-    public function getRefs()
-    {
-        return $this->get('location');
-    }
-
-    /**
-     * @param MessageRef $ref
-     * @return self
-     */
-    public function addRef(MessageRef $ref)
-    {
-        return $this->addToSet('refs', [$ref]);
     }
 }

@@ -39,8 +39,8 @@ trait FixtureLoader
         $message = clone self::$emailMessageFixture;
 
         // fixme: handle clipping microseconds due to clone issue.  see issue #15
-        $date = \DateTime::createFromFormat(DateUtils::ISO8601, '2014-12-25T12:12:00.123456+00:00');
-        $message->setSingleValue('date_sent', $date);
+        $date = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, '2014-12-25T12:12:00.123456Z');
+        $message->set('date_sent', $date);
 
         return $message;
     }

@@ -2,17 +2,17 @@
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Pbj\MessageCurie;
+use Gdbots\Pbj\SchemaCurie;
 
 class NoMessageForCurie extends \LogicException implements GdbotsPbjException
 {
-    /** @var MessageCurie */
+    /** @var SchemaCurie */
     private $curie;
 
     /**
-     * @param MessageCurie $curie
+     * @param SchemaCurie $curie
      */
-    public function __construct(MessageCurie $curie)
+    public function __construct(SchemaCurie $curie)
     {
         $this->curie = $curie;
         parent::__construct(
@@ -21,11 +21,10 @@ class NoMessageForCurie extends \LogicException implements GdbotsPbjException
     }
 
     /**
-     * @return MessageCurie
+     * @return SchemaCurie
      */
     public function getCurie()
     {
         return $this->curie;
     }
 }
-

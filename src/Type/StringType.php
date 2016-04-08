@@ -4,7 +4,6 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Common\Util\HashtagUtils;
-use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
@@ -34,8 +33,9 @@ final class StringType extends AbstractStringType
                 Assertion::true(
                     DateUtils::isValidISO8601Date($value),
                     sprintf(
-                        'Field [%s] must be a valid ISO8601 date-time.  Format must match [%s] or [%s].',
+                        'Field [%s] must be a valid ISO8601 date-time.  Format must match one of [%s], [%s] or [%s].',
                         $field->getName(),
+                        DateUtils::ISO8601_ZULU,
                         DateUtils::ISO8601,
                         \DateTime::ISO8601
                     ),
@@ -43,12 +43,8 @@ final class StringType extends AbstractStringType
                 );
                 break;
 
-            case Format::DATED_SLUG:
-                Assertion::regex($value, SlugUtils::VALID_DATED_SLUG_PATTERN, null, $field->getName());
-                break;
-
             case Format::SLUG:
-                Assertion::regex($value, SlugUtils::VALID_SLUG_PATTERN, null, $field->getName());
+                Assertion::regex($value, '/^([\w\/-]|[\w-][\w\/-]*[\w-])$/', null, $field->getName());
                 break;
 
             case Format::EMAIL:

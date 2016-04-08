@@ -18,7 +18,7 @@ class NoMessageForMixin extends \LogicException implements GdbotsPbjException
         parent::__construct(
             sprintf(
                 'MessageResolver is unable to find any messages using [%s].',
-                $mixin->getId()->getCurieWithMajorRev()
+                $mixin->getId()->getCurieMajor()
             )
         );
     }
@@ -31,4 +31,3 @@ class NoMessageForMixin extends \LogicException implements GdbotsPbjException
         return $this->mixin;
     }
 }
-

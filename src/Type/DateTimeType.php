@@ -28,7 +28,7 @@ final class DateTimeType extends AbstractType
     public function encode($value, Field $field)
     {
         if ($value instanceof \DateTime) {
-            return $this->convertToUtc($value)->format(DateUtils::ISO8601);
+            return $this->convertToUtc($value)->format(DateUtils::ISO8601_ZULU);
         }
         return null;
     }
@@ -46,7 +46,7 @@ final class DateTimeType extends AbstractType
             return $this->convertToUtc($value);
         }
 
-        $date = \DateTime::createFromFormat(DateUtils::ISO8601, $value);
+        $date = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
         if ($date instanceof \DateTime) {
             return $this->convertToUtc($date);
         }
@@ -56,7 +56,7 @@ final class DateTimeType extends AbstractType
             $field,
             sprintf(
                 'Format must be [%s].  Errors: [%s]',
-                DateUtils::ISO8601,
+                DateUtils::ISO8601_ZULU,
                 // this is mutant
                 print_r(\DateTime::getLastErrors(), true)
             )

@@ -28,7 +28,7 @@ final class BooleanType extends AbstractType
      */
     public function decode($value, Field $field)
     {
-        return (bool) $value;
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

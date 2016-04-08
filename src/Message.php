@@ -40,6 +40,22 @@ interface Message
     public function toArray();
 
     /**
+     * Returns a Yaml string version of the message.
+     * Useful for debugging or logging.
+     *
+     * @param array $options
+     * @return string
+     */
+    public function toYaml(array $options = []);
+
+    /**
+     * Returns the message as a human readable string.
+     *
+     * @return string
+     */
+    public function __toString();
+
+    /**
      * Generates an md5 hash of the json representation of the current message.
      *
      * @param string[] $ignoredFields
@@ -148,9 +164,10 @@ interface Message
      * been set you will get a null value.
      *
      * @param string $fieldName
+     * @param mixed $default
      * @return mixed
      */
-    public function get($fieldName);
+    public function get($fieldName, $default = null);
 
     /**
      * Clears the value of a field.
@@ -179,7 +196,7 @@ interface Message
     public function getClearedFields();
 
     /**
-     * Sets a single value field.
+     * @deprecated Use "set" instead, the method signature is the same.
      *
      * @param string $fieldName
      * @param mixed $value
@@ -188,6 +205,17 @@ interface Message
      * @throws GdbotsPbjException
      */
     public function setSingleValue($fieldName, $value);
+
+    /**
+     * Sets a single value field.
+     *
+     * @param string $fieldName
+     * @param mixed $value
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     */
+    public function set($fieldName, $value);
 
     /**
      * Returns true if the provided value is in the set of values.
@@ -236,9 +264,10 @@ interface Message
      *
      * @param string $fieldName
      * @param int $index
+     * @param mixed $default
      * @return mixed
      */
-    public function getFromListAt($fieldName, $index);
+    public function getFromListAt($fieldName, $index, $default = null);
 
     /**
      * Adds an array of values to an unsorted list/array (not unique).
@@ -276,9 +305,10 @@ interface Message
      *
      * @param string $fieldName
      * @param string $key
+     * @param mixed $default
      * @return mixed
      */
-    public function getFromMap($fieldName, $key);
+    public function getFromMap($fieldName, $key, $default = null);
 
     /**
      * Adds a key/value pair to a map.
