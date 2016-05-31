@@ -40,10 +40,9 @@ class MappingFactory
         'medium-blob'       => ['type' => 'binary'],
         'medium-int'        => ['type' => 'integer', 'include_in_all' => false],
         'medium-text'       => ['type' => 'string'],
-        'message'           => ['type' => 'nested'],
-        // todo: review performance of message ref as nested by default
+        'message'           => ['type' => 'object'],
         'message-ref'       => [
-            'type' => 'nested',
+            'type' => 'object',
             'properties' => [
                     'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
                     'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
@@ -190,12 +189,15 @@ class MappingFactory
 
         if (!empty($class) && class_exists($class)) {
             $schema = $class::schema();
-            return ['type' => 'nested', 'properties' => $this->mapSchema($schema, $rootObject, $path)];
+            return [
+                'type' => $field->isAList() ? 'nested' : 'object',
+                'properties' => $this->mapSchema($schema, $rootObject, $path)
+            ];
         }
 
         // todo: review, dynamic template to disable indexing by default on nested messages where type is not known until runtime?
         return [
-            'type' => 'nested',
+            'type' => $field->isAList() ? 'nested' : 'object',
             'properties' => [
                 Schema::PBJ_FIELD_NAME => [
                     'type' => 'string',

@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.0.1
+* issue #26: Use `object` instead of `nested` when message field is not a list in `Gdbots\Pbj\Marshaler\Elastica\MappingFactory`.
+
+
 ## v1.0.0
 __BREAKING CHANGES__
 
