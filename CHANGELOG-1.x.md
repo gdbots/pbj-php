@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.0.2
+* issue #26: Use `pbj_keyword_analyzer` for strings with patterns in `Gdbots\Pbj\Marshaler\Elastica\MappingFactory`.
+* Added `Schema::createMessage` convenience method that creates a message instance. 
+
+
 ## v1.0.1
 * issue #26: Use `object` instead of `nested` when message field is not a list in `Gdbots\Pbj\Marshaler\Elastica\MappingFactory`.
 

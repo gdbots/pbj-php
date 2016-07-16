@@ -221,36 +221,33 @@ class MappingFactory
             case Format::DATE_TIME:
                 return $this->types['date-time'];
 
+            /**
+             * String fields with these formats should use "pbj_keyword_analyzer" (or something similar)
+             * so searches on these fields are not case sensitive.
+             *
+             * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
+             * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
+             */
             case Format::SLUG:
-            // todo: setup custom analyzer for email as well for reverse string?
             case Format::EMAIL:
             case Format::HOSTNAME:
             case Format::IPV6:
             case Format::UUID:
             case Format::URI:
-                return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
-
-            case Format::URL:
-                return ['type' => 'string', 'index' => 'no', 'include_in_all' => false];
-
-            /**
-             * Using hashtag format with a string requires (by default) a custom analyzer
-             * in elastic search so the search can run off of the lower cased version
-             * of the hashtag and the original can remain as is (#WhatEVERCaS3_ITIS)
-             *
-             * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
-             * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
-             */
             case Format::HASHTAG:
                 return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer', 'include_in_all' => false];
 
             case Format::IPV4:
                 return ['type' => 'ip', 'include_in_all' => false];
 
+            case Format::URL:
+                return ['type' => 'string', 'index' => 'no', 'include_in_all' => false];
+
             default:
                 if ($field->getPattern()) {
-                    return ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
+                    return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer', 'include_in_all' => false];
                 }
+
                 return $this->applyAnalyzer(['type' => 'string'], $field, $rootObject, $path);
         }
     }
