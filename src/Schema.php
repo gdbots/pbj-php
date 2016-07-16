@@ -237,6 +237,23 @@ final class Schema implements ToArray, \JsonSerializable
     }
 
     /**
+     * Convenience method that creates a message instance with this schema.
+     *
+     * @param array $data
+     * @return Message
+     */
+    public function createMessage(array $data = [])
+    {
+        /** @var Message $className */
+        $className = $this->className;
+        if (empty($data)) {
+            return $className::create();
+        }
+
+        return $className::fromArray($data);
+    }
+
+    /**
      * @param string $fieldName
      * @return bool
      */
