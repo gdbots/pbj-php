@@ -2,10 +2,12 @@
 
 namespace Gdbots\Pbj\Serializer;
 
+use Gdbots\Pbj\Decoder;
+use Gdbots\Pbj\Encoder;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Message;
 
-interface Serializer
+interface Serializer extends Encoder, Decoder
 {
     /**
      * @param Message $message
