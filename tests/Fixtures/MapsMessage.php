@@ -64,7 +64,7 @@ final class MapsMessage extends AbstractMessage
                 case 'Identifier':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->className('Gdbots\Identifiers\TimeUuidIdentifier')
+                        ->className('Gdbots\Pbj\WellKnown\TimeUuidIdentifier')
                         ->build();
                     break;
 

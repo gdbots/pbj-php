@@ -2,9 +2,10 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Identifiers\TimeUuidIdentifier;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
 
 final class TimeUuidType extends AbstractType
 {
@@ -13,7 +14,7 @@ final class TimeUuidType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        Assertion::isInstanceOf($value, 'Gdbots\Identifiers\TimeUuidIdentifier', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\TimeUuidIdentifier', null, $field->getName());
         if ($field->hasClassName()) {
             Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         }
@@ -22,25 +23,26 @@ final class TimeUuidType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof TimeUuidIdentifier) {
             return $value->toString();
         }
+
         return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (empty($value)) {
             return null;
         }
 
         /** @var TimeUuidIdentifier $className */
-        $className = $field->getClassName() ?: 'Gdbots\Identifiers\TimeUuidIdentifier';
+        $className = $field->getClassName() ?: 'Gdbots\Pbj\WellKnown\TimeUuidIdentifier';
         if ($value instanceof $className) {
             return $value;
         }

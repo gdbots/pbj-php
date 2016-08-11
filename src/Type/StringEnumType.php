@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Enum;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
@@ -39,18 +40,19 @@ final class StringEnumType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof Enum) {
             return (string) $value->getValue();
         }
+
         return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (empty($value)) {
             return null;

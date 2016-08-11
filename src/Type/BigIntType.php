@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\BigNumber;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
 
 final class BigIntType extends AbstractType
@@ -30,18 +31,19 @@ final class BigIntType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof BigNumber) {
             return $value->getValue();
         }
+
         return '0';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (null === $value || $value instanceof BigNumber) {
             return $value;

@@ -2,9 +2,10 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\WellKnown\UuidIdentifier;
 
 final class UuidType extends AbstractType
 {
@@ -13,7 +14,7 @@ final class UuidType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        Assertion::isInstanceOf($value, 'Gdbots\Identifiers\UuidIdentifier', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\UuidIdentifier', null, $field->getName());
         if ($field->hasClassName()) {
             Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         }
@@ -22,25 +23,26 @@ final class UuidType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof UuidIdentifier) {
             return $value->toString();
         }
+
         return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (empty($value)) {
             return null;
         }
 
         /** @var UuidIdentifier $className */
-        $className = $field->getClassName() ?: 'Gdbots\Identifiers\UuidIdentifier';
+        $className = $field->getClassName() ?: 'Gdbots\Pbj\WellKnown\UuidIdentifier';
         if ($value instanceof $className) {
             return $value;
         }

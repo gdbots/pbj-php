@@ -2,10 +2,11 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\WellKnown\Identifier;
 
 final class IdentifierType extends AbstractType
 {
@@ -15,7 +16,7 @@ final class IdentifierType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var Identifier $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Identifiers\Identifier', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\Identifier', null, $field->getName());
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         $v = $value->toString();
         //Assertion::string($v, null, $field->getName());
@@ -39,18 +40,19 @@ final class IdentifierType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof Identifier) {
             return (string) $value->toString();
         }
+
         return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (empty($value)) {
             return null;

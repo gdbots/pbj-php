@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
@@ -57,19 +58,20 @@ abstract class AbstractBinaryType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         $value = trim($value);
         if ($value === '') {
             return null;
         }
+
         return $this->encodeToBase64 ? base64_encode($value) : $value;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         $value = trim((string) $value);
         if ($value === '') {

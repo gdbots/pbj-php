@@ -3,6 +3,7 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
@@ -24,18 +25,19 @@ final class DateType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof \DateTime) {
             return $value->format('Y-m-d');
         }
+
         return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (empty($value)) {
             return null;

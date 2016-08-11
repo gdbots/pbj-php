@@ -2,9 +2,10 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Microtime;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\WellKnown\Microtime;
 
 final class MicrotimeType extends AbstractType
 {
@@ -14,24 +15,25 @@ final class MicrotimeType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var Microtime $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Common\Microtime', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\Microtime', null, $field->getName());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         if ($value instanceof Microtime) {
             return $value->toString();
         }
+
         return null;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         if (empty($value)) {
             return null;

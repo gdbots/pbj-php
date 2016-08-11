@@ -2,13 +2,13 @@
 
 namespace Gdbots\Tests\Pbj;
 
-use Gdbots\Common\BigNumber;
-use Gdbots\Common\GeoPoint;
-use Gdbots\Common\Microtime;
 use Gdbots\Common\Util\StringUtils;
-use Gdbots\Identifiers\TimeUuidIdentifier;
-use Gdbots\Identifiers\UuidIdentifier;
 use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\BigNumber;
+use Gdbots\Pbj\WellKnown\GeoPoint;
+use Gdbots\Pbj\WellKnown\Microtime;
+use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
+use Gdbots\Pbj\WellKnown\UuidIdentifier;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;

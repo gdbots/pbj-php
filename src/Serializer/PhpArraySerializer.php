@@ -11,12 +11,15 @@ use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
+use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
+use Gdbots\Pbj\SchemaId;
 
-class PhpArraySerializer extends AbstractSerializer
+class PhpArraySerializer implements Serializer
 {
     /**
      * {@inheritdoc}
@@ -217,5 +220,28 @@ class PhpArraySerializer extends AbstractSerializer
         }
 
         throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
+    }
+
+    /**
+     * @param string $schemaId
+     * @return Message
+     *
+     * @throws GdbotsPbjException
+     * @throws InvalidResolvedSchema
+     */
+    protected function createMessage($schemaId)
+    {
+        $schemaId = SchemaId::fromString($schemaId);
+        $className = MessageResolver::resolveId($schemaId);
+
+        /** @var Message $message */
+        $message = new $className();
+        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
+            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
+        }
+
+        return $message;
     }
 }
