@@ -21,12 +21,13 @@ use Gdbots\Pbj\Type\Type;
  * For example:
  *  [
  *      // the name of the field
- *      'name': 'your-field-name',
+ *      'name' => 'your-field-name',
  *      // only one of the following values can be populated.
- *      'float_value': 1.0,
- *      'int_value': 1,
- *      'string_value': 'string',
- *      'text_value': 'some text',
+ *      'bool_value' => true,
+ *      'float_value' => 1.0,
+ *      'int_value' => 1,
+ *      'string_value' => 'string',
+ *      'text_value' => 'some text',
  *  ]
  */
 final class DynamicField implements FromArray, ToArray, \JsonSerializable

@@ -2,7 +2,6 @@
 
 namespace Gdbots\Tests\Pbj\Type;
 
-use Gdbots\Common\GeoPoint;
 use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\FieldBuilder;
@@ -10,6 +9,7 @@ use Gdbots\Pbj\Type\BinaryType;
 use Gdbots\Pbj\Type\DateTimeType;
 use Gdbots\Pbj\Type\DateType;
 use Gdbots\Pbj\Type\Type;
+use Gdbots\Pbj\WellKnown\GeoPoint;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
 class TypeTest extends \PHPUnit_Framework_TestCase

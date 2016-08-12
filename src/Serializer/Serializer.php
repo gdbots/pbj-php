@@ -10,6 +10,7 @@ interface Serializer
     /**
      * @param Message $message
      * @param array $options
+     *
      * @return mixed
      */
     public function serialize(Message $message, array $options = []);
@@ -17,6 +18,7 @@ interface Serializer
     /**
      * @param mixed $data
      * @param array $options
+     *
      * @return Message
      *
      * @throws \Exception

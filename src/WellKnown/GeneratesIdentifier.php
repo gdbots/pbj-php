@@ -2,6 +2,10 @@
 
 namespace Gdbots\Pbj\WellKnown;
 
-interface GeneratesIdentifier extends \Gdbots\Identifiers\GeneratesIdentifier
+interface GeneratesIdentifier
 {
+    /**
+     * @return static
+     */
+    public static function generate();
 }

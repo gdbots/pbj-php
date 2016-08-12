@@ -34,6 +34,7 @@ class YamlSerializer extends PhpArraySerializer
 
     /**
      * {@inheritdoc}
+     *
      * @return Message
      */
     public function deserialize($data, array $options = [])
@@ -45,6 +46,7 @@ class YamlSerializer extends PhpArraySerializer
                 throw new DeserializeMessageFailed($e->getMessage(), 0, $e);
             }
         }
+
         return parent::deserialize($data, $options);
     }
 }

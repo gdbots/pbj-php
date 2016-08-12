@@ -2,6 +2,15 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.1.0
+__POSSIBLE BREAKING CHANGES__
+
+If you are using `BigNumber`, `GeoPoint`, `Identifier` or `Microtime` classes in your own code to populate schema fields 
+you must use the new `Gdbots\Pbj\WellKnown\*` classes instead.  The old classes in `gdbots/common` are now deprecated.
+
+* issue #30: Add WellKnown Types.
+
+
 ## v1.0.2
 * issue #26: Use `pbj_keyword_analyzer` for strings with patterns in `Gdbots\Pbj\Marshaler\Elastica\MappingFactory`.
 * Added `Schema::createMessage` convenience method that creates a message instance. 

@@ -15,11 +15,13 @@ class JsonSerializer extends PhpArraySerializer
         if (isset($options['json_encode_options'])) {
             return json_encode(parent::serialize($message, $options), $options['json_encode_options']);
         }
+
         return json_encode(parent::serialize($message, $options));
     }
 
     /**
      * {@inheritdoc}
+     *
      * @return Message
      */
     public function deserialize($data, array $options = [])
@@ -30,6 +32,7 @@ class JsonSerializer extends PhpArraySerializer
                 throw new DeserializeMessageFailed($this->getLastErrorMessage());
             }
         }
+
         return parent::deserialize($data, $options);
     }
 

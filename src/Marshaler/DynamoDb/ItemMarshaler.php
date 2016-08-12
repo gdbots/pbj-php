@@ -2,7 +2,6 @@
 
 namespace Gdbots\Pbj\Marshaler\DynamoDb;
 
-use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
@@ -17,6 +16,7 @@ use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
+use Gdbots\Pbj\WellKnown\GeoPoint;
 
 /**
  * Creates an array in the DynamoDb expected attribute value format.

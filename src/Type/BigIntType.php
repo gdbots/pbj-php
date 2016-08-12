@@ -2,10 +2,10 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\BigNumber;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\WellKnown\BigNumber;
 
 final class BigIntType extends AbstractType
 {
@@ -15,7 +15,7 @@ final class BigIntType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var BigNumber $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Common\BigNumber', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\BigNumber', null, $field->getName());
         Assertion::true(
             !$value->isNegative(),
             sprintf('Field [%s] cannot be negative.', $field->getName()),

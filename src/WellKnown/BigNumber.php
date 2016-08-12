@@ -2,7 +2,13 @@
 
 namespace Gdbots\Pbj\WellKnown;
 
-// todo: move all code from Common to this class and deprecate the common version
-final class BigNumber extends \Gdbots\Common\BigNumber
+final class BigNumber extends \Moontoast\Math\BigNumber implements \JsonSerializable
 {
+    /**
+     * @return string
+     */
+    public function jsonSerialize()
+    {
+        return (string) $this->getValue();
+    }
 }

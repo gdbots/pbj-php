@@ -4,7 +4,6 @@ namespace Gdbots\Pbj\Marshaler\Elastica;
 
 use Elastica\Document;
 use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Common\GeoPoint;
 use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
@@ -19,6 +18,7 @@ use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
+use Gdbots\Pbj\WellKnown\GeoPoint;
 
 final class DocumentMarshaler
 {
