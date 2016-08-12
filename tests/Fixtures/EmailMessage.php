@@ -71,6 +71,9 @@ final class EmailMessage extends AbstractMessage
                     ->className('Gdbots\Pbj\Message')
                     ->asAList()
                     ->build(),
+                Fb::create('dynamic_fields', T\DynamicFieldType::create())
+                    ->asAList()
+                    ->build(),
             ]
         );
 

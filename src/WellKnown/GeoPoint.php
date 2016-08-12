@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
+use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 /**
  * Represents a GeoJson Point value.
@@ -21,7 +22,7 @@ final class GeoPoint implements FromArray, ToArray, \JsonSerializable
      * @param float $lat
      * @param float $lon
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function __construct($lat, $lon)
     {
@@ -29,11 +30,11 @@ final class GeoPoint implements FromArray, ToArray, \JsonSerializable
         $this->longitude = (float) $lon;
 
         if ($this->latitude > 90.0 || $this->latitude < -90.0) {
-            throw new \InvalidArgumentException('Latitude must be within range [-90.0, 90.0]');
+            throw new InvalidArgumentException('Latitude must be within range [-90.0, 90.0]');
         }
 
         if ($this->longitude > 180.0 || $this->longitude < -180.0) {
-            throw new \InvalidArgumentException('Longitude must be within range [-180.0, 180.0]');
+            throw new InvalidArgumentException('Longitude must be within range [-180.0, 180.0]');
         }
     }
 
@@ -61,7 +62,8 @@ final class GeoPoint implements FromArray, ToArray, \JsonSerializable
         if (isset($data['coordinates'])) {
             return new self($data['coordinates'][1], $data['coordinates'][0]);
         }
-        throw new \InvalidArgumentException('Payload must be a GeoJson "Point" type.');
+
+        throw new InvalidArgumentException('Payload must be a GeoJson "Point" type.');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Common\Util\StringUtils;
+use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 abstract class SlugIdentifier implements Identifier, \JsonSerializable
 {
@@ -12,18 +13,18 @@ abstract class SlugIdentifier implements Identifier, \JsonSerializable
 
     /**
      * @param string $slug
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function __construct($slug)
     {
         if (!is_string($slug)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('String expected but got [%s].', StringUtils::varToString($slug))
             );
         }
 
         if (!SlugUtils::isValid($slug)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('The value [%s] is not a valid slug.', $slug)
             );
         }

@@ -17,6 +17,7 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
+// fixme: add dynamic field to this tests (wellknown wip)
 class AddTypesTest extends \PHPUnit_Framework_TestCase
 {
     protected function getTypeValues()
@@ -252,15 +253,15 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
 
                 if (!$thrown) {
                     if (is_array($v)) {
-                        //$this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[0])));
-                        //$this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[1])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[0])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[1])));
                     } else {
-                        //$this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v)));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v)));
                     }
                 }
             }
         }
 
-        echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+        //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
     }
 }

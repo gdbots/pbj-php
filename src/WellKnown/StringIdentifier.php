@@ -3,6 +3,7 @@
 namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\Util\StringUtils;
+use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 abstract class StringIdentifier implements Identifier, \JsonSerializable
 {
@@ -11,12 +12,12 @@ abstract class StringIdentifier implements Identifier, \JsonSerializable
 
     /**
      * @param string $string
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function __construct($string)
     {
         if (!is_string($string)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('String expected but got [%s].', StringUtils::varToString($string))
             );
         }
@@ -24,7 +25,7 @@ abstract class StringIdentifier implements Identifier, \JsonSerializable
         $this->string = trim((string) $string);
 
         if (empty($this->string)) {
-            throw new \InvalidArgumentException('String cannot be empty.');
+            throw new InvalidArgumentException('String cannot be empty.');
         }
     }
 

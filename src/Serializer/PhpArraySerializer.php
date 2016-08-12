@@ -2,14 +2,10 @@
 
 namespace Gdbots\Pbj\Serializer;
 
-use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\FieldRule;
-use Gdbots\Pbj\Enum\TypeName;
-use Gdbots\Pbj\Exception\DecodeValueFailed;
-use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
@@ -136,6 +132,7 @@ class PhpArraySerializer implements Serializer, Codec
      */
     public function encodeDynamicField(DynamicField $dynamicField, Field $field)
     {
+        return $dynamicField->toArray();
     }
 
     /**
@@ -146,6 +143,7 @@ class PhpArraySerializer implements Serializer, Codec
      */
     public function decodeDynamicField($value, Field $field)
     {
+        return DynamicField::fromArray($value);
     }
 
     /**
@@ -212,7 +210,17 @@ class PhpArraySerializer implements Serializer, Codec
      */
     private function doDeserialize(array $data)
     {
-        $message = $this->createMessage((string) $data[Schema::PBJ_FIELD_NAME]);
+        $schemaId = SchemaId::fromString((string) $data[Schema::PBJ_FIELD_NAME]);
+        $className = MessageResolver::resolveId($schemaId);
+
+        /** @var Message $message */
+        $message = new $className();
+        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
+            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
+        }
+
         $schema = $message::schema();
 
         foreach ($data as $fieldName => $value) {
@@ -265,86 +273,5 @@ class PhpArraySerializer implements Serializer, Codec
         }
 
         return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
-    }
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return mixed
-     *
-     * @throws EncodeValueFailed
-     */
-    private function encodeValue($value, Field $field)
-    {
-        $type = $field->getType();
-        if ($type->encodesToScalar()) {
-            return $type->encode($value, $field);
-        }
-
-        if ($value instanceof Message) {
-            return $this->doSerialize($value);
-        }
-
-        if ($value instanceof ToArray) {
-            return $value->toArray();
-        }
-
-        throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
-    }
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return mixed
-     *
-     * @throws DecodeValueFailed
-     */
-    private function decodeValue($value, Field $field)
-    {
-        return $field->getType()->decode($value, $field, $this);
-        /*
-        if ($type->encodesToScalar()) {
-            return $type->decode($value, $field);
-        }
-
-        if ($type->isMessage()) {
-            return $this->deserialize($value);
-        }
-
-        if ($type->getTypeName() === TypeName::GEO_POINT()) {
-            return GeoPoint::fromArray($value);
-        }
-
-        if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
-            return MessageRef::fromArray($value);
-        }
-
-        throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
-        */
-    }
-
-    /**
-     * @param string $schemaId
-     * @return Message
-     *
-     * @throws GdbotsPbjException
-     * @throws InvalidResolvedSchema
-     */
-    protected function createMessage($schemaId)
-    {
-        $schemaId = SchemaId::fromString($schemaId);
-        $className = MessageResolver::resolveId($schemaId);
-
-        /** @var Message $message */
-        $message = new $className();
-        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
-
-        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
-            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
-        }
-
-        return $message;
     }
 }

@@ -32,6 +32,14 @@ class MappingFactory
         'date'              => ['type' => 'date', 'include_in_all' => false],
         'date-time'         => ['type' => 'date', 'include_in_all' => false],
         'decimal'           => ['type' => 'double', 'include_in_all' => false],
+        'dynamic-field'     => [
+            'type' => 'object',
+            'properties' => [
+                'name'      => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'int_value' => ['type' => 'long', 'include_in_all' => false],
+                // fixme: propery mappings for ES and nested conditions wellknown wip)
+            ]
+        ],
         'float'             => ['type' => 'float', 'include_in_all' => false],
         'geo-point'         => ['type' => 'geo_point', 'include_in_all' => false],
         'identifier'        => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
@@ -44,9 +52,9 @@ class MappingFactory
         'message-ref'       => [
             'type' => 'object',
             'properties' => [
-                    'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-                    'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-                    'tag'   => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'tag'   => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
             ]
         ],
         'microtime'         => ['type' => 'long', 'include_in_all' => false],

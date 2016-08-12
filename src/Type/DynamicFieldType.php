@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
-use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\DynamicField;
 
 final class DynamicFieldType extends AbstractType
 {
@@ -14,8 +14,8 @@ final class DynamicFieldType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var MessageRef $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\MessageRef', null, $field->getName());
+        /** @var DynamicField $value */
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\DynamicField', null, $field->getName());
     }
 
     /**

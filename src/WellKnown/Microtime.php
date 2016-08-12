@@ -1,6 +1,7 @@
 <?php
 
 namespace Gdbots\Pbj\WellKnown;
+use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 /**
  * Value object for microtime with methods to convert to and from integers.
@@ -87,14 +88,14 @@ final class Microtime implements \JsonSerializable
      *
      * @param string|int $stringOrInteger
      * @return self
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function fromString($stringOrInteger)
     {
         $int = (int) $stringOrInteger;
         $len = strlen($int);
         if ($len < 13 || $len > 16) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf(
                     'Input [%d] must be between 13 and 16 digits, [%d] given.',
                     $int,
