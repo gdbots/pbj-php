@@ -36,7 +36,7 @@ class MappingFactory
             'type' => 'object',
             'properties' => [
                 'name'      => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-                'int_value' => ['type' => 'long', 'include_in_all' => false],
+                'int_val' => ['type' => 'long', 'include_in_all' => false],
                 // fixme: propery mappings for ES and nested conditions wellknown wip)
             ]
         ],

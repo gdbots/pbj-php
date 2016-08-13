@@ -1,6 +1,7 @@
 <?php
 
 namespace Gdbots\Pbj\WellKnown;
+
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 /**
