@@ -4,7 +4,7 @@ namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
-use Gdbots\Pbj\Enum\DynamicFieldTypeName;
+use Gdbots\Pbj\Enum\DynamicFieldKind;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Field;
@@ -14,7 +14,6 @@ use Gdbots\Pbj\Type\FloatType;
 use Gdbots\Pbj\Type\IntType;
 use Gdbots\Pbj\Type\StringType;
 use Gdbots\Pbj\Type\TextType;
-use Gdbots\Pbj\Type\Type;
 
 /**
  * DynamicField is a wrapper for fields which would not be ideal as a map because
@@ -41,7 +40,7 @@ use Gdbots\Pbj\Type\Type;
 final class DynamicField implements FromArray, ToArray, \JsonSerializable
 {
     /**
-     * Fields are only used to allow for type guarding/decoding.
+     * Fields are only used to allow for type guarding/encoding/decoding.
      *
      * @var Field[]
      */
@@ -51,67 +50,67 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
     private $name;
 
     /** @var string */
-    private $typeName;
+    private $kind;
 
     /** @var mixed */
     private $value;
 
     /**
      * @param string $name
-     * @param DynamicFieldTypeName $typeName
+     * @param DynamicFieldKind $kind
      * @param mixed $value
      */
-    private function __construct($name, DynamicFieldTypeName $typeName, $value)
+    private function __construct($name, DynamicFieldKind $kind, $value)
     {
         $this->name = $name;
-        $this->typeName = $typeName->getValue();
-        $field = self::getField($this->typeName);
+        $this->kind = $kind->getValue();
+        $field = self::createField($this->kind);
 
         $this->value = $field->getType()->decode($value, $field);
         $field->guardValue($this->value);
     }
 
     /**
-     * @param string $typeName  A DynamicFieldTypeName value.
+     * @param string $kind
      *
      * @return Field
      */
-    private static function getField($typeName)
+    private static function createField($kind)
     {
-        if (!isset(self::$fields[$typeName])) {
-            switch ($typeName) {
-                case DynamicFieldTypeName::STRING_VAL:
+        if (!isset(self::$fields[$kind])) {
+            switch ($kind) {
+                case DynamicFieldKind::STRING_VAL:
                     $type = StringType::create();
                     break;
 
-                case DynamicFieldTypeName::TEXT_VAL:
+                case DynamicFieldKind::TEXT_VAL:
                     $type = TextType::create();
                     break;
 
-                case DynamicFieldTypeName::INT_VAL:
+                case DynamicFieldKind::INT_VAL:
                     $type = IntType::create();
                     break;
 
-                case DynamicFieldTypeName::BOOL_VAL:
+                case DynamicFieldKind::BOOL_VAL:
                     $type = BooleanType::create();
                     break;
 
-                case DynamicFieldTypeName::FLOAT_VAL:
+                case DynamicFieldKind::FLOAT_VAL:
                     $type = FloatType::create();
                     break;
 
-                case DynamicFieldTypeName::DATE_VAL:
+                case DynamicFieldKind::DATE_VAL:
                     $type = DateType::create();
                     break;
 
                 default:
-                    throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid type.', $typeName));
+                    throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid type.', $kind));
             }
 
-            self::$fields[$typeName] = new Field($typeName, $type, FieldRule::A_SINGLE_VALUE(), true);
+            self::$fields[$kind] = new Field($kind, $type, FieldRule::A_SINGLE_VALUE(), true);
         }
 
-        return self::$fields[$typeName];
+        return self::$fields[$kind];
     }
 
     /**
@@ -122,7 +121,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public static function createBoolVal($name, $value = false)
     {
-        return new self($name, DynamicFieldTypeName::BOOL_VAL(), $value);
+        return new self($name, DynamicFieldKind::BOOL_VAL(), $value);
     }
 
     /**
@@ -133,7 +132,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public static function createDateVal($name, \DateTime $value)
     {
-        return new self($name, DynamicFieldTypeName::DATE_VAL(), $value);
+        return new self($name, DynamicFieldKind::DATE_VAL(), $value);
     }
 
     /**
@@ -144,7 +143,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public static function createFloatVal($name, $value = 0.0)
     {
-        return new self($name, DynamicFieldTypeName::FLOAT_VAL(), $value);
+        return new self($name, DynamicFieldKind::FLOAT_VAL(), $value);
     }
 
     /**
@@ -155,7 +154,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public static function createIntVal($name, $value = 0)
     {
-        return new self($name, DynamicFieldTypeName::INT_VAL(), $value);
+        return new self($name, DynamicFieldKind::INT_VAL(), $value);
     }
 
     /**
@@ -166,7 +165,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public static function createStringVal($name, $value)
     {
-        return new self($name, DynamicFieldTypeName::STRING_VAL(), $value);
+        return new self($name, DynamicFieldKind::STRING_VAL(), $value);
     }
 
     /**
@@ -177,7 +176,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public static function createTextVal($name, $value)
     {
-        return new self($name, DynamicFieldTypeName::TEXT_VAL(), $value);
+        return new self($name, DynamicFieldKind::TEXT_VAL(), $value);
     }
 
     /**
@@ -191,15 +190,15 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
 
         $name = $data['name'];
         unset($data['name']);
-        $typeName = key($data);
+        $kind = key($data);
 
         try {
-            $type = DynamicFieldTypeName::create($typeName);
+            $kind = DynamicFieldKind::create($kind);
         } catch (\Exception $e) {
-            throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid type.', $typeName));
+            throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid kind.', $kind));
         }
 
-        return new self($name, $type, $data[$typeName]);
+        return new self($name, $kind, $data[$kind->getValue()]);
     }
 
     /**
@@ -207,7 +206,8 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     public function toArray()
     {
-        return ['name' => $this->name, $this->typeName => $this->value];
+        $field = self::createField($this->kind);
+        return ['name' => $this->name, $this->kind => $field->getType()->encode($this->value, $field)];
     }
 
     /**
@@ -243,11 +243,19 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
     }
 
     /**
-     * @return Type
+     * @return string
      */
-    public function getType()
+    public function getKind()
     {
-        return self::getField($this->typeName)->getType();
+        return $this->kind;
+    }
+
+    /**
+     * @return Field
+     */
+    public function getField()
+    {
+        return self::createField($this->kind);
     }
 
     /**
@@ -266,7 +274,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
     public function equals(DynamicField $other)
     {
         return $this->name === $other->name
-            && self::getField($this->typeName) === self::getField($other->typeName)
+            && $this->kind === $other->kind
             && $this->value === $other->value;
     }
 }

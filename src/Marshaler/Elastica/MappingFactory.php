@@ -35,9 +35,13 @@ class MappingFactory
         'dynamic-field'     => [
             'type' => 'object',
             'properties' => [
-                'name'      => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-                'int_val' => ['type' => 'long', 'include_in_all' => false],
-                // fixme: propery mappings for ES and nested conditions wellknown wip)
+                'name'       => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'bool_val'   => ['type' => 'boolean', 'include_in_all' => false],
+                'date_val'   => ['type' => 'date', 'include_in_all' => false],
+                'float_val'  => ['type' => 'float', 'include_in_all' => false],
+                'int_val'    => ['type' => 'long', 'include_in_all' => false],
+                'string_val' => ['type' => 'string'],
+                'text_val'   => ['type' => 'string'],
             ]
         ],
         'float'             => ['type' => 'float', 'include_in_all' => false],
@@ -172,8 +176,7 @@ class MappingFactory
     }
 
     /**
-     * todo: review, should we default include_in_parent to true?
-     * @link http://www.elastic.co/guide/en/elasticsearch/reference/1.4/mapping-nested-type.html
+     * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/nested.html
      *
      * @param Field $field
      * @param \stdClass $rootObject
@@ -203,7 +206,6 @@ class MappingFactory
             ];
         }
 
-        // todo: review, dynamic template to disable indexing by default on nested messages where type is not known until runtime?
         return [
             'type' => $field->isAList() ? 'nested' : 'object',
             'properties' => [
@@ -214,6 +216,33 @@ class MappingFactory
                 ]
             ]
         ];
+    }
+
+    /**
+     * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/nested.html
+     *
+     * @param Field $field
+     * @param \stdClass $rootObject
+     * @param string $path
+     * @return array
+     */
+    protected function mapDynamicField(Field $field, \stdClass $rootObject, $path = null)
+    {
+        $mapping = $this->types[$field->getType()->getTypeValue()];
+
+        if ($field->isAList()) {
+            $mapping['type'] = 'nested';
+        }
+
+        $mapping['properties']['string_val'] = $this->applyAnalyzer(
+            $mapping['properties']['string_val'], $field, $rootObject, $path
+        );
+
+        $mapping['properties']['text_val'] = $this->applyAnalyzer(
+            $mapping['properties']['text_val'], $field, $rootObject, $path
+        );
+
+        return $mapping;
     }
 
     /**

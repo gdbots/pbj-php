@@ -5,6 +5,7 @@ namespace Gdbots\Tests\Pbj;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\WellKnown\BigNumber;
+use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
 use Gdbots\Pbj\WellKnown\Microtime;
 use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
@@ -17,7 +18,6 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 
-// fixme: add dynamic field to this tests (wellknown wip)
 class AddTypesTest extends \PHPUnit_Framework_TestCase
 {
     protected function getTypeValues()
@@ -30,6 +30,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'Date' => new \DateTime(),
             'DateTime' => new \DateTime(),
             'Decimal' => 3.14,
+            'DynamicField' => DynamicField::createIntVal('int_val', 1),
             'Float' => 13213.032468,
             'GeoPoint' => new GeoPoint(0.5, 102.0),
             'IntEnum' => IntEnum::UNKNOWN(),
@@ -65,6 +66,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'Date' => 'not_a_date',
             'DateTime' => 'not_a_date',
             'Decimal' => 1,
+            'DynamicField' => 'not_a_dynamic_field',
             'Float' => 1,
             'GeoPoint' => 'not_a_geo_point',
             'IntEnum' => Priority::NORMAL(), // not the correct enum

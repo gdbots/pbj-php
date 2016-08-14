@@ -53,7 +53,7 @@ class ElasticaTest extends \PHPUnit_Framework_TestCase
     {
         self::$index->create(['analysis' => ['analyzer' => MappingFactory::getCustomAnalyzers()]], true);
         $type = self::$index->getType('message');
-        $mapping = (new MappingFactory())->create(EmailMessage::schema());
+        $mapping = (new MappingFactory())->create(EmailMessage::schema(), 'english');
         $mapping->setType($type);
         $mapping->send();
     }
