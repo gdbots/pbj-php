@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
+use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\DynamicFieldKind;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
@@ -40,6 +41,13 @@ use Gdbots\Pbj\Type\TextType;
 final class DynamicField implements FromArray, ToArray, \JsonSerializable
 {
     /**
+     * Regular expression pattern for matching a valid dynamic field name.
+     *
+     * @constant string
+     */
+    const VALID_NAME_PATTERN = '/^[a-zA-Z_]{1}[a-zA-Z0-9_-]*$/';
+
+    /**
      * Fields are only used to allow for type guarding/encoding/decoding.
      *
      * @var Field[]
@@ -62,6 +70,11 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      */
     private function __construct($name, DynamicFieldKind $kind, $value)
     {
+        Assertion::betweenLength($name, 1, 127);
+        Assertion::regex($name, self::VALID_NAME_PATTERN,
+            sprintf('DynamicField name [%s] must match pattern [%s].', $name, self::VALID_NAME_PATTERN)
+        );
+
         $this->name = $name;
         $this->kind = $kind->getValue();
         $field = self::createField($this->kind);
