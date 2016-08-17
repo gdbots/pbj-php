@@ -4,23 +4,21 @@ namespace Gdbots\Pbj\Marshaler\Elastica;
 
 use Elastica\Document;
 use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Common\GeoPoint;
-use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Enum\FieldRule;
-use Gdbots\Pbj\Enum\TypeName;
-use Gdbots\Pbj\Exception\DecodeValueFailed;
-use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
+use Gdbots\Pbj\WellKnown\DynamicField;
+use Gdbots\Pbj\WellKnown\GeoPoint;
 
-final class DocumentMarshaler
+final class DocumentMarshaler implements Codec
 {
     /**
      * @param Message $message
@@ -34,6 +32,110 @@ final class DocumentMarshaler
     {
         $document = $document ?: new Document();
         return $document->setData($this->doMarshal($message));
+    }
+
+    /**
+     * @param Document|array $documentOrSource Document object or source array
+     * @return Message
+     *
+     * @throws \Exception
+     * @throws GdbotsPbjException
+     */
+    public function unmarshal($documentOrSource)
+    {
+        if ($documentOrSource instanceof Document) {
+            return $this->doUnmarshal($documentOrSource->getData());
+        }
+
+        return $this->doUnmarshal($documentOrSource);
+    }
+
+    /**
+     * @param Message $message
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeMessage(Message $message, Field $field)
+    {
+        return $this->doMarshal($message);
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return Message
+     */
+    public function decodeMessage($value, Field $field)
+    {
+        return $this->doUnmarshal($value);
+    }
+
+    /**
+     * @param MessageRef $messageRef
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeMessageRef(MessageRef $messageRef, Field $field)
+    {
+        return $messageRef->toArray();
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return MessageRef
+     */
+    public function decodeMessageRef($value, Field $field)
+    {
+        return MessageRef::fromArray($value);
+    }
+
+    /**
+     * @param GeoPoint $geoPoint
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeGeoPoint(GeoPoint $geoPoint, Field $field)
+    {
+        return [$geoPoint->getLongitude(), $geoPoint->getLatitude()];
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return GeoPoint
+     */
+    public function decodeGeoPoint($value, Field $field)
+    {
+        return new GeoPoint($value[1], $value[0]);
+    }
+
+    /**
+     * @param DynamicField $dynamicField
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeDynamicField(DynamicField $dynamicField, Field $field)
+    {
+        return $dynamicField->toArray();
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return DynamicField
+     */
+    public function decodeDynamicField($value, Field $field)
+    {
+        return DynamicField::fromArray($value);
     }
 
     /**
@@ -54,28 +156,30 @@ final class DocumentMarshaler
                 if ($message->hasClearedField($fieldName)) {
                     $payload[$fieldName] = null;
                 }
+
                 continue;
             }
 
             $value = $message->get($fieldName);
+            $type = $field->getType();
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $payload[$fieldName] = $this->encodeValue($value, $field);
+                    $payload[$fieldName] = $type->encode($value, $field, $this);
                     break;
 
                 case FieldRule::A_SET:
                 case FieldRule::A_LIST:
                     $payload[$fieldName] = [];
                     foreach ($value as $v) {
-                        $payload[$fieldName][] = $this->encodeValue($v, $field);
+                        $payload[$fieldName][] = $type->encode($v, $field, $this);
                     }
                     break;
 
                 case FieldRule::A_MAP:
                     $payload[$fieldName] = [];
                     foreach ($value as $k => $v) {
-                        $payload[$fieldName][$k] = $this->encodeValue($v, $field);
+                        $payload[$fieldName][$k] = $type->encode($v, $field, $this);
                     }
                     break;
 
@@ -88,21 +192,6 @@ final class DocumentMarshaler
     }
 
     /**
-     * @param Document|array $documentOrSource Document object or source array
-     * @return Message
-     *
-     * @throws \Exception
-     * @throws GdbotsPbjException
-     */
-    public function unmarshal($documentOrSource)
-    {
-        if ($documentOrSource instanceof Document) {
-            return $this->doUnmarshal($documentOrSource->getData());
-        }
-        return $this->doUnmarshal($documentOrSource);
-    }
-
-    /**
      * @param array $data
      * @return Message
      *
@@ -111,18 +200,17 @@ final class DocumentMarshaler
      */
     private function doUnmarshal(array $data)
     {
-        Assertion::keyIsset(
-            $data,
-            Schema::PBJ_FIELD_NAME,
-            sprintf(
-                '[%s::%s] Array provided must contain the [%s] key.',
-                get_called_class(),
-                __FUNCTION__,
-                Schema::PBJ_FIELD_NAME
-            )
-        );
+        $schemaId = SchemaId::fromString((string) $data[Schema::PBJ_FIELD_NAME]);
+        $className = MessageResolver::resolveId($schemaId);
 
-        $message = $this->createMessage((string) $data[Schema::PBJ_FIELD_NAME]);
+        /** @var Message $message */
+        $message = new $className();
+        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
+            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
+        }
+
         $schema = $message::schema();
 
         foreach ($data as $fieldName => $value) {
@@ -136,10 +224,11 @@ final class DocumentMarshaler
             }
 
             $field = $schema->getField($fieldName);
+            $type = $field->getType();
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->set($fieldName, $this->decodeValue($value, $field));
+                    $message->set($fieldName, $type->decode($value, $field, $this));
                     break;
 
                 case FieldRule::A_SET:
@@ -147,7 +236,7 @@ final class DocumentMarshaler
                     Assertion::isArray($value, sprintf('Field [%s] must be an array.', $fieldName), $fieldName);
                     $values = [];
                     foreach ($value as $v) {
-                        $values[] = $this->decodeValue($v, $field);
+                        $values[] = $type->decode($v, $field, $this);
                     }
 
                     if ($field->isASet()) {
@@ -164,7 +253,7 @@ final class DocumentMarshaler
                         $fieldName
                     );
                     foreach ($value as $k => $v) {
-                        $message->addToMap($fieldName, $k, $this->decodeValue($v, $field));
+                        $message->addToMap($fieldName, $k, $type->decode($v, $field, $this));
                     }
                     break;
 
@@ -174,89 +263,5 @@ final class DocumentMarshaler
         }
 
         return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
-    }
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     * @return mixed
-     *
-     * @throws EncodeValueFailed
-     */
-    private function encodeValue($value, Field $field)
-    {
-        $type = $field->getType();
-        if ($type->encodesToScalar()) {
-            return $type->encode($value, $field);
-        }
-
-        if ($value instanceof Message) {
-            return $this->doMarshal($value);
-        }
-
-        /**
-         * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-geo-point-type.html#_lat_lon_as_array_5
-         */
-        if ($value instanceof GeoPoint) {
-            return [$value->getLongitude(), $value->getLatitude()];
-        }
-
-        if ($value instanceof ToArray) {
-            return $value->toArray();
-        }
-
-        throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
-    }
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     * @return mixed
-     *
-     * @throws DecodeValueFailed
-     */
-    private function decodeValue($value, Field $field)
-    {
-        $type = $field->getType();
-        if ($type->encodesToScalar()) {
-            return $type->decode($value, $field);
-        }
-
-        if ($type->isMessage()) {
-            return $this->doUnmarshal($value);
-        }
-
-        if ($type->getTypeName() === TypeName::GEO_POINT()) {
-            return new GeoPoint($value[1], $value[0]);
-        }
-
-        if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
-            return MessageRef::fromArray($value);
-        }
-
-        throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
-    }
-
-    /**
-     * @param string $schemaId
-     * @return Message
-     *
-     * @throws GdbotsPbjException
-     * @throws InvalidResolvedSchema
-     */
-    private function createMessage($schemaId)
-    {
-        $schemaId = SchemaId::fromString($schemaId);
-        $className = MessageResolver::resolveId($schemaId);
-
-        /** @var Message $message */
-        $message = new $className();
-        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
-
-        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
-            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
-        }
-
-        return $message;
     }
 }

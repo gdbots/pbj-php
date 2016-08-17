@@ -3,6 +3,7 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
 
 final class FloatType extends AbstractType
@@ -18,7 +19,7 @@ final class FloatType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         return (float) $value;
     }
@@ -26,7 +27,7 @@ final class FloatType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         return (float) $value;
     }

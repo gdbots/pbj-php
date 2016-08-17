@@ -58,5 +58,31 @@
       "_schema": "pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0",
       "test1": "value1"
     }
+  ],
+  "dynamic_fields": [
+    {
+      "name": "bool_val",
+      "bool_val": true
+    },
+    {
+      "name": "date_val",
+      "date_val": "2015-12-25"
+    },
+    {
+      "name": "float_val",
+      "float_val": 3.14
+    },
+    {
+      "name": "int_val",
+      "int_val": 100
+    },
+    {
+      "name": "string_val",
+      "string_val": "string"
+    },
+    {
+      "name": "text_val",
+      "text_val": "text"
+    }
   ]
 }

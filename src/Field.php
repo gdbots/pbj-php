@@ -6,12 +6,12 @@ use Gdbots\Common\Enum;
 use Gdbots\Common\ToArray;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Common\Util\NumberUtils;
-use Gdbots\Identifiers\Identifier;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\Type\Type;
+use Gdbots\Pbj\WellKnown\Identifier;
 
 final class Field implements ToArray, \JsonSerializable
 {

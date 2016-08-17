@@ -17,6 +17,7 @@ class PhpSerializer implements Serializer
 
     /**
      * {@inheritdoc}
+     *
      * @return Message
      */
     public function deserialize($data, array $options = [])

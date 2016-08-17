@@ -33,6 +33,16 @@ final class MessageResolver
     private static $resolvedMixins = [];
 
     /**
+     * Returns all of the registed schemas.
+     *
+     * @return array
+     */
+    public static function all()
+    {
+        return self::$messages;
+    }
+
+    /**
      * Returns the fully qualified php class name to be used for the provided schema id.
      *
      * @param SchemaId $id

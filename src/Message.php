@@ -11,6 +11,7 @@ interface Message
 {
     /**
      * @return Schema
+     *
      * @throws SchemaNotDefined
      */
     public static function schema();
@@ -27,6 +28,7 @@ interface Message
      * @see Gdbots\Pbj\Serializer\PhpArraySerializer::deserialize
      *
      * @param array $data
+     *
      * @return static
      */
     public static function fromArray(array $data = []);
@@ -44,6 +46,7 @@ interface Message
      * Useful for debugging or logging.
      *
      * @param array $options
+     *
      * @return string
      */
     public function toYaml(array $options = []);
@@ -59,6 +62,7 @@ interface Message
      * Generates an md5 hash of the json representation of the current message.
      *
      * @param string[] $ignoredFields
+     *
      * @return string
      */
     public function generateEtag(array $ignoredFields = []);
@@ -67,6 +71,7 @@ interface Message
      * Generates a reference to this message with an optional tag.
      *
      * @param string $tag
+     *
      * @return MessageRef
      */
     public function generateMessageRef($tag = null);
@@ -115,6 +120,7 @@ interface Message
      * Returns true if the data of the message matches.
      *
      * @param Message $other
+     *
      * @return bool
      */
     public function equals(Message $other);
@@ -125,6 +131,7 @@ interface Message
      * setting a message as being "replayed" will also freeze the message.
      *
      * @param bool|null $replay
+     *
      * @return bool
      *
      * @throws LogicException
@@ -136,6 +143,7 @@ interface Message
      * Operation will NOT overwrite any fields already set.
      *
      * @param string|null $fieldName
+     *
      * @return static
      */
     public function populateDefaults($fieldName = null);
@@ -147,6 +155,7 @@ interface Message
      * todo: review, possible optimized merge when schemas match
      *
      * @param Message $message
+     *
      * @return static
      */
     //public function mergeFrom(Message $message);
@@ -155,6 +164,7 @@ interface Message
      * Returns true if the field has been populated.
      *
      * @param string $fieldName
+     *
      * @return bool
      */
     public function has($fieldName);
@@ -165,6 +175,7 @@ interface Message
      *
      * @param string $fieldName
      * @param mixed $default
+     *
      * @return mixed
      */
     public function get($fieldName, $default = null);
@@ -173,6 +184,7 @@ interface Message
      * Clears the value of a field.
      *
      * @param string $fieldName
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -184,6 +196,7 @@ interface Message
      * Returns true if the field has been cleared.
      *
      * @param string $fieldName
+     *
      * @return bool
      */
     public function hasClearedField($fieldName);
@@ -200,6 +213,7 @@ interface Message
      *
      * @param string $fieldName
      * @param mixed $value
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -211,6 +225,7 @@ interface Message
      *
      * @param string $fieldName
      * @param mixed $value
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -222,6 +237,7 @@ interface Message
      *
      * @param string $fieldName
      * @param mixed $value
+     *
      * @return bool
      */
     public function isInSet($fieldName, $value);
@@ -231,6 +247,7 @@ interface Message
      *
      * @param string $fieldName
      * @param array $values
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -242,6 +259,7 @@ interface Message
      *
      * @param string $fieldName
      * @param array $values
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -255,6 +273,7 @@ interface Message
      *
      * @param string $fieldName
      * @param mixed $value
+     *
      * @return bool
      */
     public function isInList($fieldName, $value);
@@ -265,6 +284,7 @@ interface Message
      * @param string $fieldName
      * @param int $index
      * @param mixed $default
+     *
      * @return mixed
      */
     public function getFromListAt($fieldName, $index, $default = null);
@@ -274,6 +294,7 @@ interface Message
      *
      * @param string $fieldName
      * @param array $values
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -285,6 +306,7 @@ interface Message
      *
      * @param string $fieldName
      * @param int $index
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -296,6 +318,7 @@ interface Message
      *
      * @param string $fieldName
      * @param string $key
+     *
      * @return bool
      */
     public function isInMap($fieldName, $key);
@@ -306,6 +329,7 @@ interface Message
      * @param string $fieldName
      * @param string $key
      * @param mixed $default
+     *
      * @return mixed
      */
     public function getFromMap($fieldName, $key, $default = null);
@@ -316,6 +340,7 @@ interface Message
      * @param string $fieldName
      * @param string $key
      * @param mixed $value
+     *
      * @return static
      *
      * @throws GdbotsPbjException
@@ -327,6 +352,7 @@ interface Message
      *
      * @param string $fieldName
      * @param string $key
+     *
      * @return static
      *
      * @throws GdbotsPbjException

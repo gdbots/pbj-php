@@ -3,6 +3,7 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
 
 // todo: review precision/scale handling.  this seems putrid
@@ -19,7 +20,7 @@ final class DecimalType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         return (float) bcadd((float) $value, '0', $field->getScale());
     }
@@ -27,7 +28,7 @@ final class DecimalType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         return (float) bcadd((float) $value, '0', $field->getScale());
     }

@@ -33,7 +33,6 @@ final class EmailMessage extends AbstractMessage
                     ->build(),
                 Fb::create('subject', T\StringType::create())
                     ->withDefault(function (EmailMessage $message = null) {
-                        // closure func default spice or gtfo and use named automagic defaults?
                         if (!$message) {
                             return null;
                         }
@@ -70,6 +69,9 @@ final class EmailMessage extends AbstractMessage
                     ->build(),
                 Fb::create('any_of_message', T\MessageType::create())
                     ->className('Gdbots\Pbj\Message')
+                    ->asAList()
+                    ->build(),
+                Fb::create('dynamic_fields', T\DynamicFieldType::create())
                     ->asAList()
                     ->build(),
             ]

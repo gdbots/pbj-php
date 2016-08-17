@@ -33,6 +33,7 @@ abstract class AbstractType implements Type
             $typeName = StringUtils::toSlugFromCamel(str_replace('Type', '', end($a)));
             self::$instances[$type] = new static(TypeName::create($typeName));
         }
+
         return self::$instances[$type];
     }
 

@@ -2,11 +2,10 @@
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\Assertion;
-use Gdbots\Pbj\Exception\DecodeValueFailed;
-use Gdbots\Pbj\Exception\EncodeValueFailed;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\WellKnown\GeoPoint;
 
 final class GeoPointType extends AbstractType
 {
@@ -16,23 +15,23 @@ final class GeoPointType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var GeoPoint $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Common\GeoPoint', null, $field->getName());
+        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\GeoPoint', null, $field->getName());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
-        throw new EncodeValueFailed($value, $field, 'GeoPoints must be encoded with a Serializer.');
+        return $codec->encodeGeoPoint($value, $field);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
-        throw new DecodeValueFailed($value, $field, 'GeoPoints must be decoded with a Serializer.');
+        return $codec->decodeGeoPoint($value, $field);
     }
 
     /**

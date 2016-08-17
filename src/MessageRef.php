@@ -4,7 +4,6 @@ namespace Gdbots\Pbj;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Exception\LogicException;
 
@@ -42,7 +41,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         Assertion::regex($this->id, '/^[\w\/\.:-]+$/', null, 'MessageRef.id');
 
         if (null !== $tag) {
-            $this->tag = SlugUtils::create($tag) ?: null;
+            $this->tag = strtolower(preg_replace('/[^\w\.-]/', '-', $tag)) ?: null;
         }
 
         if ($this->curie->isMixin()) {

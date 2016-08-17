@@ -2,6 +2,7 @@
 
 namespace Gdbots\Pbj\Type;
 
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
@@ -22,6 +23,7 @@ interface Type
 
     /**
      * Shortcut to returning the value of the TypeName
+     *
      * @return string
      */
     public function getTypeValue();
@@ -29,6 +31,7 @@ interface Type
     /**
      * @param mixed $value
      * @param Field $field
+     *
      * @throws \Exception
      */
     public function guard($value, Field $field);
@@ -36,22 +39,26 @@ interface Type
     /**
      * @param mixed $value
      * @param Field $field
+     * @param Codec $codec
+     *
      * @return mixed
      *
      * @throws GdbotsPbjException
      * @throws EncodeValueFailed
      */
-    public function encode($value, Field $field);
+    public function encode($value, Field $field, Codec $codec = null);
 
     /**
      * @param mixed $value
      * @param Field $field
+     * @param Codec $codec
+     *
      * @return mixed
      *
      * @throws GdbotsPbjException
      * @throws DecodeValueFailed
      */
-    public function decode($value, Field $field);
+    public function decode($value, Field $field, Codec $codec = null);
 
     /**
      * Returns true if the value gets decoded and stored during runtime as a scalar value.
@@ -101,18 +108,21 @@ interface Type
 
     /**
      * Returns the minimum value supported by an integer type.
+     *
      * @return int
      */
     public function getMin();
 
     /**
      * Returns the maximum value supported by an integer type.
+     *
      * @return int
      */
     public function getMax();
 
     /**
      * Returns the maximum number of bytes supported by the string or binary type.
+     *
      * @return int
      */
     public function getMaxBytes();

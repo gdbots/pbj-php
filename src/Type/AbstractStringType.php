@@ -4,6 +4,7 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
 
 abstract class AbstractStringType extends AbstractType
@@ -37,24 +38,26 @@ abstract class AbstractStringType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
         $value = trim($value);
         if ($value === '') {
             return null;
         }
+
         return $value;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
         $value = trim((string) $value);
         if ($value === '') {
             return null;
         }
+
         return $value;
     }
 

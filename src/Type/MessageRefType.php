@@ -3,8 +3,7 @@
 namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Assertion;
-use Gdbots\Pbj\Exception\DecodeValueFailed;
-use Gdbots\Pbj\Exception\EncodeValueFailed;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\MessageRef;
 
@@ -22,17 +21,17 @@ final class MessageRefType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function encode($value, Field $field)
+    public function encode($value, Field $field, Codec $codec = null)
     {
-        throw new EncodeValueFailed($value, $field, 'MessageRef must be encoded with a Serializer.');
+        return $codec->encodeMessageRef($value, $field);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decode($value, Field $field)
+    public function decode($value, Field $field, Codec $codec = null)
     {
-        throw new DecodeValueFailed($value, $field, 'MessageRef must be decoded with a Serializer.');
+        return $codec->decodeMessageRef($value, $field);
     }
 
     /**

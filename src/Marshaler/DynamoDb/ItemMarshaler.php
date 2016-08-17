@@ -2,13 +2,12 @@
 
 namespace Gdbots\Pbj\Marshaler\DynamoDb;
 
-use Gdbots\Common\GeoPoint;
 use Gdbots\Pbj\Assertion;
+use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\TypeName;
-use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Message;
@@ -17,6 +16,8 @@ use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
+use Gdbots\Pbj\WellKnown\DynamicField;
+use Gdbots\Pbj\WellKnown\GeoPoint;
 
 /**
  * Creates an array in the DynamoDb expected attribute value format.
@@ -26,7 +27,7 @@ use Gdbots\Pbj\SchemaId;
  *
  * @link http://blogs.aws.amazon.com/php/post/Tx3QE1CEXG8QG1Z/DynamoDB-JSON-and-Array-Marshaling-for-PHP
  */
-final class ItemMarshaler
+final class ItemMarshaler implements Codec
 {
     const TYPE_S = 'S';
     const TYPE_N = 'N';
@@ -114,6 +115,125 @@ final class ItemMarshaler
     }
 
     /**
+     * @param Message $message
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeMessage(Message $message, Field $field)
+    {
+        return ['M' => $this->marshal($message)];
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return Message
+     */
+    public function decodeMessage($value, Field $field)
+    {
+        return $this->unmarshal($value);
+    }
+
+    /**
+     * @param MessageRef $messageRef
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeMessageRef(MessageRef $messageRef, Field $field)
+    {
+        return [
+            'M' => [
+                'curie' => [self::TYPE_STRING => $messageRef->getCurie()->toString()],
+                'id'    => [self::TYPE_STRING => $messageRef->getId()],
+                'tag'   => $messageRef->hasTag() ? [self::TYPE_STRING => $messageRef->getTag()] : ['NULL' => true]
+            ]
+        ];
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return MessageRef
+     */
+    public function decodeMessageRef($value, Field $field)
+    {
+        return new MessageRef(
+            SchemaCurie::fromString($value['curie']['S']),
+            $value['id']['S'],
+            isset($value['tag']['NULL']) ? null : $value['tag']['S']
+        );
+    }
+
+    /**
+     * @param GeoPoint $geoPoint
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeGeoPoint(GeoPoint $geoPoint, Field $field)
+    {
+        return [
+            'M' => [
+                'type' => [self::TYPE_STRING => 'Point'],
+                'coordinates' => [
+                    'L' => [
+                        [self::TYPE_NUMBER => (string) $geoPoint->getLongitude()],
+                        [self::TYPE_NUMBER => (string) $geoPoint->getLatitude()]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return GeoPoint
+     */
+    public function decodeGeoPoint($value, Field $field)
+    {
+        return new GeoPoint($value['coordinates']['L'][1]['N'], $value['coordinates']['L'][0]['N']);
+    }
+
+    /**
+     * @param DynamicField $dynamicField
+     * @param Field $field
+     *
+     * @return mixed
+     */
+    public function encodeDynamicField(DynamicField $dynamicField, Field $field)
+    {
+        return [
+            'M' => [
+                'name' => [self::TYPE_STRING => $dynamicField->getName()],
+                $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
+            ]
+        ];
+    }
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return DynamicField
+     */
+    public function decodeDynamicField($value, Field $field)
+    {
+        $data = ['name' => $value['name']['S']];
+        unset($value['name']);
+
+        $kind = key($value);
+        $data[$kind] = current($value[$kind]);
+
+        return DynamicField::fromArray($data);
+    }
+
+    /**
      * @param array $data
      * @return Message
      *
@@ -133,7 +253,17 @@ final class ItemMarshaler
             )
         );
 
-        $message = $this->createMessage((string) $data['M'][Schema::PBJ_FIELD_NAME]['S']);
+        $schemaId = SchemaId::fromString((string) $data['M'][Schema::PBJ_FIELD_NAME]['S']);
+        $className = MessageResolver::resolveId($schemaId);
+
+        /** @var Message $message */
+        $message = new $className();
+        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+
+        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
+            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
+        }
+
         $schema = $message::schema();
 
         foreach ($data['M'] as $fieldName => $dynamoValue) {
@@ -150,9 +280,11 @@ final class ItemMarshaler
             }
 
             $field = $schema->getField($fieldName);
+            $type = $field->getType();
+
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->set($fieldName, $this->decodeValue($value, $field));
+                    $message->set($fieldName, $type->decode($value, $field, $this));
                     break;
 
                 case FieldRule::A_SET:
@@ -160,11 +292,11 @@ final class ItemMarshaler
                     $values = [];
                     if ('L' === $dynamoType) {
                         foreach ($value as $v) {
-                            $values[] = $this->decodeValue(isset($v['M']) ? $v['M'] : current($v), $field);
+                            $values[] = $type->decode(isset($v['M']) ? $v['M'] : current($v), $field, $this);
                         }
                     } else {
                         foreach ($value as $v) {
-                            $values[] = $this->decodeValue($v, $field);
+                            $values[] = $type->decode($v, $field, $this);
                         }
                     }
 
@@ -177,7 +309,7 @@ final class ItemMarshaler
 
                 case FieldRule::A_MAP:
                     foreach ($value as $k => $v) {
-                        $message->addToMap($fieldName, $k, $this->decodeValue(current($v), $field));
+                        $message->addToMap($fieldName, $k, $type->decode(current($v), $field, $this));
                     }
                     break;
 
@@ -199,42 +331,32 @@ final class ItemMarshaler
     private function encodeValue($value, Field $field)
     {
         $type = $field->getType();
+
         if ($type->encodesToScalar()) {
-            if ($type->isBinary()) {
-                $value = $type->encode($value, $field);
-                if (empty($value)) {
-                    return ['NULL' => true];
-                } else {
-                    return [self::TYPE_BINARY => $value];
-                }
-            } elseif ($type->isString()) {
-                $value = $type->encode($value, $field);
+            if ($type->isString()) {
+                $value = $type->encode($value, $field, $this);
                 if (empty($value)) {
                     return ['NULL' => true];
                 } else {
                     return [self::TYPE_STRING => $value];
                 }
             } elseif ($type->isNumeric()) {
-                return [self::TYPE_NUMBER => (string) $type->encode($value, $field)];
+                return [self::TYPE_NUMBER => (string) $type->encode($value, $field, $this)];
             } elseif ($type->isBoolean()) {
-                return ['BOOL' => $type->encode($value, $field)];
+                return ['BOOL' => $type->encode($value, $field, $this)];
+            } elseif ($type->isBinary()) {
+                $value = $type->encode($value, $field, $this);
+                if (empty($value)) {
+                    return ['NULL' => true];
+                } else {
+                    return [self::TYPE_BINARY => $value];
+                }
             }
+
             throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
         }
 
-        if ($value instanceof Message) {
-            return ['M' => $this->marshal($value)];
-        }
-
-        if ($value instanceof GeoPoint) {
-            return $this->encodeGeoPoint($value);
-        }
-
-        if ($value instanceof MessageRef) {
-            return $this->encodeMessageRef($value);
-        }
-
-        throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
+        return $type->encode($value, $field, $this);
     }
 
     /**
@@ -256,17 +378,17 @@ final class ItemMarshaler
         if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
             $list = [];
             foreach ($value as $v) {
-                $list[] = $this->encodeMessageRef($v);
+                $list[] = $type->encode($v, $field, $this);
             }
             return ['L' => $list];
         }
 
-        if ($type->isBinary()) {
-            $dynamoType = self::TYPE_BINARY_SET;
-        } elseif ($type->isString()) {
+        if ($type->isString()) {
             $dynamoType = self::TYPE_STRING_SET;
         } elseif ($type->isNumeric()) {
             $dynamoType = self::TYPE_NUMBER_SET;
+        } elseif ($type->isBinary()) {
+            $dynamoType = self::TYPE_BINARY_SET;
         } else {
             throw new EncodeValueFailed(
                 $value,
@@ -278,102 +400,12 @@ final class ItemMarshaler
         $result = [];
         foreach ($value as $v) {
             if ($type->encodesToScalar()) {
-                $result[] = (string) $type->encode($v, $field);
+                $result[] = (string) $type->encode($v, $field, $this);
             } else {
                 $result[] = (string) $v;
             }
         }
 
         return [$dynamoType => $result];
-    }
-
-    /**
-     * @param GeoPoint $value
-     * @return array
-     */
-    private function encodeGeoPoint(GeoPoint $value)
-    {
-        return [
-            'M' => [
-                'type' => [self::TYPE_STRING => 'Point'],
-                'coordinates' => [
-                    'L' => [
-                        [self::TYPE_NUMBER => (string) $value->getLongitude()],
-                        [self::TYPE_NUMBER => (string) $value->getLatitude()]
-                    ]
-                ]
-            ]
-        ];
-    }
-
-    /**
-     * @param MessageRef $value
-     * @return array
-     */
-    private function encodeMessageRef(MessageRef $value)
-    {
-        return [
-            'M' => [
-                'curie' => [self::TYPE_STRING => $value->getCurie()->toString()],
-                'id'    => [self::TYPE_STRING => $value->getId()],
-                'tag'   => $value->hasTag() ? [self::TYPE_STRING => $value->getTag()] : ['NULL' => true]
-            ]
-        ];
-    }
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     * @return mixed
-     *
-     * @throws DecodeValueFailed
-     */
-    private function decodeValue($value, Field $field)
-    {
-        $type = $field->getType();
-        if ($type->encodesToScalar()) {
-            return $type->decode($value, $field);
-        }
-
-        if ($type->isMessage()) {
-            return $this->unmarshal($value);
-        }
-
-        if ($type->getTypeName() === TypeName::GEO_POINT()) {
-            return new GeoPoint($value['coordinates']['L'][1]['N'], $value['coordinates']['L'][0]['N']);
-        }
-
-        if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
-            return new MessageRef(
-                SchemaCurie::fromString($value['curie']['S']),
-                $value['id']['S'],
-                isset($value['tag']['NULL']) ? null : $value['tag']['S']
-            );
-        }
-
-        throw new DecodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
-    }
-
-    /**
-     * @param string $schemaId
-     * @return Message
-     *
-     * @throws GdbotsPbjException
-     * @throws InvalidResolvedSchema
-     */
-    private function createMessage($schemaId)
-    {
-        $schemaId = SchemaId::fromString($schemaId);
-        $className = MessageResolver::resolveId($schemaId);
-
-        /** @var Message $message */
-        $message = new $className();
-        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
-
-        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
-            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
-        }
-
-        return $message;
     }
 }
