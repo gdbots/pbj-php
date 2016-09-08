@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.1.1
+* issue #32: Add "TrinaryType".  ref https://en.wikipedia.org/wiki/Three-valued_logic
+
+
 ## v1.1.0
 __POSSIBLE BREAKING CHANGES__
 

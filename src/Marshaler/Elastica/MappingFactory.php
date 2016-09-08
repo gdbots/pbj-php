@@ -74,6 +74,7 @@ class MappingFactory
         'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
         'timestamp'         => ['type' => 'date', 'include_in_all' => false],
         'tiny-int'          => ['type' => 'short', 'include_in_all' => false],
+        'trinary'           => ['type' => 'short', 'include_in_all' => false],
         'uuid'              => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
     ];
 
