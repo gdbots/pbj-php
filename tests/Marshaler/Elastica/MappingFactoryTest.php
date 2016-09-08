@@ -568,6 +568,15 @@ JSON;
                 }
             },
             {
+                "trinary_template": {
+                    "path_match": "Trinary.*",
+                    "mapping": {
+                        "type": "short",
+                        "include_in_all": false
+                    }
+                }
+            },
+            {
                 "uuid_template": {
                     "path_match": "Uuid.*",
                     "mapping": {
