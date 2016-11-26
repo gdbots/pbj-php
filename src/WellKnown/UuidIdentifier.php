@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\WellKnown;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-class UuidIdentifier implements Identifier, GeneratesIdentifier, \JsonSerializable
+class UuidIdentifier implements Identifier, GeneratesIdentifier
 {
     /** @var UuidInterface */
     protected $uuid;

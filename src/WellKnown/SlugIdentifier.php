@@ -6,7 +6,7 @@ use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 
-abstract class SlugIdentifier implements Identifier, \JsonSerializable
+abstract class SlugIdentifier implements Identifier
 {
     /** @var string */
     protected $slug;
