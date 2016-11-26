@@ -2,7 +2,7 @@
 
 namespace Gdbots\Pbj\WellKnown;
 
-interface Identifier
+interface Identifier extends \JsonSerializable
 {
     /**
      * Creates an identifier object from a string representation
@@ -27,16 +27,10 @@ interface Identifier
     public function __toString();
 
     /**
-     * @see Identifier::toString
-     * @return string
-     */
-    public function jsonSerialize();
-
-    /**
      * Compares the object to another Identifier object. Returns true if both have the same type and value.
      *
      * @param Identifier $other
-     * @return boolean
+     * @return bool
      */
     public function equals(Identifier $other);
 }

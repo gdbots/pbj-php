@@ -25,7 +25,7 @@ interface Message
 
     /**
      * Returns a new message from the provided array using the PhpArray Serializer.
-     * @see Gdbots\Pbj\Serializer\PhpArraySerializer::deserialize
+     * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::deserialize
      *
      * @param array $data
      *
@@ -35,7 +35,7 @@ interface Message
 
     /**
      * Returns the message as an associative array using the PhpArray Serializer.
-     * @see Gdbots\Pbj\Serializer\PhpArraySerializer::serialize
+     * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::serialize
      *
      * @return array
      */

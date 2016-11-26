@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\WellKnown;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 
-abstract class StringIdentifier implements Identifier, \JsonSerializable
+abstract class StringIdentifier implements Identifier
 {
     /** @var string */
     protected $string;

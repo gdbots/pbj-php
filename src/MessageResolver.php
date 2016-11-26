@@ -5,6 +5,7 @@ namespace Gdbots\Pbj;
 use Gdbots\Pbj\Exception\MoreThanOneMessageForMixin;
 use Gdbots\Pbj\Exception\NoMessageForCurie;
 use Gdbots\Pbj\Exception\NoMessageForMixin;
+use Gdbots\Pbj\Exception\NoMessageForQName;
 use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 
 final class MessageResolver
@@ -31,6 +32,15 @@ final class MessageResolver
      * @var Schema[]
      */
     private static $resolvedMixins = [];
+
+    /**
+     * An array of resolved lookups by qname.
+     *
+     * @see SchemaQName
+     *
+     * @var SchemaCurie[]
+     */
+    private static $resolvedQnames = [];
 
     /**
      * Returns all of the registed schemas.
@@ -97,6 +107,35 @@ final class MessageResolver
     }
 
     /**
+     * Returns the SchemaCurie for the given SchemaQName.
+     *
+     * @param SchemaQName $qname
+     * @return SchemaCurie
+     *
+     * @throws NoMessageForQName
+     */
+    public static function resolveQName(SchemaQName $qname)
+    {
+        $key = $qname->toString();
+
+        if (isset(self::$resolvedQnames[$key])) {
+            return self::$resolvedQnames[$key];
+        }
+
+        $qvendor = $qname->getVendor();
+        $qmessage = $qname->getMessage();
+
+        foreach (self::$messages as $id => $class) {
+            list($vendor, $package, $category, $message) = explode(':', $id);
+            if ($qvendor === $vendor && $qmessage === $message) {
+                return self::$resolvedQnames[$key] = SchemaCurie::fromString($vendor.':'.$package.':'.$category.':'.$message);
+            }
+        }
+
+        throw new NoMessageForQName($qname);
+    }
+
+    /**
      * Adds a single schema to the resolver.  This is used in tests or dynamic
      * message schema creation (not a typical use case).
      *
@@ -159,7 +198,6 @@ final class MessageResolver
 
     /**
      * Returns an array of Schemas expected to be using the provided mixin.
-     * todo: write unit tests for MessageResolver
      *
      * @param Mixin $mixin
      * @param string $inPackage

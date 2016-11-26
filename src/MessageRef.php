@@ -87,7 +87,10 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
      */
     public static function fromString($string)
     {
-        list($ref, $tag) = explode('#', $string, 2);
+        $parts = explode('#', $string, 2);
+        $ref = $parts[0];
+        $tag = isset($parts[1]) ? $parts[1] : null;
+
         $parts = explode(':', $ref, 5);
         $id = array_pop($parts);
         $curie = SchemaCurie::fromString(implode(':', $parts));
