@@ -27,17 +27,26 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     private $tag;
 
     /**
+     * When serialized we store the curie as a string so we can
+     * restore the singleton instance upon wakeup.
+     *
+     * @var string
+     */
+    private $cs;
+
+    /**
      * todo: review random failures from YamlSerializer on $id when no tag is present.
      *
      * @param SchemaCurie $curie
-     * @param string $id
-     * @param string $tag The tag will be automatically fixed to a slug-formatted-string.
+     * @param string      $id
+     * @param string      $tag The tag will be automatically fixed to a slug-formatted-string.
+     *
      * @throws \Exception
      */
     public function __construct(SchemaCurie $curie, $id, $tag = null)
     {
         $this->curie = $curie;
-        $this->id = trim((string) $id) ?: 'null';
+        $this->id = trim((string)$id) ?: 'null';
         Assertion::regex($this->id, '/^[\w\/\.:-]+$/', null, 'MessageRef.id');
 
         if (null !== $tag) {
@@ -70,6 +79,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         if (null !== $this->tag) {
             return ['curie' => $this->curie->toString(), 'id' => $this->id, 'tag' => $this->tag];
         }
+
         return ['curie' => $this->curie->toString(), 'id' => $this->id];
     }
 
@@ -83,6 +93,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param string $string A string with format curie:id#tag
+     *
      * @return self
      */
     public static function fromString($string)
@@ -105,6 +116,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         if (null !== $this->tag) {
             return $this->curie->toString() . ':' . $this->id . '#' . $this->tag;
         }
+
         return $this->curie->toString() . ':' . $this->id;
     }
 
@@ -158,10 +170,29 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
 
     /**
      * @param MessageRef $other
+     *
      * @return bool
      */
     public function equals(MessageRef $other)
     {
         return $this->toString() === $other->toString();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __sleep()
+    {
+        $this->cs = $this->curie->toString();
+        return ['cs', 'id', 'tag'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __wakeup()
+    {
+        $this->curie = SchemaCurie::fromString($this->cs);
+        $this->cs = null;
     }
 }
