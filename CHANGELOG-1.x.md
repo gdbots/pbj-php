@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.1.3
+* issue #36: BUG :: In `MessageRef`, when using php serialization a MessageRef doesn't always restore curies correctly.
+  This may have been the culprit for issue #34.
+
+
 ## v1.1.2
 * issue #34: BUG :: MessageRef from string fails when no tag is supplied.
 * Extended `\JsonSerializable` in `Gdbots\Pbj\WellKnown\Identifier` since we implement it on all identifiers anyways.
