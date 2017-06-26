@@ -3,7 +3,7 @@ language: php
 php:
   - 5.6
   - 7.0
-#  - hhvm # currently failing with: Message was: "DateTimeZone::__construct(): Unknown or bad timezone (+00:00)"
+  - 7.1
 
 before_script:
   - composer self-update
