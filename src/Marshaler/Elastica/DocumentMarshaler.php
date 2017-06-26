@@ -205,7 +205,7 @@ final class DocumentMarshaler implements Codec
 
         /** @var Message $message */
         $message = new $className();
-        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+        Assertion::isInstanceOf($message, Message::class);
 
         if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
             throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);

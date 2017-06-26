@@ -14,7 +14,7 @@ final class UuidType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\UuidIdentifier', null, $field->getName());
+        Assertion::isInstanceOf($value, UuidIdentifier::class, null, $field->getName());
         if ($field->hasClassName()) {
             Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         }
@@ -42,7 +42,7 @@ final class UuidType extends AbstractType
         }
 
         /** @var UuidIdentifier $className */
-        $className = $field->getClassName() ?: 'Gdbots\Pbj\WellKnown\UuidIdentifier';
+        $className = $field->getClassName() ?: UuidIdentifier::class;
         if ($value instanceof $className) {
             return $value;
         }

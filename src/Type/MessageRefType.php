@@ -15,7 +15,7 @@ final class MessageRefType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var MessageRef $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\MessageRef', null, $field->getName());
+        Assertion::isInstanceOf($value, MessageRef::class, null, $field->getName());
     }
 
     /**

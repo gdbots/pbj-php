@@ -3,8 +3,9 @@
 namespace Gdbots\Pbj;
 
 use Assert\Assertion as BaseAssertion;
+use Gdbots\Pbj\Exception\AssertionFailed;
 
 class Assertion extends BaseAssertion
 {
-    protected static $exceptionClass = 'Gdbots\Pbj\Exception\AssertionFailed';
+    protected static $exceptionClass = AssertionFailed::class;
 }

@@ -33,7 +33,7 @@ class MappingFactory
         'date-time'         => ['type' => 'date', 'include_in_all' => false],
         'decimal'           => ['type' => 'double', 'include_in_all' => false],
         'dynamic-field'     => [
-            'type' => 'object',
+            'type'       => 'object',
             'properties' => [
                 'name'       => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
                 'bool_val'   => ['type' => 'boolean', 'include_in_all' => false],
@@ -42,7 +42,7 @@ class MappingFactory
                 'int_val'    => ['type' => 'long', 'include_in_all' => false],
                 'string_val' => ['type' => 'string'],
                 'text_val'   => ['type' => 'string'],
-            ]
+            ],
         ],
         'float'             => ['type' => 'float', 'include_in_all' => false],
         'geo-point'         => ['type' => 'geo_point', 'include_in_all' => false],
@@ -54,12 +54,12 @@ class MappingFactory
         'medium-text'       => ['type' => 'string'],
         'message'           => ['type' => 'object'],
         'message-ref'       => [
-            'type' => 'object',
+            'type'       => 'object',
             'properties' => [
                 'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
                 'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
                 'tag'   => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-            ]
+            ],
         ],
         'microtime'         => ['type' => 'long', 'include_in_all' => false],
         'signed-big-int'    => ['type' => 'long', 'include_in_all' => false],
@@ -91,14 +91,15 @@ class MappingFactory
         return [
             'pbj_keyword_analyzer' => [
                 'tokenizer' => 'keyword',
-                'filter' => 'lowercase',
-            ]
+                'filter'    => 'lowercase',
+            ],
         ];
     }
 
     /**
      * @param Schema $schema
      * @param string $defaultAnalyzer
+     *
      * @return Mapping
      */
     public function create(Schema $schema, $defaultAnalyzer = null)
@@ -116,9 +117,10 @@ class MappingFactory
     }
 
     /**
-     * @param Schema $schema
+     * @param Schema    $schema
      * @param \stdClass $rootObject
-     * @param string $path
+     * @param string    $path
+     *
      * @return array
      */
     protected function mapSchema(Schema $schema, \stdClass $rootObject, $path = null)
@@ -143,20 +145,20 @@ class MappingFactory
                     $rootObject->dynamic_templates[] = [
                         $templateName => [
                             'path_match' => $fieldPath . '.*',
-                            'mapping' => $this->$method($field, $rootObject, $fieldPath),
-                        ]
+                            'mapping'    => $this->$method($field, $rootObject, $fieldPath),
+                        ],
                     ];
                 } else {
                     $rootObject->dynamic_templates[] = [
                         $templateName => [
                             'path_match' => $fieldPath . '.*',
-                            'mapping' => $this->applyAnalyzer(
+                            'mapping'    => $this->applyAnalyzer(
                                 $this->types[$type->getTypeValue()],
                                 $field,
                                 $rootObject,
                                 $path
-                            )
-                        ]
+                            ),
+                        ],
                     ];
                 }
             } else {
@@ -179,52 +181,60 @@ class MappingFactory
     /**
      * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/nested.html
      *
-     * @param Field $field
+     * @param Field     $field
      * @param \stdClass $rootObject
-     * @param string $path
+     * @param string    $path
+     *
      * @return array
      */
     protected function mapMessage(Field $field, \stdClass $rootObject, $path = null)
     {
         /** @var Message $class */
-        $class = $field->getClassName();
+        $class = null;
+        $anyOfClassNames = $field->getAnyOfClassNames();
 
-        if (!empty($class) && !class_exists($class)) {
-            /*
-             * gdbots/pbjc compiler generates an interface and a concrete class with
-             * a V# suffix.  v1 would of course generally exist so we have a good chance
-             * of finding a class and thus a schema using this strategy.  we will however
-             * need to get fancier as versions increase and when mixins are used.
-             */
-            $class = $class . 'V1';
+        if (!empty($anyOfClassNames) && count($anyOfClassNames) === 1) {
+            $class = current($anyOfClassNames);
+            if (!class_exists($class)) {
+                /*
+                 * gdbots/pbjc compiler generates an interface and a concrete class with
+                 * a V# suffix.  v1 would of course generally exist so we have a good chance
+                 * of finding a class and thus a schema using this strategy.  we will however
+                 * need to get fancier as versions increase and when mixins are used.
+                 *
+                 * fixme: address mapping messages that use a mixin as the anyOf
+                 */
+                $class = "{$class}V1";
+            }
         }
 
         if (!empty($class) && class_exists($class)) {
             $schema = $class::schema();
             return [
-                'type' => $field->isAList() ? 'nested' : 'object',
-                'properties' => $this->mapSchema($schema, $rootObject, $path)
+                'type'       => $field->isAList() ? 'nested' : 'object',
+                'properties' => $this->mapSchema($schema, $rootObject, $path),
             ];
         }
 
         return [
-            'type' => $field->isAList() ? 'nested' : 'object',
+            'type'       => $field->isAList() ? 'nested' : 'object',
             'properties' => [
                 Schema::PBJ_FIELD_NAME => [
-                    'type' => 'string',
-                    'index' => 'not_analyzed',
-                    'include_in_all' => false
-                ]
-            ]
+                    'type'           => 'string',
+                    'index'          => 'not_analyzed',
+                    'include_in_all' => false,
+                ],
+            ],
         ];
     }
 
     /**
      * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/nested.html
      *
-     * @param Field $field
+     * @param Field     $field
      * @param \stdClass $rootObject
-     * @param string $path
+     * @param string    $path
+     *
      * @return array
      */
     protected function mapDynamicField(Field $field, \stdClass $rootObject, $path = null)
@@ -247,9 +257,10 @@ class MappingFactory
     }
 
     /**
-     * @param Field $field
+     * @param Field     $field
      * @param \stdClass $rootObject
-     * @param string $path
+     * @param string    $path
+     *
      * @return array
      */
     protected function mapString(Field $field, \stdClass $rootObject, $path = null)
@@ -294,10 +305,11 @@ class MappingFactory
      * Modify the analyzer for a property prior to adding it to the document mapping.
      * This is only applied to "string" types.
      *
-     * @param array $mapping
-     * @param Field $field
+     * @param array     $mapping
+     * @param Field     $field
      * @param \stdClass $rootObject
-     * @param null $path
+     * @param null      $path
+     *
      * @return array
      */
     protected function applyAnalyzer(array $mapping, Field $field, \stdClass $rootObject, $path = null)

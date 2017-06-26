@@ -24,7 +24,7 @@ class PhpSerializer implements Serializer
     {
         /** @var Message $message */
         $message = unserialize($data);
-        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+        Assertion::isInstanceOf($message, Message::class);
         return $message;
     }
 }

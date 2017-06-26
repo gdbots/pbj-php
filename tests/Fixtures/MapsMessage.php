@@ -8,6 +8,9 @@ use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
+use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
+use Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum;
+use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
 
 final class MapsMessage extends AbstractMessage
 {
@@ -16,7 +19,7 @@ final class MapsMessage extends AbstractMessage
      */
     public static function getAllTypes()
     {
-        $reflector = new \ReflectionClass('Gdbots\Pbj\Type\Type');
+        $reflector = new \ReflectionClass(T\Type::class);
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($reflector->getFileName())));
         $types = [];
         /** @var \SplFileInfo $file */
@@ -64,28 +67,30 @@ final class MapsMessage extends AbstractMessage
                 case 'Identifier':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->className('Gdbots\Pbj\WellKnown\TimeUuidIdentifier')
+                        ->className(TimeUuidIdentifier::class)
                         ->build();
                     break;
 
                 case 'IntEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->className('Gdbots\Tests\Pbj\Fixtures\Enum\IntEnum')
+                        ->className(IntEnum::class)
                         ->build();
                     break;
 
                 case 'StringEnum':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->className('Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum')
+                        ->className(StringEnum::class)
                         ->build();
                     break;
 
                 case 'Message':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                        ->anyOfClassNames([
+                            NestedMessage::class
+                        ])
                         ->build();
                     break;
 

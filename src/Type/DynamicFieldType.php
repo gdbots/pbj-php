@@ -15,7 +15,7 @@ final class DynamicFieldType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var DynamicField $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\DynamicField', null, $field->getName());
+        Assertion::isInstanceOf($value, DynamicField::class, null, $field->getName());
     }
 
     /**

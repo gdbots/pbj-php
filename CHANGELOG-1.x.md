@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.1.4
+* issue #38: Validate message type against anyOf only, not class name.
+* Update reference to class names to use php's builtin class property, e.g. `MyClass::class`.
+
+
 ## v1.1.3
 * issue #36: BUG :: In `MessageRef`, when using php serialization a MessageRef doesn't always restore curies correctly.
   This may have been the culprit for issue #34.

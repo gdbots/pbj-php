@@ -44,6 +44,7 @@ final class ItemMarshaler implements Codec
 
     /**
      * @param Message $message
+     *
      * @return array
      *
      * @throws \Exception
@@ -103,7 +104,9 @@ final class ItemMarshaler implements Codec
 
     /**
      * Pass the Item of a result.  $result['Item']
+     *
      * @param array $data
+     *
      * @return Message
      *
      * @throws \Exception
@@ -116,7 +119,7 @@ final class ItemMarshaler implements Codec
 
     /**
      * @param Message $message
-     * @param Field $field
+     * @param Field   $field
      *
      * @return mixed
      */
@@ -138,7 +141,7 @@ final class ItemMarshaler implements Codec
 
     /**
      * @param MessageRef $messageRef
-     * @param Field $field
+     * @param Field      $field
      *
      * @return mixed
      */
@@ -148,8 +151,8 @@ final class ItemMarshaler implements Codec
             'M' => [
                 'curie' => [self::TYPE_STRING => $messageRef->getCurie()->toString()],
                 'id'    => [self::TYPE_STRING => $messageRef->getId()],
-                'tag'   => $messageRef->hasTag() ? [self::TYPE_STRING => $messageRef->getTag()] : ['NULL' => true]
-            ]
+                'tag'   => $messageRef->hasTag() ? [self::TYPE_STRING => $messageRef->getTag()] : ['NULL' => true],
+            ],
         ];
     }
 
@@ -170,7 +173,7 @@ final class ItemMarshaler implements Codec
 
     /**
      * @param GeoPoint $geoPoint
-     * @param Field $field
+     * @param Field    $field
      *
      * @return mixed
      */
@@ -178,14 +181,14 @@ final class ItemMarshaler implements Codec
     {
         return [
             'M' => [
-                'type' => [self::TYPE_STRING => 'Point'],
+                'type'        => [self::TYPE_STRING => 'Point'],
                 'coordinates' => [
                     'L' => [
-                        [self::TYPE_NUMBER => (string) $geoPoint->getLongitude()],
-                        [self::TYPE_NUMBER => (string) $geoPoint->getLatitude()]
-                    ]
-                ]
-            ]
+                        [self::TYPE_NUMBER => (string)$geoPoint->getLongitude()],
+                        [self::TYPE_NUMBER => (string)$geoPoint->getLatitude()],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -202,7 +205,7 @@ final class ItemMarshaler implements Codec
 
     /**
      * @param DynamicField $dynamicField
-     * @param Field $field
+     * @param Field        $field
      *
      * @return mixed
      */
@@ -210,9 +213,9 @@ final class ItemMarshaler implements Codec
     {
         return [
             'M' => [
-                'name' => [self::TYPE_STRING => $dynamicField->getName()],
+                'name'                   => [self::TYPE_STRING => $dynamicField->getName()],
                 $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
-            ]
+            ],
         ];
     }
 
@@ -235,6 +238,7 @@ final class ItemMarshaler implements Codec
 
     /**
      * @param array $data
+     *
      * @return Message
      *
      * @throws \Exception
@@ -253,12 +257,12 @@ final class ItemMarshaler implements Codec
             )
         );
 
-        $schemaId = SchemaId::fromString((string) $data['M'][Schema::PBJ_FIELD_NAME]['S']);
+        $schemaId = SchemaId::fromString((string)$data['M'][Schema::PBJ_FIELD_NAME]['S']);
         $className = MessageResolver::resolveId($schemaId);
 
         /** @var Message $message */
         $message = new $className();
-        Assertion::isInstanceOf($message, 'Gdbots\Pbj\Message');
+        Assertion::isInstanceOf($message, Message::class);
 
         if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
             throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
@@ -324,6 +328,7 @@ final class ItemMarshaler implements Codec
     /**
      * @param mixed $value
      * @param Field $field
+     *
      * @return mixed
      *
      * @throws EncodeValueFailed
@@ -341,7 +346,7 @@ final class ItemMarshaler implements Codec
                     return [self::TYPE_STRING => $value];
                 }
             } elseif ($type->isNumeric()) {
-                return [self::TYPE_NUMBER => (string) $type->encode($value, $field, $this)];
+                return [self::TYPE_NUMBER => (string)$type->encode($value, $field, $this)];
             } elseif ($type->isBoolean()) {
                 return ['BOOL' => $type->encode($value, $field, $this)];
             } elseif ($type->isBinary()) {
@@ -362,6 +367,7 @@ final class ItemMarshaler implements Codec
     /**
      * @param array $value
      * @param Field $field
+     *
      * @return mixed
      *
      * @throws EncodeValueFailed
@@ -400,9 +406,9 @@ final class ItemMarshaler implements Codec
         $result = [];
         foreach ($value as $v) {
             if ($type->encodesToScalar()) {
-                $result[] = (string) $type->encode($v, $field, $this);
+                $result[] = (string)$type->encode($v, $field, $this);
             } else {
-                $result[] = (string) $v;
+                $result[] = (string)$v;
             }
         }
 
