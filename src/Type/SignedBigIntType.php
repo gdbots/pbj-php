@@ -15,7 +15,7 @@ final class SignedBigIntType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var BigNumber $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\BigNumber', null, $field->getName());
+        Assertion::isInstanceOf($value, BigNumber::class, null, $field->getName());
         Assertion::true(
             $value->isGreaterThanOrEqualTo('-9223372036854775808'),
             sprintf('Field [%s] cannot be less than [-9223372036854775808].', $field->getName()),

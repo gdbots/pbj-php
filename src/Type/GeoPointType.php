@@ -15,7 +15,7 @@ final class GeoPointType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var GeoPoint $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\GeoPoint', null, $field->getName());
+        Assertion::isInstanceOf($value, GeoPoint::class, null, $field->getName());
     }
 
     /**

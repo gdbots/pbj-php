@@ -16,7 +16,7 @@ final class IdentifierType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var Identifier $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\Identifier', null, $field->getName());
+        Assertion::isInstanceOf($value, Identifier::class, null, $field->getName());
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         $v = $value->toString();
         //Assertion::string($v, null, $field->getName());

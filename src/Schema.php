@@ -43,15 +43,15 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param SchemaId|string $id
-     * @param string $className
-     * @param Field[] $fields
-     * @param Mixin[] $mixins
+     * @param string          $className
+     * @param Field[]         $fields
+     * @param Mixin[]         $mixins
      */
     public function __construct($id, $className, array $fields = [], array $mixins = [])
     {
         Assertion::classExists($className, null, 'className');
-        Assertion::allIsInstanceOf($fields, 'Gdbots\Pbj\Field', null, 'fields');
-        Assertion::allIsInstanceOf($mixins, 'Gdbots\Pbj\Mixin', null, 'mixins');
+        Assertion::allIsInstanceOf($fields, Field::class, null, 'fields');
+        Assertion::allIsInstanceOf($mixins, Mixin::class, null, 'mixins');
 
         $this->id = $id instanceof SchemaId ? $id : SchemaId::fromString($id);
         $this->className = $className;
@@ -91,18 +91,18 @@ final class Schema implements ToArray, \JsonSerializable
     public function toArray()
     {
         return [
-            'id' => $this->id,
-            'curie' => $this->getCurie(),
+            'id'          => $this->id,
+            'curie'       => $this->getCurie(),
             'curie_major' => $this->getCurieMajor(),
-            'qname' => $this->getQName(),
-            'class_name' => $this->className,
-            'mixins' => array_map(
-                function(Mixin $mixin) {
+            'qname'       => $this->getQName(),
+            'class_name'  => $this->className,
+            'mixins'      => array_map(
+                function (Mixin $mixin) {
                     return $mixin->getId();
                 },
                 array_values($this->mixins)
             ),
-            'fields' => $this->fields,
+            'fields'      => $this->fields,
         ];
     }
 
@@ -124,6 +124,7 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param Field $field
+     *
      * @throws FieldAlreadyDefined
      * @throws FieldOverrideNotCompatible
      */
@@ -149,6 +150,7 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param Mixin $mixin
+     *
      * @throws MixinAlreadyAdded
      */
     private function addMixin(Mixin $mixin)
@@ -225,6 +227,7 @@ final class Schema implements ToArray, \JsonSerializable
      * SomeClass::importUserV1(ImportUserV1 $command)
      *
      * @param bool $withMajor
+     *
      * @return string
      */
     public function getHandlerMethodName($withMajor = true)
@@ -233,13 +236,14 @@ final class Schema implements ToArray, \JsonSerializable
             return lcfirst($this->classShortName);
         }
 
-        return lcfirst(str_replace('V'.$this->id->getVersion()->getMajor(), '', $this->classShortName));
+        return lcfirst(str_replace('V' . $this->id->getVersion()->getMajor(), '', $this->classShortName));
     }
 
     /**
      * Convenience method that creates a message instance with this schema.
      *
      * @param array $data
+     *
      * @return Message
      */
     public function createMessage(array $data = [])
@@ -255,6 +259,7 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param string $fieldName
+     *
      * @return bool
      */
     public function hasField($fieldName)
@@ -264,6 +269,7 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param string $fieldName
+     *
      * @return Field
      * @throws FieldNotDefined
      */
@@ -297,6 +303,7 @@ final class Schema implements ToArray, \JsonSerializable
      * @see SchemaId::getCurieMajor
      *
      * @param string $mixinId
+     *
      * @return bool
      */
     public function hasMixin($mixinId)
@@ -306,6 +313,7 @@ final class Schema implements ToArray, \JsonSerializable
 
     /**
      * @param string $mixinId
+     *
      * @return Mixin
      * @throws MixinNotDefined
      */

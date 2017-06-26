@@ -87,24 +87,24 @@ final class Field implements ToArray, \JsonSerializable
     private $overridable = false;
 
     /**
-     * @param string $name
-     * @param Type $type
-     * @param FieldRule $rule
-     * @param bool $required
-     * @param null|int $minLength
-     * @param null|int $maxLength
-     * @param null|string $pattern
-     * @param null|string $format
-     * @param null|int $min
-     * @param null|int $max
-     * @param int $precision
-     * @param int $scale
-     * @param null|mixed $default
-     * @param bool $useTypeDefault
-     * @param null|string $className
-     * @param null|array $anyOfClassNames
+     * @param string        $name
+     * @param Type          $type
+     * @param FieldRule     $rule
+     * @param bool          $required
+     * @param null|int      $minLength
+     * @param null|int      $maxLength
+     * @param null|string   $pattern
+     * @param null|string   $format
+     * @param null|int      $min
+     * @param null|int      $max
+     * @param int           $precision
+     * @param int           $scale
+     * @param null|mixed    $default
+     * @param bool          $useTypeDefault
+     * @param null|string   $className
+     * @param null|array    $anyOfClassNames
      * @param \Closure|null $assertion
-     * @param bool $overridable
+     * @param bool          $overridable
      */
     public function __construct(
         $name,
@@ -134,19 +134,7 @@ final class Field implements ToArray, \JsonSerializable
         Assertion::boolean($useTypeDefault);
         Assertion::boolean($overridable);
 
-        /*
-         * a message type allows for interfaces to be used
-         * as the "className".  so long as the provided argument
-         * passes the instanceof check it's okay.
-         */
-        if ($type->getTypeValue() === TypeName::MESSAGE) {
-            if (!class_exists($className) && !interface_exists($className)) {
-                Assertion::true(
-                    false,
-                    sprintf('Field [%s] className [%s] must be a class or interface.', $name, $className)
-                );
-            }
-        } else {
+        if ($type->getTypeValue() !== TypeName::MESSAGE) {
             // anyOf is only supported on nested messages
             Assertion::nullOrClassExists($className);
             $anyOfClassNames = null;
@@ -169,6 +157,7 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * @param FieldRule $rule
+     *
      * @throws AssertionFailed
      */
     private function applyFieldRule(FieldRule $rule = null)
@@ -187,15 +176,15 @@ final class Field implements ToArray, \JsonSerializable
     }
 
     /**
-     * @param null|int $minLength
-     * @param null|int $maxLength
+     * @param null|int    $minLength
+     * @param null|int    $maxLength
      * @param null|string $pattern
      * @param null|string $format
      */
     private function applyStringOptions($minLength = null, $maxLength = null, $pattern = null, $format = null)
     {
-        $minLength = (int) $minLength;
-        $maxLength = (int) $maxLength;
+        $minLength = (int)$minLength;
+        $maxLength = (int)$maxLength;
         if ($maxLength > 0) {
             $this->maxLength = $maxLength;
             $this->minLength = NumberUtils::bound($minLength, 0, $this->maxLength);
@@ -218,17 +207,17 @@ final class Field implements ToArray, \JsonSerializable
     /**
      * @param null|int $min
      * @param null|int $max
-     * @param int $precision
-     * @param int $scale
+     * @param int      $precision
+     * @param int      $scale
      */
     private function applyNumericOptions($min = null, $max = null, $precision = 10, $scale = 2)
     {
         if (null !== $max) {
-            $this->max = (int) $max;
+            $this->max = (int)$max;
         }
 
         if (null !== $min) {
-            $this->min = (int) $min;
+            $this->min = (int)$min;
             if (null !== $this->max) {
                 if ($this->min > $this->max) {
                     $this->min = $this->max;
@@ -236,12 +225,13 @@ final class Field implements ToArray, \JsonSerializable
             }
         }
 
-        $this->precision = NumberUtils::bound((int) $precision, 1, 65);
-        $this->scale = NumberUtils::bound((int) $scale, 0, $this->precision);
+        $this->precision = NumberUtils::bound((int)$precision, 1, 65);
+        $this->scale = NumberUtils::bound((int)$scale, 0, $this->precision);
     }
 
     /**
      * @param mixed $default
+     *
      * @throws AssertionFailed
      * @throws \Exception
      */
@@ -420,6 +410,7 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * @param Message $message
+     *
      * @return mixed
      */
     public function getDefault(Message $message = null)
@@ -448,6 +439,7 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * @param mixed $default
+     *
      * @throws AssertionFailed
      * @throws \Exception
      */
@@ -518,6 +510,7 @@ final class Field implements ToArray, \JsonSerializable
 
     /**
      * @param mixed $value
+     *
      * @throws AssertionFailed
      * @throws \Exception
      */
@@ -542,24 +535,24 @@ final class Field implements ToArray, \JsonSerializable
     public function toArray()
     {
         return [
-            'name'          => $this->name,
-            'type'          => $this->type->getTypeValue(),
-            'rule'          => $this->rule->getName(),
-            'required'      => $this->required,
-            'min_length'    => $this->minLength,
-            'max_length'    => $this->maxLength,
-            'pattern'       => $this->pattern,
-            'format'        => $this->format->getValue(),
-            'min'           => $this->min,
-            'max'           => $this->max,
-            'precision'     => $this->precision,
-            'scale'         => $this->scale,
-            'default'       => $this->getDefault(),
-            'use_type_default' => $this->useTypeDefault,
-            'class_name'    => $this->className,
+            'name'               => $this->name,
+            'type'               => $this->type->getTypeValue(),
+            'rule'               => $this->rule->getName(),
+            'required'           => $this->required,
+            'min_length'         => $this->minLength,
+            'max_length'         => $this->maxLength,
+            'pattern'            => $this->pattern,
+            'format'             => $this->format->getValue(),
+            'min'                => $this->min,
+            'max'                => $this->max,
+            'precision'          => $this->precision,
+            'scale'              => $this->scale,
+            'default'            => $this->getDefault(),
+            'use_type_default'   => $this->useTypeDefault,
+            'class_name'         => $this->className,
             'any_of_class_names' => $this->anyOfClassNames,
-            'has_assertion' => null !== $this->assertion,
-            'overridable'   => $this->overridable,
+            'has_assertion'      => null !== $this->assertion,
+            'overridable'        => $this->overridable,
         ];
     }
 
@@ -578,6 +571,7 @@ final class Field implements ToArray, \JsonSerializable
      * todo: implement/test isCompatibleForMerge
      *
      * @param Field $other
+     *
      * @return bool
      */
     public function isCompatibleForMerge(Field $other)
@@ -610,6 +604,7 @@ final class Field implements ToArray, \JsonSerializable
      * override to this field.
      *
      * @param Field $other
+     *
      * @return bool
      */
     public function isCompatibleForOverride(Field $other)

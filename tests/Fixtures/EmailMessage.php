@@ -5,6 +5,7 @@ namespace Gdbots\Tests\Pbj\Fixtures;
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\FieldBuilder as Fb;
+use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
@@ -42,14 +43,14 @@ final class EmailMessage extends AbstractMessage
                 Fb::create('body', T\StringType::create())->build(),
                 Fb::create('priority', T\IntEnumType::create())
                     ->required()
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Priority')
+                    ->className(Priority::class)
                     ->withDefault(Priority::NORMAL)
                     ->build(),
                 Fb::create('sent', T\BooleanType::create())->build(),
                 Fb::create('date_sent', T\DateTimeType::create())->build(),
                 Fb::create('microtime_sent', T\MicrotimeType::create())->build(),
                 Fb::create('provider', T\StringEnumType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                    ->className(Provider::class)
                     ->withDefault(Provider::GMAIL())
                     ->build(),
                 Fb::create('labels', T\StringType::create())
@@ -57,18 +58,20 @@ final class EmailMessage extends AbstractMessage
                     ->asASet()
                     ->build(),
                 Fb::create('nested', T\MessageType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\NestedMessage')
+                    ->anyOfClassNames([
+                        NestedMessage::class
+                    ])
                     ->build(),
                 Fb::create('enum_in_set', T\StringEnumType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                    ->className(Provider::class)
                     ->asASet()
                     ->build(),
                 Fb::create('enum_in_list', T\StringEnumType::create())
-                    ->className('Gdbots\Tests\Pbj\Fixtures\Enum\Provider')
+                    ->className(Provider::class)
                     ->asAList()
                     ->build(),
                 Fb::create('any_of_message', T\MessageType::create())
-                    ->className('Gdbots\Pbj\Message')
+                    ->className(Message::class)
                     ->asAList()
                     ->build(),
                 Fb::create('dynamic_fields', T\DynamicFieldType::create())

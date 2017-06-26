@@ -15,7 +15,7 @@ final class MicrotimeType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var Microtime $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Pbj\WellKnown\Microtime', null, $field->getName());
+        Assertion::isInstanceOf($value, Microtime::class, null, $field->getName());
     }
 
     /**

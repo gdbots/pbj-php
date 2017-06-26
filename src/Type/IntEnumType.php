@@ -16,7 +16,7 @@ final class IntEnumType extends AbstractType
     public function guard($value, Field $field)
     {
         /** @var Enum $value */
-        Assertion::isInstanceOf($value, 'Gdbots\Common\Enum', null, $field->getName());
+        Assertion::isInstanceOf($value, Enum::class, null, $field->getName());
         Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
         Assertion::integer($value->getValue(), null, $field->getName());
         Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $field->getName());
