@@ -11,7 +11,9 @@ abstract class AbstractMixin implements Mixin, ToArray, \JsonSerializable
     /**
      * Private constructor to ensure flyweight construction.
      */
-    final private function __construct() {}
+    final private function __construct()
+    {
+    }
 
     /**
      * @return static
@@ -28,10 +30,26 @@ abstract class AbstractMixin implements Mixin, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
+    final public static function findOne($inPackage = null, $inCategory = null)
+    {
+        return MessageResolver::findOneUsingMixin(static::create(), $inPackage, $inCategory);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    final public static function findAll($inPackage = null, $inCategory = null)
+    {
+        return MessageResolver::findAllUsingMixin(static::create(), $inPackage, $inCategory);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     final public function toArray()
     {
         return [
-            'id' => $this->getId(),
+            'id'     => $this->getId(),
             'fields' => $this->getFields(),
         ];
     }

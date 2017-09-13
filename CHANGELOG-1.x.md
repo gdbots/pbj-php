@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.1.5
+* issue #40: Create shortcut in Mixin for findOne and findAll.
+
+
 ## v1.1.4
 * issue #38: Validate message type against anyOf only, not class name.
 * Update reference to class names to use php's builtin class property, e.g. `MyClass::class`.
