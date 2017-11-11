@@ -43,7 +43,7 @@ class ElasticaTest extends TestCase
         if (null === self::$index) {
             return;
         }
-        //self::deleteIndex();
+        self::deleteIndex();
     }
 
     /**
