@@ -3,8 +3,9 @@
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
+use PHPUnit\Framework\TestCase;
 
-class MapsTest extends \PHPUnit_Framework_TestCase
+class MapsTest extends TestCase
 {
     public function testStringMap()
     {

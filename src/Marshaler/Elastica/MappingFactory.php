@@ -35,47 +35,50 @@ class MappingFactory
         'dynamic-field'     => [
             'type'       => 'object',
             'properties' => [
-                'name'       => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'name'       => ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false],
                 'bool_val'   => ['type' => 'boolean', 'include_in_all' => false],
                 'date_val'   => ['type' => 'date', 'include_in_all' => false],
                 'float_val'  => ['type' => 'float', 'include_in_all' => false],
                 'int_val'    => ['type' => 'long', 'include_in_all' => false],
-                'string_val' => ['type' => 'string'],
-                'text_val'   => ['type' => 'string'],
+                'string_val' => [
+                    'type'   => 'text',
+                    'fields' => ['raw' => ['type' => 'text', 'analyzer' => 'pbj_keyword']],
+                ],
+                'text_val'   => ['type' => 'text'],
             ],
         ],
         'float'             => ['type' => 'float', 'include_in_all' => false],
         'geo-point'         => ['type' => 'geo_point', 'include_in_all' => false],
-        'identifier'        => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'identifier'        => ['type' => 'keyword', 'include_in_all' => false],
         'int'               => ['type' => 'long', 'include_in_all' => false],
         'int-enum'          => ['type' => 'integer', 'include_in_all' => false],
         'medium-blob'       => ['type' => 'binary'],
         'medium-int'        => ['type' => 'integer', 'include_in_all' => false],
-        'medium-text'       => ['type' => 'string'],
+        'medium-text'       => ['type' => 'text'],
         'message'           => ['type' => 'object'],
         'message-ref'       => [
             'type'       => 'object',
             'properties' => [
-                'curie' => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-                'id'    => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-                'tag'   => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+                'curie' => ['type' => 'keyword', 'include_in_all' => false],
+                'id'    => ['type' => 'keyword', 'include_in_all' => false],
+                'tag'   => ['type' => 'keyword', 'include_in_all' => false],
             ],
         ],
         'microtime'         => ['type' => 'long', 'include_in_all' => false],
         'signed-big-int'    => ['type' => 'long', 'include_in_all' => false],
         'signed-int'        => ['type' => 'integer', 'include_in_all' => false],
-        'signed-medium-int' => ['type' => 'long', 'include_in_all' => false],
+        'signed-medium-int' => ['type' => 'integer', 'include_in_all' => false],
         'signed-small-int'  => ['type' => 'short', 'include_in_all' => false],
         'signed-tiny-int'   => ['type' => 'byte', 'include_in_all' => false],
         'small-int'         => ['type' => 'integer', 'include_in_all' => false],
-        'string'            => ['type' => 'string'],
-        'string-enum'       => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
-        'text'              => ['type' => 'string'],
-        'time-uuid'         => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'string'            => ['type' => 'text'],
+        'string-enum'       => ['type' => 'keyword', 'include_in_all' => false],
+        'text'              => ['type' => 'text'],
+        'time-uuid'         => ['type' => 'keyword', 'include_in_all' => false],
         'timestamp'         => ['type' => 'date', 'include_in_all' => false],
         'tiny-int'          => ['type' => 'short', 'include_in_all' => false],
-        'trinary'           => ['type' => 'short', 'include_in_all' => false],
-        'uuid'              => ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false],
+        'trinary'           => ['type' => 'byte', 'include_in_all' => false],
+        'uuid'              => ['type' => 'keyword', 'include_in_all' => false],
     ];
 
     /**
@@ -89,7 +92,7 @@ class MappingFactory
     public static function getCustomAnalyzers()
     {
         return [
-            'pbj_keyword_analyzer' => [
+            'pbj_keyword' => [
                 'tokenizer' => 'keyword',
                 'filter'    => 'lowercase',
             ],
@@ -133,7 +136,7 @@ class MappingFactory
             $fieldPath = empty($path) ? $fieldName : $path . '.' . $fieldName;
 
             if ($fieldName === Schema::PBJ_FIELD_NAME) {
-                $map[$fieldName] = ['type' => 'string', 'index' => 'not_analyzed', 'include_in_all' => false];
+                $map[$fieldName] = ['type' => 'keyword', 'include_in_all' => false];
                 continue;
             }
 
@@ -220,8 +223,7 @@ class MappingFactory
             'type'       => $field->isAList() ? 'nested' : 'object',
             'properties' => [
                 Schema::PBJ_FIELD_NAME => [
-                    'type'           => 'string',
-                    'index'          => 'not_analyzed',
+                    'type'           => 'keyword',
                     'include_in_all' => false,
                 ],
             ],
@@ -271,39 +273,37 @@ class MappingFactory
                 return $this->types['date-time'];
 
             /**
-             * String fields with these formats should use "pbj_keyword_analyzer" (or something similar)
+             * Text fields with these formats should use "'pbj_keyword" (or something similar)
              * so searches on these fields are not case sensitive.
              *
              * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
              * @link http://stackoverflow.com/questions/15079064/how-to-setup-a-tokenizer-in-elasticsearch
              */
-            case Format::SLUG:
             case Format::EMAIL:
-            case Format::HOSTNAME:
-            case Format::IPV6:
-            case Format::UUID:
-            case Format::URI:
             case Format::HASHTAG:
-                return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer', 'include_in_all' => false];
+            case Format::HOSTNAME:
+            case Format::SLUG:
+            case Format::URI:
+            case Format::URL:
+            case Format::UUID:
+                return ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false];
 
             case Format::IPV4:
+            case Format::IPV6:
                 return ['type' => 'ip', 'include_in_all' => false];
-
-            case Format::URL:
-                return ['type' => 'string', 'index' => 'no', 'include_in_all' => false];
 
             default:
                 if ($field->getPattern()) {
-                    return ['type' => 'string', 'analyzer' => 'pbj_keyword_analyzer', 'include_in_all' => false];
+                    return ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false];
                 }
 
-                return $this->applyAnalyzer(['type' => 'string'], $field, $rootObject, $path);
+                return $this->applyAnalyzer(['type' => 'text'], $field, $rootObject, $path);
         }
     }
 
     /**
      * Modify the analyzer for a property prior to adding it to the document mapping.
-     * This is only applied to "string" types.
+     * This is only applied to "text" types.
      *
      * @param array     $mapping
      * @param Field     $field
@@ -318,11 +318,11 @@ class MappingFactory
             return $mapping;
         }
 
-        if (!isset($mapping['type']) || 'string' != $mapping['type']) {
+        if (!isset($mapping['type']) || 'text' !== $mapping['type']) {
             return $mapping;
         }
 
-        if (isset($mapping['index']) && 'analyzed' != $mapping['index']) {
+        if (isset($mapping['index']) && false === $mapping['index']) {
             return $mapping;
         }
 

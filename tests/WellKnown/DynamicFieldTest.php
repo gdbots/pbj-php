@@ -4,8 +4,9 @@ namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use PHPUnit\Framework\TestCase;
 
-class DynamicFieldTest extends \PHPUnit_Framework_TestCase
+class DynamicFieldTest extends TestCase
 {
     public function testAddToMessage()
     {

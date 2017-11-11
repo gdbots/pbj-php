@@ -8,8 +8,9 @@ use Elastica\Type;
 use Gdbots\Pbj\Marshaler\Elastica\MappingFactory;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
+use PHPUnit\Framework\TestCase;
 
-class MappingFactoryTest extends \PHPUnit_Framework_TestCase
+class MappingFactoryTest extends TestCase
 {
     /** @var MappingFactory */
     protected $factory;
@@ -35,30 +36,28 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
     "pbj_test_type": {
         "properties": {
             "_schema": {
-                "type": "string",
-                "index": "not_analyzed",
+                "type": "keyword",
                 "include_in_all": false
             },
             "id": {
-                "type": "string",
-                "index": "not_analyzed",
+                "type": "keyword",
                 "include_in_all": false
             },
             "from_name": {
-                "type": "string",
+                "type": "text",
                 "analyzer": "english"
             },
             "from_email": {
-                "type": "string",
-                "analyzer": "pbj_keyword_analyzer",
+                "type": "text",
+                "analyzer": "pbj_keyword",
                 "include_in_all": false
             },
             "subject": {
-                "type": "string",
+                "type": "text",
                 "analyzer": "english"
             },
             "body": {
-                "type": "string",
+                "type": "text",
                 "analyzer": "english"
             },
             "priority": {
@@ -78,25 +77,23 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
                 "include_in_all": false
             },
             "provider": {
-                "type": "string",
-                "index": "not_analyzed",
+                "type": "keyword",
                 "include_in_all": false
             },
             "labels": {
-                "type": "string",
-                "analyzer": "pbj_keyword_analyzer",
+                "type": "text",
+                "analyzer": "pbj_keyword",
                 "include_in_all": false
             },
             "nested": {
                 "type": "object",
                 "properties": {
                     "_schema": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "keyword",
                         "include_in_all": false
                     },
                     "test1": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "english"
                     },
                     "test2": {
@@ -111,18 +108,15 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
                         "type": "object",
                         "properties": {
                             "curie": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             },
                             "id": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             },
                             "tag": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             }
                         }
@@ -130,21 +124,18 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
                 }
             },
             "enum_in_set": {
-                "type": "string",
-                "index": "not_analyzed",
+                "type": "keyword",
                 "include_in_all": false
             },
             "enum_in_list": {
-                "type": "string",
-                "index": "not_analyzed",
+                "type": "keyword",
                 "include_in_all": false
             },
             "any_of_message": {
                 "type": "nested",
                 "properties": {
                     "_schema": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "keyword",
                         "include_in_all": false
                     }
                 }
@@ -153,8 +144,8 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
                 "type": "nested",
                 "properties": {
                     "name": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "text",
+                        "analyzer": "pbj_keyword",
                         "include_in_all": false
                     },
                     "bool_val": {
@@ -174,11 +165,17 @@ class MappingFactoryTest extends \PHPUnit_Framework_TestCase
                         "include_in_all": false
                     },
                     "string_val": {
-                        "type": "string",
+                        "type": "text",
+                        "fields": {
+                            "raw": {
+                                "type": "text",
+                                "analyzer": "pbj_keyword"
+                            }
+                        },
                         "analyzer": "english"
                     },
                     "text_val": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "english"
                     }
                 }
@@ -198,8 +195,7 @@ JSON;
     "pbj_test_type": {
         "properties": {
             "_schema": {
-                "type": "string",
-                "index": "not_analyzed",
+                "type": "keyword",
                 "include_in_all": false
             }
         },
@@ -272,8 +268,8 @@ JSON;
                         "type": "object",
                         "properties": {
                             "name": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "text",
+                                "analyzer": "pbj_keyword",
                                 "include_in_all": false
                             },
                             "bool_val": {
@@ -293,11 +289,17 @@ JSON;
                                 "include_in_all": false
                             },
                             "string_val": {
-                                "type": "string",
+                                "type": "text",
+                                "fields": {
+                                    "raw": {
+                                        "type": "text",
+                                        "analyzer": "pbj_keyword"
+                                    }
+                                },
                                 "analyzer": "english"
                             },
                             "text_val": {
-                                "type": "string",
+                                "type": "text",
                                 "analyzer": "english"
                             }
                         }
@@ -326,8 +328,7 @@ JSON;
                 "identifier_template": {
                     "path_match": "Identifier.*",
                     "mapping": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "keyword",
                         "include_in_all": false
                     }
                 }
@@ -371,7 +372,7 @@ JSON;
                 "mediumtext_template": {
                     "path_match": "MediumText.*",
                     "mapping": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "english"
                     }
                 }
@@ -383,18 +384,15 @@ JSON;
                         "type": "object",
                         "properties": {
                             "curie": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             },
                             "id": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             },
                             "tag": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             }
                         }
@@ -408,12 +406,11 @@ JSON;
                         "type": "object",
                         "properties": {
                             "_schema": {
-                                "type": "string",
-                                "index": "not_analyzed",
+                                "type": "keyword",
                                 "include_in_all": false
                             },
                             "test1": {
-                                "type": "string",
+                                "type": "text",
                                 "analyzer": "english"
                             },
                             "test2": {
@@ -428,18 +425,15 @@ JSON;
                                 "type": "object",
                                 "properties": {
                                     "curie": {
-                                        "type": "string",
-                                        "index": "not_analyzed",
+                                        "type": "keyword",
                                         "include_in_all": false
                                     },
                                     "id": {
-                                        "type": "string",
-                                        "index": "not_analyzed",
+                                        "type": "keyword",
                                         "include_in_all": false
                                     },
                                     "tag": {
-                                        "type": "string",
-                                        "index": "not_analyzed",
+                                        "type": "text",
                                         "include_in_all": false
                                     }
                                 }
@@ -515,8 +509,7 @@ JSON;
                 "stringenum_template": {
                     "path_match": "StringEnum.*",
                     "mapping": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "keyword",
                         "include_in_all": false
                     }
                 }
@@ -525,7 +518,7 @@ JSON;
                 "string_template": {
                     "path_match": "String.*",
                     "mapping": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "english"
                     }
                 }
@@ -534,7 +527,7 @@ JSON;
                 "text_template": {
                     "path_match": "Text.*",
                     "mapping": {
-                        "type": "string",
+                        "type": "text",
                         "analyzer": "english"
                     }
                 }
@@ -552,8 +545,7 @@ JSON;
                 "timeuuid_template": {
                     "path_match": "TimeUuid.*",
                     "mapping": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "keyword",
                         "include_in_all": false
                     }
                 }
@@ -571,7 +563,7 @@ JSON;
                 "trinary_template": {
                     "path_match": "Trinary.*",
                     "mapping": {
-                        "type": "short",
+                        "type": "byte",
                         "include_in_all": false
                     }
                 }
@@ -580,8 +572,7 @@ JSON;
                 "uuid_template": {
                     "path_match": "Uuid.*",
                     "mapping": {
-                        "type": "string",
-                        "index": "not_analyzed",
+                        "type": "keyword",
                         "include_in_all": false
                     }
                 }
@@ -603,6 +594,7 @@ JSON;
 
     /**
      * @param array $templates
+     *
      * @return array
      */
     private function sortDynamicTemplates(array $templates)

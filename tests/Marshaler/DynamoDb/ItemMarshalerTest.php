@@ -4,8 +4,9 @@ namespace Gdbots\Tests\Pbj\Marshaler\DynamoDb;
 
 use Gdbots\Pbj\Marshaler\DynamoDb\ItemMarshaler;
 use Gdbots\Tests\Pbj\FixtureLoader;
+use PHPUnit\Framework\TestCase;
 
-class ItemMarshalerTest extends \PHPUnit_Framework_TestCase
+class ItemMarshalerTest extends TestCase
 {
     use FixtureLoader;
 

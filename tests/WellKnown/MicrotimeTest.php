@@ -3,12 +3,13 @@
 namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\Microtime;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Some of the tests run many iterations to ensure that different values
  * returned from microtime() and gettimeofday() calls cover more possibilites.
  */
-class MicrotimeTest extends \PHPUnit_Framework_TestCase
+class MicrotimeTest extends TestCase
 {
     protected $testCount = 2500;
 
@@ -23,7 +24,7 @@ class MicrotimeTest extends \PHPUnit_Framework_TestCase
             $m = Microtime::fromTimeOfDay($tod);
 
             $this->assertSame($sec, $m->getSeconds());
-            $this->assertSame($sec, (int) $m->toDateTime()->format('U'));
+            $this->assertSame($sec, (int)$m->toDateTime()->format('U'));
             $this->assertSame($usec, $m->getMicroSeconds());
             $this->assertSame($str, $m->toString());
             --$i;
@@ -41,7 +42,7 @@ class MicrotimeTest extends \PHPUnit_Framework_TestCase
             $m = Microtime::fromString($str);
 
             $this->assertSame($sec, $m->getSeconds());
-            $this->assertSame($sec, (int) $m->toDateTime()->format('U'));
+            $this->assertSame($sec, (int)$m->toDateTime()->format('U'));
             $this->assertSame($usec, $m->getMicroSeconds());
             $this->assertSame($str, $m->toString());
             --$i;
@@ -59,11 +60,11 @@ class MicrotimeTest extends \PHPUnit_Framework_TestCase
         $i = 6;
         do {
             $usec = str_repeat('1', $i);
-            $usecFixed = (int) str_pad($usec, 6, '0');
+            $usecFixed = (int)str_pad($usec, 6, '0');
             $str = $sec . $usecFixed;
             $m = Microtime::fromString($sec . $usec);
             $this->assertSame($sec, $m->getSeconds());
-            $this->assertSame($sec, (int) $m->toDateTime()->format('U'));
+            $this->assertSame($sec, (int)$m->toDateTime()->format('U'));
             $this->assertSame($usecFixed, $m->getMicroSeconds());
             $this->assertSame($str, $m->toString());
             --$i;

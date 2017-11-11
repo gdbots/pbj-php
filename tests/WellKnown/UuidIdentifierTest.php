@@ -3,9 +3,10 @@
 namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\UuidIdentifier;
+use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
-class UuidIdentifierTest extends \PHPUnit_Framework_TestCase
+class UuidIdentifierTest extends TestCase
 {
     public function testGenerate()
     {

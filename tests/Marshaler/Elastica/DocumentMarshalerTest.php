@@ -4,8 +4,9 @@ namespace Gdbots\Tests\Pbj\Marshaler\Elastica;
 
 use Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
 use Gdbots\Tests\Pbj\FixtureLoader;
+use PHPUnit\Framework\TestCase;
 
-class DocumentMarshalerTest extends \PHPUnit_Framework_TestCase
+class DocumentMarshalerTest extends TestCase
 {
     use FixtureLoader;
 

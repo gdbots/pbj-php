@@ -6,10 +6,10 @@ use Elastica\Document;
 use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
-use Gdbots\Pbj\Exception\InvalidResolvedSchema;
-use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
+use Gdbots\Pbj\Exception\InvalidResolvedSchema;
+use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
@@ -21,8 +21,9 @@ use Gdbots\Pbj\WellKnown\GeoPoint;
 final class DocumentMarshaler implements Codec
 {
     /**
-     * @param Message $message
+     * @param Message  $message
      * @param Document $document
+     *
      * @return Document
      *
      * @throws \Exception
@@ -36,6 +37,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param Document|array $documentOrSource Document object or source array
+     *
      * @return Message
      *
      * @throws \Exception
@@ -52,7 +54,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param Message $message
-     * @param Field $field
+     * @param Field   $field
      *
      * @return mixed
      */
@@ -74,7 +76,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param MessageRef $messageRef
-     * @param Field $field
+     * @param Field      $field
      *
      * @return mixed
      */
@@ -96,7 +98,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param GeoPoint $geoPoint
-     * @param Field $field
+     * @param Field    $field
      *
      * @return mixed
      */
@@ -118,7 +120,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param DynamicField $dynamicField
-     * @param Field $field
+     * @param Field        $field
      *
      * @return mixed
      */
@@ -140,6 +142,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param Message $message
+     *
      * @return array
      */
     private function doMarshal(Message $message)
@@ -193,6 +196,7 @@ final class DocumentMarshaler implements Codec
 
     /**
      * @param array $data
+     *
      * @return Message
      *
      * @throws \Exception
@@ -200,7 +204,7 @@ final class DocumentMarshaler implements Codec
      */
     private function doUnmarshal(array $data)
     {
-        $schemaId = SchemaId::fromString((string) $data[Schema::PBJ_FIELD_NAME]);
+        $schemaId = SchemaId::fromString((string)$data[Schema::PBJ_FIELD_NAME]);
         $className = MessageResolver::resolveId($schemaId);
 
         /** @var Message $message */

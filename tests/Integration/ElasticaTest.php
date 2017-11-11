@@ -8,8 +8,9 @@ use Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
 use Gdbots\Pbj\Marshaler\Elastica\MappingFactory;
 use Gdbots\Tests\Pbj\FixtureLoader;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use PHPUnit\Framework\TestCase;
 
-class ElasticaTest extends \PHPUnit_Framework_TestCase
+class ElasticaTest extends TestCase
 {
     use FixtureLoader;
 
@@ -42,8 +43,7 @@ class ElasticaTest extends \PHPUnit_Framework_TestCase
         if (null === self::$index) {
             return;
         }
-
-        self::deleteIndex();
+        //self::deleteIndex();
     }
 
     /**
@@ -83,6 +83,7 @@ class ElasticaTest extends \PHPUnit_Framework_TestCase
         $document = $this->marshaler->marshal($this->message);
         $document->setId(1);
         $type->addDocument($document);
+        $this->assertTrue(true);
     }
 
     public function testGetDocument()

@@ -8,8 +8,9 @@ use Aws\DynamoDb\Exception\DynamoDbException;
 use Gdbots\Pbj\Marshaler\DynamoDb\ItemMarshaler;
 use Gdbots\Tests\Pbj\FixtureLoader;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use PHPUnit\Framework\TestCase;
 
-class DynamoDbTest extends \PHPUnit_Framework_TestCase
+class DynamoDbTest extends TestCase
 {
     use FixtureLoader;
 
@@ -37,8 +38,8 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
 
         self::$client = new DynamoDbClient([
             'credentials' => new Credentials($key, $secret),
-            'region' => 'us-west-2',
-            'version' => '2012-08-10'
+            'region'      => 'us-west-2',
+            'version'     => '2012-08-10',
         ]);
 
         self::createTable();
@@ -61,22 +62,22 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
         try {
             self::$client->describeTable(['TableName' => self::$tableName]);
             return;
-        } catch (DynamoDbException $e)  {
+        } catch (DynamoDbException $e) {
             // table doesn't exist, create it below
         }
 
         self::$client->createTable([
-            'TableName' => self::$tableName,
-            'AttributeDefinitions' => [
+            'TableName'             => self::$tableName,
+            'AttributeDefinitions'  => [
                 ['AttributeName' => 'id', 'AttributeType' => 'S'],
             ],
-            'KeySchema' => array(
+            'KeySchema'             => [
                 ['AttributeName' => 'id', 'KeyType' => 'HASH'],
-            ),
+            ],
             'ProvisionedThroughput' => [
                 'ReadCapacityUnits'  => 5,
-                'WriteCapacityUnits' => 5
-            ]
+                'WriteCapacityUnits' => 5,
+            ],
         ]);
 
         self::$client->waitUntil('TableExists', ['TableName' => self::$tableName]);
@@ -108,7 +109,7 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
             $item = $this->marshaler->marshal($this->message);
             self::$client->putItem([
                 'TableName' => self::$tableName,
-                'Item' => $item
+                'Item'      => $item,
             ]);
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
@@ -120,9 +121,9 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
     {
         try {
             $result = self::$client->getItem([
-                'TableName' => self::$tableName,
+                'TableName'      => self::$tableName,
                 'ConsistentRead' => true,
-                'Key' => ['id' => ['S' => $this->message->get('id')->toString()]]
+                'Key'            => ['id' => ['S' => $this->message->get('id')->toString()]],
             ]);
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
@@ -143,7 +144,6 @@ class DynamoDbTest extends \PHPUnit_Framework_TestCase
 
             $this->assertSame(json_encode($expected), json_encode($actual));
         }
-
         //echo json_encode($message, JSON_PRETTY_PRINT);
     }
 }

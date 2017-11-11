@@ -3,9 +3,10 @@
 namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
+use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
-class TimeUuidIdentifierTest extends \PHPUnit_Framework_TestCase
+class TimeUuidIdentifierTest extends TestCase
 {
     public function testGenerate()
     {

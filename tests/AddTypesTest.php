@@ -17,78 +17,79 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
+use PHPUnit\Framework\TestCase;
 
-class AddTypesTest extends \PHPUnit_Framework_TestCase
+class AddTypesTest extends TestCase
 {
     protected function getTypeValues()
     {
         return [
-            'BigInt' => [new BigNumber(0), new BigNumber('18446744073709551615')],
-            'Binary' => 'aG9tZXIgc2ltcHNvbg==',
-            'Blob' => 'aG9tZXIgc2ltcHNvbg==',
-            'Boolean' => [false, true],
-            'Date' => new \DateTime(),
-            'DateTime' => new \DateTime(),
-            'Decimal' => 3.14,
-            'DynamicField' => DynamicField::createIntVal('int_val', 1),
-            'Float' => 13213.032468,
-            'GeoPoint' => new GeoPoint(0.5, 102.0),
-            'IntEnum' => IntEnum::UNKNOWN(),
-            'Int' => [0, 4294967295],
-            'MediumInt' => [0, 16777215],
-            'MediumBlob' => 'aG9tZXIgc2ltcHNvbg==',
-            'MediumText' => 'medium text',
-            'Message' => NestedMessage::create(),
-            'MessageRef' => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()),
-            'Microtime' => Microtime::create(),
-            'SignedBigInt' => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
+            'BigInt'          => [new BigNumber(0), new BigNumber('18446744073709551615')],
+            'Binary'          => 'aG9tZXIgc2ltcHNvbg==',
+            'Blob'            => 'aG9tZXIgc2ltcHNvbg==',
+            'Boolean'         => [false, true],
+            'Date'            => new \DateTime(),
+            'DateTime'        => new \DateTime(),
+            'Decimal'         => 3.14,
+            'DynamicField'    => DynamicField::createIntVal('int_val', 1),
+            'Float'           => 13213.032468,
+            'GeoPoint'        => new GeoPoint(0.5, 102.0),
+            'IntEnum'         => IntEnum::UNKNOWN(),
+            'Int'             => [0, 4294967295],
+            'MediumInt'       => [0, 16777215],
+            'MediumBlob'      => 'aG9tZXIgc2ltcHNvbg==',
+            'MediumText'      => 'medium text',
+            'Message'         => NestedMessage::create(),
+            'MessageRef'      => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()),
+            'Microtime'       => Microtime::create(),
+            'SignedBigInt'    => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],
-            'SignedSmallInt' => [-32768, 32767],
-            'SignedTinyInt' => [-128, 127],
-            'SmallInt' => [0, 65535],
-            'StringEnum' => StringEnum::UNKNOWN(),
-            'String' => 'string',
-            'Text' => 'text',
-            'TimeUuid' => TimeUuidIdentifier::generate(),
-            'Timestamp' => time(),
-            'TinyInt' => [0, 255],
-            'Uuid' => UuidIdentifier::generate(),
+            'SignedSmallInt'  => [-32768, 32767],
+            'SignedTinyInt'   => [-128, 127],
+            'SmallInt'        => [0, 65535],
+            'StringEnum'      => StringEnum::UNKNOWN(),
+            'String'          => 'string',
+            'Text'            => 'text',
+            'TimeUuid'        => TimeUuidIdentifier::generate(),
+            'Timestamp'       => time(),
+            'TinyInt'         => [0, 255],
+            'Uuid'            => UuidIdentifier::generate(),
         ];
     }
 
     protected function getInvalidTypeValues()
     {
         return [
-            'BigInt' => [new BigNumber(-1), new BigNumber('18446744073709551616')],
-            'Binary' => false,
-            'Blob' => false,
-            'Boolean' => 'not_a_bool',
-            'Date' => 'not_a_date',
-            'DateTime' => 'not_a_date',
-            'Decimal' => 1,
-            'DynamicField' => 'not_a_dynamic_field',
-            'Float' => 1,
-            'GeoPoint' => 'not_a_geo_point',
-            'IntEnum' => Priority::NORMAL(), // not the correct enum
-            'Int' => [-1, 4294967296],
-            'MediumInt' => [-1, 16777216],
-            'MediumBlob' => false,
-            'MediumText' => false,
-            'Message' => EmailMessage::create(), // not the correct message
-            'MessageRef' => 'not_a_message_ref',
-            'Microtime' => microtime(),
-            'SignedBigInt' => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
+            'BigInt'          => [new BigNumber(-1), new BigNumber('18446744073709551616')],
+            'Binary'          => false,
+            'Blob'            => false,
+            'Boolean'         => 'not_a_bool',
+            'Date'            => 'not_a_date',
+            'DateTime'        => 'not_a_date',
+            'Decimal'         => 1,
+            'DynamicField'    => 'not_a_dynamic_field',
+            'Float'           => 1,
+            'GeoPoint'        => 'not_a_geo_point',
+            'IntEnum'         => Priority::NORMAL(), // not the correct enum
+            'Int'             => [-1, 4294967296],
+            'MediumInt'       => [-1, 16777216],
+            'MediumBlob'      => false,
+            'MediumText'      => false,
+            'Message'         => EmailMessage::create(), // not the correct message
+            'MessageRef'      => 'not_a_message_ref',
+            'Microtime'       => microtime(),
+            'SignedBigInt'    => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
             'SignedMediumInt' => [-8388609, 8388608],
-            'SignedSmallInt' => [-32769, 32768],
-            'SignedTinyInt' => [-129, 128],
-            'SmallInt' => [-1, 65536],
-            'StringEnum' => Provider::AOL(), // not the correct enum
-            'String' => false,
-            'Text' => false,
-            'TimeUuid' => 'not_a_time_uuid',
-            'Timestamp' => 'not_a_timestamp',
-            'TinyInt' => [-1, 256],
-            'Uuid' => 'not_a_uuid',
+            'SignedSmallInt'  => [-32769, 32768],
+            'SignedTinyInt'   => [-129, 128],
+            'SmallInt'        => [-1, 65536],
+            'StringEnum'      => Provider::AOL(), // not the correct enum
+            'String'          => false,
+            'Text'            => false,
+            'TimeUuid'        => 'not_a_time_uuid',
+            'Timestamp'       => 'not_a_timestamp',
+            'TinyInt'         => [-1, 256],
+            'Uuid'            => 'not_a_uuid',
         ];
     }
 
@@ -108,6 +109,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             } catch (\Exception $e) {
                 $thrown = true;
             }
+
+            $this->assertTrue($thrown, 'Did not accept invalid type');
 
             if (!$thrown) {
                 if (is_array($v)) {
@@ -139,7 +142,7 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
             'SignedSmallInt',
             'SignedMediumInt',
             'SignedInt',
-            'Timestamp'
+            'Timestamp',
         ];
         $allStrings = ['Binary', 'Blob', 'MediumBlob', 'MediumText', 'String', 'Text'];
 
@@ -253,6 +256,8 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                     $thrown = true;
                 }
 
+                $this->assertTrue($thrown, 'Did not accept invalid/mismatched value');
+
                 if (!$thrown) {
                     if (is_array($v)) {
                         $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[0])));
@@ -263,7 +268,6 @@ class AddTypesTest extends \PHPUnit_Framework_TestCase
                 }
             }
         }
-
         //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
     }
 }
