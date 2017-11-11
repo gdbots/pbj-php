@@ -433,7 +433,7 @@ JSON;
                                         "include_in_all": false
                                     },
                                     "tag": {
-                                        "type": "text",
+                                        "type": "keyword",
                                         "include_in_all": false
                                     }
                                 }
@@ -473,7 +473,7 @@ JSON;
                 "signedmediumint_template": {
                     "path_match": "SignedMediumInt.*",
                     "mapping": {
-                        "type": "long",
+                        "type": "integer",
                         "include_in_all": false
                     }
                 }
