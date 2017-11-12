@@ -4,8 +4,9 @@ namespace Gdbots\Tests\Pbj\Type;
 
 use Gdbots\Pbj\FieldBuilder;
 use Gdbots\Pbj\Type\TrinaryType;
+use PHPUnit\Framework\TestCase;
 
-class TrinaryTypeTest extends \PHPUnit_Framework_TestCase
+class TrinaryTypeTest extends TestCase
 {
     public function testEncode()
     {
@@ -40,6 +41,7 @@ class TrinaryTypeTest extends \PHPUnit_Framework_TestCase
         $type->guard(0, $field);
         $type->guard(1, $field);
         $type->guard(2, $field);
+        $this->assertTrue(true, 'Accepted valid values');
     }
 
     public function testInvalidValues()
@@ -63,6 +65,8 @@ class TrinaryTypeTest extends \PHPUnit_Framework_TestCase
             } catch (\Exception $e) {
                 $thrown = true;
             }
+
+            $this->assertTrue($thrown, 'Did not accept invalid value');
 
             if (!$thrown) {
                 $this->fail(sprintf('TrinaryType field accepted invalid value [%s].', $val));

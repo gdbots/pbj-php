@@ -11,8 +11,9 @@ use Gdbots\Pbj\Type\DateType;
 use Gdbots\Pbj\Type\Type;
 use Gdbots\Pbj\WellKnown\GeoPoint;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
+use PHPUnit\Framework\TestCase;
 
-class TypeTest extends \PHPUnit_Framework_TestCase
+class TypeTest extends TestCase
 {
     public function testDateType()
     {
@@ -130,6 +131,8 @@ class TypeTest extends \PHPUnit_Framework_TestCase
             } catch (AssertionFailed $e) {
                 $thrown = true;
             }
+
+            $this->assertTrue($thrown, 'Did not accept more than max bytes');
 
             if (!$thrown) {
                 $this->fail(

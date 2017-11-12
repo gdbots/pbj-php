@@ -10,11 +10,13 @@ use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 /**
  * @return EmailMessage
  */
-function createEmailMessage() {
+function createEmailMessage()
+{
     $json = file_get_contents(__DIR__ . '/Fixtures/email-message.json');
     return (new JsonSerializer())->deserialize($json);
 }
 
-function numTimes() {
+function numTimes()
+{
     return 2500;
 }

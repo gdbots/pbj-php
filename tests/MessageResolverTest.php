@@ -5,8 +5,9 @@ namespace Gdbots\Tests\Pbj;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\SchemaQName;
+use PHPUnit\Framework\TestCase;
 
-class MessageResolverTest extends \PHPUnit_Framework_TestCase
+class MessageResolverTest extends TestCase
 {
     public function testResolveQName()
     {

@@ -3,10 +3,13 @@
 namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\SlugIdentifier;
+use PHPUnit\Framework\TestCase;
 
-class SampleSlugIdentifier extends SlugIdentifier {}
+class SampleSlugIdentifier extends SlugIdentifier
+{
+}
 
-class SlugIdentifierTest extends \PHPUnit_Framework_TestCase
+class SlugIdentifierTest extends TestCase
 {
     public function testCreate()
     {

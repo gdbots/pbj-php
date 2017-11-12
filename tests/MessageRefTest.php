@@ -3,8 +3,9 @@
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Pbj\MessageRef;
+use PHPUnit\Framework\TestCase;
 
-class MessageRefTest extends \PHPUnit_Framework_TestCase
+class MessageRefTest extends TestCase
 {
     /**
      * @dataProvider getValidMessageRefs
@@ -26,7 +27,7 @@ class MessageRefTest extends \PHPUnit_Framework_TestCase
      */
     public function testValidMessageRefs($string)
     {
-        $ref = MessageRef::fromString($string);
+        $this->assertSame($string, (string)MessageRef::fromString($string));
     }
 
     /**

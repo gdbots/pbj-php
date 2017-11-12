@@ -4,13 +4,14 @@ namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Common\Enum;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
-use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 use Gdbots\Tests\Pbj\Fixtures\MapsMessage;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
+use PHPUnit\Framework\TestCase;
 
-class MessageTest extends \PHPUnit_Framework_TestCase
+class MessageTest extends TestCase
 {
     use FixtureLoader;
 
@@ -38,8 +39,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
     public function testUniqueItemsInSet()
     {
         $message = EmailMessage::create()
-            ->addToSet('labels', ['CHICKEN', 'Chicken', 'chicken', 'DONUTS', 'Donuts', 'donuts'])
-        ;
+            ->addToSet('labels', ['CHICKEN', 'Chicken', 'chicken', 'DONUTS', 'Donuts', 'donuts']);
 
         $this->assertCount(2, $message->get('labels'));
         $this->assertSame($message->get('labels'), ['chicken', 'donuts']);
@@ -148,8 +148,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create()
             ->set('test1', 'val1')
-            ->addToSet('test2', [1, 2])
-        ;
+            ->addToSet('test2', [1, 2]);
 
         $message->set('nested', $nestedMessage);
         $this->assertSame($nestedMessage->get('test2'), [1, 2]);
@@ -163,9 +162,9 @@ class MessageTest extends \PHPUnit_Framework_TestCase
                 'any_of_message',
                 [
                     MapsMessage::create()->addToMap('String', 'test:field:name', 'value1'),
-                    NestedMessage::create()->set('test1', 'value1')
+                    NestedMessage::create()->set('test1', 'value1'),
                 ]
-        );
+            );
 
         $this->assertCount(2, $message->get('any_of_message'));
     }
@@ -228,6 +227,7 @@ class MessageTest extends \PHPUnit_Framework_TestCase
             $message->set('from_name', 'homer')->get('nested')->set('test1', 'original');
             $this->fail('Original message should still be immutable.');
         } catch (FrozenMessageIsImmutable $e) {
+            $this->assertTrue(true, 'Message is immutable');
         }
     }
 }
