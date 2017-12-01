@@ -2,4 +2,6 @@
 
 namespace Gdbots\Pbj\Exception;
 
-interface GdbotsPbjException {}
+interface GdbotsPbjException extends \Throwable
+{
+}

@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.0.1
+* Update `Gdbots\Pbj\Exception\GdbotsPbjException` to extend `\Throwable`.
+
+
 ## v2.0.0
 __BREAKING CHANGES__
 
