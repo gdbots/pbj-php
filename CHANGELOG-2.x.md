@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.0.2
+* Update mapping such that `text` types using pbj_keyword `analyzer` are now `keyword` types using pbj_keyword `normalizer`.
+
+
 ## v2.0.1
 * Update `Gdbots\Pbj\Exception\GdbotsPbjException` to extend `\Throwable`.
 
