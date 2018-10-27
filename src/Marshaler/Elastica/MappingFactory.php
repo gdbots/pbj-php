@@ -100,6 +100,25 @@ class MappingFactory
     }
 
     /**
+     * Returns the custom normalizers that an index will need to when indexing some
+     * pbj fields/types when certain options are used (urls, hashtag format, etc.)
+     *
+     * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-normalizers.html
+     *
+     * @return array
+     */
+    public static function getCustomNormalizers()
+    {
+        return [
+            'pbj_keyword' => [
+                'type'        => 'custom',
+                'char_filter' => [],
+                'filter'      => ['lowercase', 'asciifolding'],
+            ],
+        ];
+    }
+
+    /**
      * @param Schema $schema
      * @param string $defaultAnalyzer
      *
@@ -273,7 +292,7 @@ class MappingFactory
                 return $this->types['date-time'];
 
             /**
-             * Text fields with these formats should use "'pbj_keyword" (or something similar)
+             * String fields with these formats should use "pbj_keyword" (or something similar)
              * so searches on these fields are not case sensitive.
              *
              * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
