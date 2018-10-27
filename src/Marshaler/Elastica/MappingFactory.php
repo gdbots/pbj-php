@@ -35,14 +35,14 @@ class MappingFactory
         'dynamic-field'     => [
             'type'       => 'object',
             'properties' => [
-                'name'       => ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false],
+                'name'       => ['type' => 'keyword', 'normalizer' => 'pbj_keyword', 'include_in_all' => false],
                 'bool_val'   => ['type' => 'boolean', 'include_in_all' => false],
                 'date_val'   => ['type' => 'date', 'include_in_all' => false],
                 'float_val'  => ['type' => 'float', 'include_in_all' => false],
                 'int_val'    => ['type' => 'long', 'include_in_all' => false],
                 'string_val' => [
                     'type'   => 'text',
-                    'fields' => ['raw' => ['type' => 'text', 'analyzer' => 'pbj_keyword']],
+                    'fields' => ['raw' => ['type' => 'keyword', 'normalizer' => 'pbj_keyword']],
                 ],
                 'text_val'   => ['type' => 'text'],
             ],
@@ -95,6 +95,25 @@ class MappingFactory
             'pbj_keyword' => [
                 'tokenizer' => 'keyword',
                 'filter'    => 'lowercase',
+            ],
+        ];
+    }
+
+    /**
+     * Returns the custom normalizers that an index will need to when indexing some
+     * pbj fields/types when certain options are used (urls, hashtag format, etc.)
+     *
+     * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-normalizers.html
+     *
+     * @return array
+     */
+    public static function getCustomNormalizers()
+    {
+        return [
+            'pbj_keyword' => [
+                'type'        => 'custom',
+                'char_filter' => [],
+                'filter'      => ['lowercase', 'asciifolding'],
             ],
         ];
     }
@@ -273,7 +292,7 @@ class MappingFactory
                 return $this->types['date-time'];
 
             /**
-             * Text fields with these formats should use "'pbj_keyword" (or something similar)
+             * String fields with these formats should use "pbj_keyword" (or something similar)
              * so searches on these fields are not case sensitive.
              *
              * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html
@@ -286,7 +305,7 @@ class MappingFactory
             case Format::URI:
             case Format::URL:
             case Format::UUID:
-                return ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false];
+                return ['type' => 'keyword', 'normalizer' => 'pbj_keyword', 'include_in_all' => false];
 
             case Format::IPV4:
             case Format::IPV6:
@@ -294,7 +313,7 @@ class MappingFactory
 
             default:
                 if ($field->getPattern()) {
-                    return ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false];
+                    return ['type' => 'keyword', 'normalizer' => 'pbj_keyword', 'include_in_all' => false];
                 }
 
                 return $this->applyAnalyzer(['type' => 'text'], $field, $rootObject, $path);

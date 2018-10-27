@@ -48,8 +48,8 @@ class MappingFactoryTest extends TestCase
                 "analyzer": "english"
             },
             "from_email": {
-                "type": "text",
-                "analyzer": "pbj_keyword",
+                "type": "keyword",
+                "normalizer": "pbj_keyword",
                 "include_in_all": false
             },
             "subject": {
@@ -81,8 +81,8 @@ class MappingFactoryTest extends TestCase
                 "include_in_all": false
             },
             "labels": {
-                "type": "text",
-                "analyzer": "pbj_keyword",
+                "type": "keyword",
+                "normalizer": "pbj_keyword",
                 "include_in_all": false
             },
             "nested": {
@@ -144,8 +144,8 @@ class MappingFactoryTest extends TestCase
                 "type": "nested",
                 "properties": {
                     "name": {
-                        "type": "text",
-                        "analyzer": "pbj_keyword",
+                        "type": "keyword",
+                        "normalizer": "pbj_keyword",
                         "include_in_all": false
                     },
                     "bool_val": {
@@ -168,8 +168,8 @@ class MappingFactoryTest extends TestCase
                         "type": "text",
                         "fields": {
                             "raw": {
-                                "type": "text",
-                                "analyzer": "pbj_keyword"
+                                "type": "keyword",
+                                "normalizer": "pbj_keyword"
                             }
                         },
                         "analyzer": "english"
@@ -268,8 +268,8 @@ JSON;
                         "type": "object",
                         "properties": {
                             "name": {
-                                "type": "text",
-                                "analyzer": "pbj_keyword",
+                                "type": "keyword",
+                                "normalizer": "pbj_keyword",
                                 "include_in_all": false
                             },
                             "bool_val": {
@@ -292,8 +292,8 @@ JSON;
                                 "type": "text",
                                 "fields": {
                                     "raw": {
-                                        "type": "text",
-                                        "analyzer": "pbj_keyword"
+                                        "type": "keyword",
+                                        "normalizer": "pbj_keyword"
                                     }
                                 },
                                 "analyzer": "english"
