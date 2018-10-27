@@ -35,14 +35,14 @@ class MappingFactory
         'dynamic-field'     => [
             'type'       => 'object',
             'properties' => [
-                'name'       => ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false],
+                'name'       => ['type' => 'keyword', 'normalizer' => 'pbj_keyword', 'include_in_all' => false],
                 'bool_val'   => ['type' => 'boolean', 'include_in_all' => false],
                 'date_val'   => ['type' => 'date', 'include_in_all' => false],
                 'float_val'  => ['type' => 'float', 'include_in_all' => false],
                 'int_val'    => ['type' => 'long', 'include_in_all' => false],
                 'string_val' => [
                     'type'   => 'text',
-                    'fields' => ['raw' => ['type' => 'text', 'analyzer' => 'pbj_keyword']],
+                    'fields' => ['raw' => ['type' => 'keyword', 'normalizer' => 'pbj_keyword']],
                 ],
                 'text_val'   => ['type' => 'text'],
             ],
@@ -286,7 +286,7 @@ class MappingFactory
             case Format::URI:
             case Format::URL:
             case Format::UUID:
-                return ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false];
+                return ['type' => 'keyword', 'normalizer' => 'pbj_keyword', 'include_in_all' => false];
 
             case Format::IPV4:
             case Format::IPV6:
@@ -294,7 +294,7 @@ class MappingFactory
 
             default:
                 if ($field->getPattern()) {
-                    return ['type' => 'text', 'analyzer' => 'pbj_keyword', 'include_in_all' => false];
+                    return ['type' => 'keyword', 'normalizer' => 'pbj_keyword', 'include_in_all' => false];
                 }
 
                 return $this->applyAnalyzer(['type' => 'text'], $field, $rootObject, $path);
