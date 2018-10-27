@@ -2,8 +2,13 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
-## v2.0.2
+## v2.1.0
+__REQUIRES REINDEXING__
+
+Using the MappingFactory to generate the mappings in Elasticsearch will cause some mappings to change.  You will need to recreate the mappings and reindex your data when you upgrade to this version.
+
 * Update mapping such that `text` types using pbj_keyword `analyzer` are now `keyword` types using pbj_keyword `normalizer`.
+* Add `getCustomNormalizers` method to `Gdbots\Pbj\Marshaler\Elastica\MappingFactory` which by default provides the pbj_keyword normalizer.
 
 
 ## v2.0.1
