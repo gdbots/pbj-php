@@ -57,6 +57,9 @@ final class EmailMessage extends AbstractMessage
                     ->format(Format::HASHTAG())
                     ->asASet()
                     ->build(),
+                Fb::create('unsubscribe_url', T\TextType::create())
+                    ->format(Format::URL())
+                    ->build(),
                 Fb::create('nested', T\MessageType::create())
                     ->anyOfClassNames([
                         NestedMessage::class

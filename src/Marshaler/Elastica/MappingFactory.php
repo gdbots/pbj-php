@@ -286,6 +286,30 @@ class MappingFactory
      */
     protected function mapString(Field $field, \stdClass $rootObject, $path = null)
     {
+        return $this->mapUsingFormat($field, $rootObject, $path);
+    }
+
+    /**
+     * @param Field     $field
+     * @param \stdClass $rootObject
+     * @param string    $path
+     *
+     * @return array
+     */
+    protected function mapText(Field $field, \stdClass $rootObject, $path = null)
+    {
+        return $this->mapUsingFormat($field, $rootObject, $path);
+    }
+
+    /**
+     * @param Field     $field
+     * @param \stdClass $rootObject
+     * @param string    $path
+     *
+     * @return array
+     */
+    protected function mapUsingFormat(Field $field, \stdClass $rootObject, $path = null)
+    {
         switch ($field->getFormat()->getValue()) {
             case Format::DATE:
             case Format::DATE_TIME:
