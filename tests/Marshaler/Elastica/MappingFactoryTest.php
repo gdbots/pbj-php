@@ -85,6 +85,11 @@ class MappingFactoryTest extends TestCase
                 "normalizer": "pbj_keyword",
                 "include_in_all": false
             },
+            "unsubscribe_url": {
+                "type": "keyword",
+                "normalizer": "pbj_keyword",
+                "include_in_all": false
+            },
             "nested": {
                 "type": "object",
                 "properties": {
