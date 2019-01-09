@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.1.2
+* Allow for `beberlei/assert` constraint `^2.7 || ^3.0`.
+* Add php 7.3 to
+
+
 ## v2.1.1
 * Apply same guard rules for all string types so format and pattern are enforced. This is needed because it is very common to need a text field type for a URL due to sizes often being greater than 255 bytes.
 

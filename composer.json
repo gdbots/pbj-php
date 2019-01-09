@@ -7,7 +7,7 @@
   "require": {
     "php": ">=7.1",
     "ext-bcmath": "*",
-    "beberlei/assert": "^2.7",
+    "beberlei/assert": "^2.7 || ^3.0",
     "gdbots/common": "^1.1",
     "moontoast/math": "^1.1",
     "ramsey/uuid": "^3.7",
@@ -30,10 +30,5 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "2.0.x-dev"
-    }
   }
 }
