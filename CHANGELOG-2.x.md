@@ -4,7 +4,7 @@ This changelog references the relevant changes done in 2.x versions.
 
 ## v2.1.2
 * Allow for `beberlei/assert` constraint `^2.7 || ^3.0`.
-* Add php 7.3 to
+* Add php 7.3 to travis.
 
 
 ## v2.1.1
