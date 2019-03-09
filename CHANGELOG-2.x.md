@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.1.3
+* Set dynamic to `false` by default when using the Elastica MappingFactory. https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html
+
+
 ## v2.1.2
 * Allow for `beberlei/assert` constraint `^2.7 || ^3.0`.
 * Add php 7.3 to travis.
