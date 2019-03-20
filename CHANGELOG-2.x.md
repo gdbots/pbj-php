@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.1.4
+* Revert set dynamic to `false` by default. It seems to break the dynamic templates which are named "dynamic" but in fact are rather explicit. Needs more testing to determine the sweet spot.
+
+
 ## v2.1.3
 * Set dynamic to `false` by default when using the Elastica MappingFactory. https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic.html
 

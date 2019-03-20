@@ -185,8 +185,7 @@ class MappingFactoryTest extends TestCase
                     }
                 }
             }
-        },
-        "dynamic": false
+        }
     }
 }
 JSON;

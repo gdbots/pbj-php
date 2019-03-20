@@ -130,7 +130,6 @@ class MappingFactory
         $rootObject = new \stdClass();
         $rootObject->dynamic_templates = [];
         $mapping = new Mapping(null, $this->mapSchema($schema, $rootObject));
-        $mapping->setParam('dynamic', false);
         foreach (get_object_vars($rootObject) as $k => $v) {
             if (!empty($v)) {
                 $mapping->setParam($k, $v);
