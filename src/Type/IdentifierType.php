@@ -89,6 +89,6 @@ final class IdentifierType extends AbstractType
      */
     public function getMaxBytes()
     {
-        return 100;
+        return 255;
     }
 }
