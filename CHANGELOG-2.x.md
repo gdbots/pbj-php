@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.1.5
+* Allow `IdentifierType` to be 255 bytes, same as `StringType`.
+
+
 ## v2.1.4
 * Revert set dynamic to `false` by default. It seems to break the dynamic templates which are named "dynamic" but in fact are rather explicit. Needs more testing to determine the sweet spot.
 
