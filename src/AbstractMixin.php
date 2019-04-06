@@ -30,17 +30,17 @@ abstract class AbstractMixin implements Mixin, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    final public static function findOne($inPackage = null, $inCategory = null)
+    final public static function findOne()
     {
-        return MessageResolver::findOneUsingMixin(static::create(), $inPackage, $inCategory);
+        return MessageResolver::findOneUsingMixin(static::create());
     }
 
     /**
      * {@inheritdoc}
      */
-    final public static function findAll($inPackage = null, $inCategory = null)
+    final public static function findAll()
     {
-        return MessageResolver::findAllUsingMixin(static::create(), $inPackage, $inCategory);
+        return MessageResolver::findAllUsingMixin(static::create());
     }
 
     /**

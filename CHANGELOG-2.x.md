@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.2.0
+* Optimize the `MessageResolver` by creating a manifest with all of the classes and mixins so no messages have to be instantiated when using `findOneUsingMixin` or `findAllUsingMixin` is executed.
+
+
 ## v2.1.5
 * Allow `IdentifierType` to be 255 bytes, same as `StringType`.
 
