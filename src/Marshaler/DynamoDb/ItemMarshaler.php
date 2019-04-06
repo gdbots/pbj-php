@@ -61,9 +61,11 @@ final class ItemMarshaler implements Codec
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {
+                /*
                 if ($message->hasClearedField($fieldName)) {
                     $payload[$fieldName] = ['NULL' => true];
                 }
+                */
                 continue;
             }
 

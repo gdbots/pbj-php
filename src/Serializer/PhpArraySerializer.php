@@ -157,15 +157,18 @@ class PhpArraySerializer implements Serializer, Codec
         $message->validate();
 
         $payload = [];
-        $includeAllFields = isset($this->options['includeAllFields']) && true === $this->options['includeAllFields'];
+        // $includeAllFields = isset($this->options['includeAllFields']) && true === $this->options['includeAllFields'];
 
         foreach ($schema->getFields() as $field) {
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {
+                // suspect this may not be needed at all.
+                /*
                 if ($includeAllFields || $message->hasClearedField($fieldName)) {
                     $payload[$fieldName] = null;
                 }
+                */
 
                 continue;
             }

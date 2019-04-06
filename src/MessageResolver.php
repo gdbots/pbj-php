@@ -258,13 +258,9 @@ final class MessageResolver
         if (!isset(self::$resolvedMixins[$key])) {
             $schemas = [];
             foreach ((self::$mixins[$key] ?? []) as $id) {
-                if (isset(self::$classes[$id])) {
-                    /** @var Schema $schema */
-                    $schema = self::$classes[$id]::schema();
-                    $schemas[$schema->getCurieMajor()] = $schema;
-                }
+                $schemas[] = self::$classes[$id]::schema();
             }
-            self::$resolvedMixins[$key] = array_values($schemas);
+            self::$resolvedMixins[$key] = $schemas;
         }
 
         if (empty(self::$resolvedMixins[$key])) {
