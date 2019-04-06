@@ -2,42 +2,41 @@
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Pbj\Mixin;
 use Gdbots\Pbj\Schema;
 
 class MoreThanOneMessageForMixin extends \LogicException implements GdbotsPbjException
 {
-    /** @var Mixin */
+    /** @var string */
     private $mixin;
 
     /** @var Schema[] */
     private $schemas;
 
     /**
-     * @param Mixin $mixin
+     * @param string   $mixin
      * @param Schema[] $schemas
      */
-    public function __construct(Mixin $mixin, array $schemas)
+    public function __construct(string $mixin, array $schemas)
     {
         $this->mixin = $mixin;
         $this->schemas = $schemas;
-        $ids = array_map(function(Schema $schema) {
+        $ids = array_map(function (Schema $schema) {
             return $schema->getId()->toString() . ' => ' . $schema->getClassName();
         }, $schemas);
         parent::__construct(
             sprintf(
                 'MessageResolver returned multiple messages using [%s] when one was expected.  ' .
                 'Messages found:' . PHP_EOL . '%s',
-                $mixin->getId()->getCurieMajor(),
+                $mixin,
                 implode(PHP_EOL, $ids)
             )
         );
     }
 
     /**
-     * @return Mixin
+     * @return string
      */
-    public function getMixin()
+    public function getMixin(): string
     {
         return $this->mixin;
     }
@@ -45,7 +44,7 @@ class MoreThanOneMessageForMixin extends \LogicException implements GdbotsPbjExc
     /**
      * @return Schema[]
      */
-    public function getSchemas()
+    public function getSchemas(): array
     {
         return $this->schemas;
     }

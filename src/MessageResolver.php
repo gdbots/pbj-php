@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
@@ -11,22 +12,32 @@ use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 final class MessageResolver
 {
     /**
-     * An array of all the available class names keyed by the schema resolver key
-     * and curies for resolution that is not version specific.
+     * An array of all the available schemas keyed by a curie or curie major.
+     * The value is an int used to correlate with the other maps.
+     *
+     * @var int[]
+     */
+    private static $curies = [];
+
+    /**
+     * An array of all the classes, the numeric key relates to the int
+     * from the curies array.
+     *
+     * @var string[]
+     */
+    private static $classes = [];
+
+    /**
+     * An array of ints keyed by the mixin curie. The value is a list of
+     * ints which relate to the curies that are using the mixin.
      *
      * @var array
      */
-    private static $messages = [];
-
-    /**
-     * An array of resolved messages in this request.
-     * @var array
-     */
-    private static $resolved = [];
+    private static $mixins = [];
 
     /**
      * An array of resolved lookups by mixin, keyed by the mixin id with major rev
-     * and optionally a package and category (for faster lookups)
+     *
      * @see SchemaId::getCurieMajor
      *
      * @var Schema[]
@@ -43,41 +54,57 @@ final class MessageResolver
     private static $resolvedQnames = [];
 
     /**
+     * An array with the following structure (gdbots/pbjc-php automatically creates this)
+     * [
+     *     'curies' => [
+     *         'vendor:package:category:message' => 1, // int is used to connect other values
+     *     ],
+     *     'classes' => [
+     *         1 => 'Vendor\Package\Category\MessageV1', // 1 refers to the value of the curies entry
+     *     ],
+     *     'mixins' => [
+     *         'gdbots:pbjx:mixin:command:v1' => [1] // 1 refers to the value of the curies entry
+     *     ],
+     * ]
+     *
+     * @param array $manifest
+     */
+    public static function registerManifest(array $manifest): void
+    {
+        self::$curies = $manifest['curies'] ?? [];
+        self::$classes = $manifest['classes'] ?? [];
+        self::$mixins = $manifest['mixins'] ?? [];
+    }
+
+    /**
      * Returns all of the registed schemas.
      *
-     * @return array
+     * @return Message[]
      */
-    public static function all()
+    public static function all(): array
     {
-        return self::$messages;
+        return array_values(self::$classes);
     }
 
     /**
      * Returns the fully qualified php class name to be used for the provided schema id.
      *
      * @param SchemaId $id
-     * @return string
+     *
+     * @return Message
+     *
      * @throws NoMessageForSchemaId
      */
-    public static function resolveId(SchemaId $id)
+    public static function resolveId(SchemaId $id): string
     {
         $curieMajor = $id->getCurieMajor();
-        if (isset(self::$resolved[$curieMajor])) {
-            return self::$resolved[$curieMajor];
-        }
-
-        if (isset(self::$messages[$curieMajor])) {
-            $className = self::$messages[$curieMajor];
-            self::$resolved[$curieMajor] = $className;
-            return $className;
+        if (isset(self::$curies[$curieMajor])) {
+            return self::$classes[self::$curies[$curieMajor]];
         }
 
         $curie = $id->getCurie()->toString();
-        if (isset(self::$messages[$curie])) {
-            $className = self::$messages[$curie];
-            self::$resolved[$curieMajor] = $className;
-            self::$resolved[$curie] = $className;
-            return $className;
+        if (isset(self::$curies[$curie])) {
+            return self::$classes[self::$curies[$curie]];
         }
 
         throw new NoMessageForSchemaId($id);
@@ -86,36 +113,35 @@ final class MessageResolver
     /**
      * Returns the fully qualified php class name to be used for the provided curie.
      *
-     * @param SchemaCurie $curie
-     * @return string
+     * @param SchemaCurie|string $curie
+     *
+     * @return Message
+     *
      * @throws NoMessageForCurie
      */
-    public static function resolveCurie(SchemaCurie $curie)
+    public static function resolveCurie($curie): string
     {
-        $key = $curie->toString();
-        if (isset(self::$resolved[$key])) {
-            return self::$resolved[$key];
+        $key = (string)$curie;
+        if (isset(self::$curies[$key])) {
+            return self::$classes[self::$curies[$key]];
         }
 
-        if (isset(self::$messages[$key])) {
-            $className = self::$messages[$key];
-            self::$resolved[$key] = $className;
-            return $className;
-        }
-
-        throw new NoMessageForCurie($curie);
+        throw new NoMessageForCurie(SchemaCurie::fromString($key));
     }
 
     /**
-     * Returns the SchemaCurie for the given SchemaQName.
+     * @param SchemaQName|string $qname
      *
-     * @param SchemaQName $qname
      * @return SchemaCurie
      *
      * @throws NoMessageForQName
      */
-    public static function resolveQName(SchemaQName $qname)
+    public static function resolveQName($qname): SchemaCurie
     {
+        if (!$qname instanceof SchemaQName) {
+            $qname = SchemaQName::fromString((string)$qname);
+        }
+
         $key = $qname->toString();
 
         if (isset(self::$resolvedQnames[$key])) {
@@ -125,10 +151,10 @@ final class MessageResolver
         $qvendor = $qname->getVendor();
         $qmessage = $qname->getMessage();
 
-        foreach (self::$messages as $id => $class) {
-            list($vendor, $package, $category, $message) = explode(':', $id);
+        foreach (self::$curies as $curie => $id) {
+            list($vendor, $package, $category, $message) = explode(':', $curie);
             if ($qvendor === $vendor && $qmessage === $message) {
-                return self::$resolvedQnames[$key] = SchemaCurie::fromString($vendor.':'.$package.':'.$category.':'.$message);
+                return self::$resolvedQnames[$key] = SchemaCurie::fromString($vendor . ':' . $package . ':' . $category . ':' . $message);
             }
         }
 
@@ -137,13 +163,23 @@ final class MessageResolver
 
     /**
      * Adds a single schema to the resolver.  This is used in tests or dynamic
-     * message schema creation (not a typical use case).
+     * message schema creation (not a typical or recommended use case).
      *
      * @param Schema $schema
      */
-    public static function registerSchema(Schema $schema)
+    public static function registerSchema(Schema $schema): void
     {
-        self::$messages[$schema->getId()->getCurieMajor()] = $schema->getClassName();
+        $nextId = count(self::$curies) + 10000;
+        self::$curies[$schema->getId()->getCurieMajor()] = $nextId;
+        self::$classes[$nextId] = $schema->getClassName();
+        foreach ($schema->getMixinIds() as $mixin) {
+            unset(self::$resolvedMixins[$mixin]);
+            if (!isset(self::$mixins[$mixin])) {
+                self::$mixins[$mixin] = [];
+            }
+
+            self::$mixins[$mixin][] = $nextId;
+        }
     }
 
     /**
@@ -151,14 +187,19 @@ final class MessageResolver
      * @see SchemaId::getCurieMajor
      *
      * @param SchemaId|string $id
-     * @param string $className
+     * @param string          $className
      */
-    public static function register($id, $className)
+    public static function register($id, string $className): void
     {
+        @trigger_error(sprintf('"%s" is deprecated. Use "registerManifest" instead.', __CLASS__), E_USER_DEPRECATED);
+
         if ($id instanceof SchemaId) {
             $id = $id->getCurieMajor();
         }
-        self::$messages[(string) $id] = $className;
+
+        $nextId = count(self::$curies) + 20000;
+        self::$curies[$id] = $nextId;
+        self::$classes[$nextId] = $className;
     }
 
     /**
@@ -168,27 +209,28 @@ final class MessageResolver
      */
     public static function registerMap(array $map)
     {
-        if (empty(self::$messages)) {
-            self::$messages = $map;
-            return;
+        @trigger_error(sprintf('"%s" is deprecated. Use "registerManifest" instead.', __CLASS__), E_USER_DEPRECATED);
+        $nextId = count(self::$curies) + 30000;
+        foreach ($map as $curie => $class) {
+            ++$nextId;
+            self::$curies[$curie] = $nextId;
+            self::$classes[$nextId] = $class;
         }
-        self::$messages = array_merge(self::$messages, $map);
     }
 
     /**
      * Return the one schema expected to be using the provided mixin.
      *
-     * @param Mixin $mixin
-     * @param string $inPackage
-     * @param string $inCategory
+     * @param Mixin|string $mixin Mixin or curie major
+     *
      * @return Schema
      *
      * @throws MoreThanOneMessageForMixin
      * @throws NoMessageForMixin
      */
-    public static function findOneUsingMixin(Mixin $mixin, $inPackage = null, $inCategory = null)
+    public static function findOneUsingMixin($mixin): Schema
     {
-        $schemas = self::findAllUsingMixin($mixin, $inPackage, $inCategory);
+        $schemas = self::findAllUsingMixin($mixin);
         if (1 !== count($schemas)) {
             throw new MoreThanOneMessageForMixin($mixin, $schemas);
         }
@@ -197,49 +239,34 @@ final class MessageResolver
     }
 
     /**
-     * Returns an array of Schemas expected to be using the provided mixin.
+     * Returns an array of Schemas using the provided mixin.
      *
-     * @param Mixin $mixin
-     * @param string $inPackage
-     * @param string $inCategory
+     * @param Mixin|string $mixin Mixin or curie major
+     *
      * @return Schema[]
      *
      * @throws NoMessageForMixin
      */
-    public static function findAllUsingMixin(Mixin $mixin, $inPackage = null, $inCategory = null)
+    public static function findAllUsingMixin($mixin): array
     {
-        $mixinId = $mixin->getId()->getCurieMajor();
-        $key = sprintf('%s%s%s', $mixinId, $inPackage, $inCategory);
-
-        if (!isset(self::$resolvedMixins[$key])) {
-            $filtered = !empty($inPackage) || !empty($inCategory);
-            /** @var Message $class */
-            $schemas = [];
-            foreach (self::$messages as $id => $class) {
-                if ($filtered) {
-                    list($vendor, $package, $category, $message) = explode(':', $id);
-                    if (!empty($inPackage) && $package != $inPackage) {
-                        continue;
-                    }
-                    if (!empty($inCategory) && $category != $inCategory) {
-                        continue;
-                    }
-                }
-
-                $schema = $class::schema();
-                if ($schema->hasMixin($mixinId)) {
-                    $schemas[] = $schema;
-                }
-            }
-            self::$resolvedMixins[$key] = $schemas;
+        if ($mixin instanceof Mixin) {
+            $key = $mixin->getId()->getCurieMajor();
         } else {
-            $schemas = self::$resolvedMixins[$key];
+            $key = $mixin;
         }
 
-        if (empty($schemas)) {
+        if (!isset(self::$resolvedMixins[$key])) {
+            $schemas = [];
+            foreach ((self::$mixins[$key] ?? []) as $id) {
+                $schemas[] = self::$classes[$id]::schema();
+            }
+            self::$resolvedMixins[$key] = $schemas;
+        }
+
+        if (empty(self::$resolvedMixins[$key])) {
             throw new NoMessageForMixin($mixin);
         }
 
-        return $schemas;
+        return self::$resolvedMixins[$key];
     }
 }

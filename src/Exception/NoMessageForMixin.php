@@ -2,31 +2,24 @@
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Pbj\Mixin;
-
 class NoMessageForMixin extends \LogicException implements GdbotsPbjException
 {
-    /** @var Mixin */
+    /** @var string */
     private $mixin;
 
     /**
-     * @param Mixin $mixin
+     * @param string $mixin
      */
-    public function __construct(Mixin $mixin)
+    public function __construct(string $mixin)
     {
         $this->mixin = $mixin;
-        parent::__construct(
-            sprintf(
-                'MessageResolver is unable to find any messages using [%s].',
-                $mixin->getId()->getCurieMajor()
-            )
-        );
+        parent::__construct(sprintf('MessageResolver is unable to find any messages using [%s].', $mixin));
     }
 
     /**
-     * @return Mixin
+     * @return string
      */
-    public function getMixin()
+    public function getMixin(): string
     {
         return $this->mixin;
     }

@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.2.0
+* Optimize the `MessageResolver` by using a manifest with all of the classes and mixins so no messages have to be instantiated when using `findOneUsingMixin` or `findAllUsingMixin` to find out if they have the given mixin.
+* Comment out the logic that includes fields on serialized or marshaled objects when field is null.
+
+
 ## v2.1.5
 * Allow `IdentifierType` to be 255 bytes, same as `StringType`.
 
