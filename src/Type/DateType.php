@@ -7,7 +7,6 @@ use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
-// todo: use DateTimeImmutable?
 final class DateType extends AbstractType
 {
     /** @var \DateTimeZone */
@@ -18,8 +17,8 @@ final class DateType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var \DateTime $value */
-        Assertion::isInstanceOf($value, 'DateTime', null, $field->getName());
+        /** @var \DateTimeInterface $value */
+        Assertion::isInstanceOf($value, \DateTimeInterface::class, null, $field->getName());
     }
 
     /**
@@ -27,7 +26,7 @@ final class DateType extends AbstractType
      */
     public function encode($value, Field $field, Codec $codec = null)
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof \DateTimeInterface) {
             return $value->format('Y-m-d');
         }
 
@@ -43,20 +42,23 @@ final class DateType extends AbstractType
             return null;
         }
 
-        if ($value instanceof \DateTime) {
+        if ($value instanceof \DateTimeInterface) {
             // ensures we're always in UTC and have no time parts.
             $value = $value->format('Y-m-d');
         }
 
-        $date = \DateTime::createFromFormat('!Y-m-d', $value, $this->getUtcTimeZone());
-        if ($date instanceof \DateTime) {
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, $this->getUtcTimeZone());
+        if ($date instanceof \DateTimeImmutable) {
             return $date;
         }
 
         throw new DecodeValueFailed(
             $value,
             $field,
-            sprintf('Format must be [Y-m-d].  Errors: [%s]', print_r(\DateTime::getLastErrors(), true))
+            sprintf(
+                'Format must be [Y-m-d].  Errors: [%s]',
+                print_r(\DateTimeImmutable::getLastErrors(), true)
+            )
         );
     }
 

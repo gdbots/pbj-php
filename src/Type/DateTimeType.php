@@ -8,7 +8,6 @@ use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
-// todo: use DateTimeImmutable?
 final class DateTimeType extends AbstractType
 {
     /** @var \DateTimeZone */
@@ -19,8 +18,8 @@ final class DateTimeType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var \DateTime $value */
-        Assertion::isInstanceOf($value, 'DateTime', null, $field->getName());
+        /** @var \DateTimeInterface $value */
+        Assertion::isInstanceOf($value, \DateTimeInterface::class, null, $field->getName());
     }
 
     /**
@@ -28,7 +27,7 @@ final class DateTimeType extends AbstractType
      */
     public function encode($value, Field $field, Codec $codec = null)
     {
-        if ($value instanceof \DateTime) {
+        if ($value instanceof \DateTimeInterface) {
             return $this->convertToUtc($value)->format(DateUtils::ISO8601_ZULU);
         }
 
@@ -44,12 +43,12 @@ final class DateTimeType extends AbstractType
             return null;
         }
 
-        if ($value instanceof \DateTime) {
+        if ($value instanceof \DateTimeInterface) {
             return $this->convertToUtc($value);
         }
 
-        $date = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
-        if ($date instanceof \DateTime) {
+        $date = \DateTimeImmutable::createFromFormat(DateUtils::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
+        if ($date instanceof \DateTimeInterface) {
             return $this->convertToUtc($date);
         }
 
@@ -60,7 +59,7 @@ final class DateTimeType extends AbstractType
                 'Format must be [%s].  Errors: [%s]',
                 DateUtils::ISO8601_ZULU,
                 // this is mutant
-                print_r(\DateTime::getLastErrors(), true)
+                print_r(\DateTimeImmutable::getLastErrors() ?: \DateTime::getLastErrors(), true)
             )
         );
     }
@@ -90,17 +89,26 @@ final class DateTimeType extends AbstractType
     }
 
     /**
-     * @param \DateTime $date
-     * @return \DateTime
+     * @param \DateTimeInterface $date
+     *
+     * @return \DateTimeInterface
      */
-    private function convertToUtc(\DateTime $date)
+    private function convertToUtc(\DateTimeInterface $date)
     {
-        if (null === $this->utc) {
-            $this->utc = new \DateTimeZone('UTC');
-        }
-
         if ($date->getOffset() !== 0) {
+            if (null === $this->utc) {
+                $this->utc = new \DateTimeZone('UTC');
+            }
+
+            if ($date instanceof \DateTimeImmutable) {
+                $date = \DateTime::createFromFormat(
+                    DateUtils::ISO8601_ZULU,
+                    $date->format(DateUtils::ISO8601_ZULU)
+                );
+            }
+
             $date->setTimezone($this->utc);
+            $date = \DateTimeImmutable::createFromMutable($date);
         }
 
         return $date;
