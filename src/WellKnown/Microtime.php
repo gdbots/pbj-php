@@ -174,6 +174,8 @@ final class Microtime implements \JsonSerializable
     }
 
     /**
+     * todo: shall we return \DateTimeImmutable here too?
+     *
      * @return \DateTime
      */
     public function toDateTime()
