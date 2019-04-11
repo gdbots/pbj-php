@@ -31,7 +31,9 @@ final class Microtime implements \JsonSerializable
     /**
      * Private constructor to ensure static methods are used.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     /**
      * Create a new object using the current microtime.
@@ -49,16 +51,17 @@ final class Microtime implements \JsonSerializable
      *
      * @link http://php.net/manual/en/function.microtime.php
      *
-     * @param float $float  e.g. 1422060753.9581
+     * @param float $float e.g. 1422060753.9581
+     *
      * @return self
      */
     public static function fromFloat($float)
     {
         $str = substr(str_pad(str_replace('.', '', $float), 16, '0'), 0, 16);
         $m = new self();
-        $m->int = (int) $str;
-        $m->sec = (int) substr($str, 0, 10);
-        $m->usec = (int) substr($str, -6);
+        $m->int = (int)$str;
+        $m->sec = (int)substr($str, 0, 10);
+        $m->usec = (int)substr($str, -6);
         return $m;
     }
 
@@ -69,15 +72,16 @@ final class Microtime implements \JsonSerializable
      * @link http://php.net/manual/en/function.gettimeofday.php
      *
      * @param array $tod
+     *
      * @return self
      */
     public static function fromTimeOfDay(array $tod)
     {
         $str = $tod['sec'] . str_pad($tod['usec'], 6, '0', STR_PAD_LEFT);
         $m = new self();
-        $m->int = (int) $str;
-        $m->sec = (int) substr($str, 0, 10);
-        $m->usec = (int) substr($str, -6);
+        $m->int = (int)$str;
+        $m->sec = (int)substr($str, 0, 10);
+        $m->usec = (int)substr($str, -6);
         return $m;
     }
 
@@ -88,12 +92,13 @@ final class Microtime implements \JsonSerializable
      * Lack of precision on digits will be automatically padded with zeroes.
      *
      * @param string|int $stringOrInteger
+     *
      * @return self
      * @throws InvalidArgumentException
      */
     public static function fromString($stringOrInteger)
     {
-        $int = (int) $stringOrInteger;
+        $int = (int)$stringOrInteger;
         $len = strlen($int);
         if ($len < 13 || $len > 16) {
             throw new InvalidArgumentException(
@@ -106,13 +111,13 @@ final class Microtime implements \JsonSerializable
         }
 
         if ($len < 16) {
-            $int = (int) str_pad($int, 16, '0');
+            $int = (int)str_pad($int, 16, '0');
         }
 
         $m = new self();
         $m->int = $int;
-        $m->sec = (int) substr($int, 0, 10);
-        $m->usec = (int) substr($int, -6);
+        $m->sec = (int)substr($int, 0, 10);
+        $m->usec = (int)substr($int, -6);
         return $m;
     }
 
@@ -120,16 +125,17 @@ final class Microtime implements \JsonSerializable
      * Creates a new microtime from a \DateTime object using
      * it's timestamp and microseconds.
      *
-     * @param \DateTime $date
+     * @param \DateTimeInterface $date
+     *
      * @return self
      */
-    public static function fromDateTime(\DateTime $date)
+    public static function fromDateTime(\DateTimeInterface $date)
     {
         $str = $date->format('U') . str_pad($date->format('u'), 6, '0');
         $m = new self();
-        $m->int = (int) $str;
-        $m->sec = (int) substr($str, 0, 10);
-        $m->usec = (int) substr($str, -6);
+        $m->int = (int)$str;
+        $m->sec = (int)substr($str, 0, 10);
+        $m->usec = (int)substr($str, -6);
         return $m;
     }
 
@@ -138,7 +144,7 @@ final class Microtime implements \JsonSerializable
      */
     public function toString()
     {
-        return (string) $this->int;
+        return (string)$this->int;
     }
 
     /**
@@ -176,7 +182,7 @@ final class Microtime implements \JsonSerializable
     /**
      * todo: shall we return \DateTimeImmutable here too?
      *
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function toDateTime()
     {
@@ -188,6 +194,6 @@ final class Microtime implements \JsonSerializable
      */
     public function toFloat()
     {
-        return (float) ($this->sec . '.' . str_pad($this->usec, 6, '0', STR_PAD_LEFT));
+        return (float)($this->sec . '.' . str_pad($this->usec, 6, '0', STR_PAD_LEFT));
     }
 }
