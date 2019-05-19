@@ -80,12 +80,20 @@ abstract class AbstractStringType extends AbstractType
                 break;
 
             case Format::IPV4:
-            case Format::IPV6:
-                /*
-                 * todo: need separate assertion for ipv4 and ipv6
-                 */
                 Assertion::url(
                     'http://' . $value,
+                    sprintf(
+                        'Field [%s] must be a valid [%s].',
+                        $field->getName(),
+                        $field->getFormat()->getValue()
+                    ),
+                    $field->getName()
+                );
+                break;
+
+            case Format::IPV6:
+                Assertion::url(
+                    'http://[' . $value . ']',
                     sprintf(
                         'Field [%s] must be a valid [%s].',
                         $field->getName(),

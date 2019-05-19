@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.2.3
+* Add proper validation for `Format::IPV6`.
+
+
 ## v2.2.2
 * `Microtime::fromDateTime` should now accept `DateTimeInterface`. 
 
