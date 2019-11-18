@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 1.x versions.
 
 
+## v1.2.0
+* Require php `>=7.1`.
+* Add `MessageResolver::registerManifest` from v2.x. 
+
+
 ## v1.1.5
 * issue #40: Create shortcut in Mixin for findOne and findAll.
 
