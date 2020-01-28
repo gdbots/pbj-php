@@ -696,4 +696,14 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __wakeup()
+    {
+        $this->isFrozen = false;
+        $this->isReplay = null;
+        $this->clearedFields = [];
+    }
 }

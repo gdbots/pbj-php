@@ -2,16 +2,21 @@
 This changelog references the relevant changes done in 2.x versions.
 
 
+## v2.2.4
+* Reset isFrozen, isReplay and clearedFields in `AbstractMessage::__wakeup` so an unserialized message has clean slate.
+* Optimize `TimeUuididentifier` and `Uuididentifier` so it doesn't create a uuid instance from string, only validates it.
+
+
 ## v2.2.3
 * Add proper validation for `Format::IPV6`.
 
 
 ## v2.2.2
-* `Microtime::fromDateTime` should now accept `DateTimeInterface`. 
+* `Microtime::fromDateTime` should now accept `DateTimeInterface`.
 
 
 ## v2.2.1
-* Use `DateTimeImmutable` in `DateType` and `DateTimeType`. 
+* Use `DateTimeImmutable` in `DateType` and `DateTimeType`.
 
 
 ## v2.2.0
@@ -60,5 +65,5 @@ __BREAKING CHANGES__
 * Change `pbj_keyword_analyzer` to just `pbj_keyword` in `Gdbots\Pbj\Marshaler\Elastica\MappingFactory`.
 * Require php `>=7.1` in `composer.json`.
 * __NOTICE:__ php7 type hinting (scalar arguments and return types) with `declare(strict_types=1);`
-  will be added in a minor update in the 2.x line. This should NOT be a breaking change if your 
+  will be added in a minor update in the 2.x line. This should NOT be a breaking change if your
   code is respecting the doc blocks which represent the public API.

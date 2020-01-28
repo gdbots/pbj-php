@@ -9,18 +9,20 @@ use Ramsey\Uuid\UuidInterface;
 class TimeUuidIdentifier extends UuidIdentifier
 {
     /**
-     * @param UuidInterface $uuid
-     * @throws InvalidArgumentException
+     * @param UuidInterface|string $uuid
      */
-    protected function __construct(UuidInterface $uuid)
+    protected function __construct($uuid)
     {
-        parent::__construct($uuid);
-        $version = $uuid->getVersion();
-        if ($version !== 1) {
-            throw new InvalidArgumentException(
-                sprintf('A time based (version 1) uuid is required.  Version provided [%s].', $version)
-            );
+        if ($uuid instanceof UuidInterface) {
+            $version = $uuid->getVersion();
+            if ($version !== 1) {
+                throw new InvalidArgumentException(
+                    sprintf('A time based (version 1) uuid is required.  Version provided [%s].', $version)
+                );
+            }
         }
+
+        parent::__construct($uuid);
     }
 
     /**

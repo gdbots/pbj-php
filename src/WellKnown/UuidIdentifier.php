@@ -2,20 +2,25 @@
 
 namespace Gdbots\Pbj\WellKnown;
 
+use Gdbots\Pbj\Assertion;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class UuidIdentifier implements Identifier, GeneratesIdentifier
 {
-    /** @var UuidInterface */
+    /** @var string */
     protected $uuid;
 
     /**
-     * @param UuidInterface $uuid
+     * @param UuidInterface|string $uuid
      */
-    protected function __construct(UuidInterface $uuid)
+    protected function __construct($uuid)
     {
-        $this->uuid = $uuid;
+        if (!$uuid instanceof UuidInterface) {
+            Assertion::uuid($uuid);
+        }
+
+        $this->uuid = (string)$uuid;
     }
 
     /**
@@ -33,7 +38,7 @@ class UuidIdentifier implements Identifier, GeneratesIdentifier
      */
     public static function fromString($string)
     {
-        return new static(Uuid::fromString($string));
+        return new static($string);
     }
 
     /**
@@ -41,7 +46,7 @@ class UuidIdentifier implements Identifier, GeneratesIdentifier
      */
     public function toString()
     {
-        return $this->uuid->toString();
+        return $this->uuid;
     }
 
     /**
