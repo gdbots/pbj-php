@@ -47,11 +47,13 @@ final class Schema implements ToArray, \JsonSerializable
      * @param Field[]         $fields
      * @param Mixin[]         $mixins
      */
-    public function __construct($id, $className, array $fields = [], array $mixins = [])
+    public function __construct($id, string $className, array $fields = [], array $mixins = [])
     {
+        /*
         Assertion::classExists($className, null, 'className');
         Assertion::allIsInstanceOf($fields, Field::class, null, 'fields');
         Assertion::allIsInstanceOf($mixins, Mixin::class, null, 'mixins');
+        */
 
         $this->id = $id instanceof SchemaId ? $id : SchemaId::fromString($id);
         $this->className = $className;
@@ -66,7 +68,7 @@ final class Schema implements ToArray, \JsonSerializable
         );
 
         foreach ($mixins as $mixin) {
-            $this->addMixin($mixin);
+            //$this->addMixin($mixin);
         }
 
         foreach ($fields as $field) {
@@ -88,7 +90,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id'          => $this->id,

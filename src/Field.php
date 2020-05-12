@@ -532,7 +532,7 @@ final class Field implements ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'name'               => $this->name,

@@ -10,23 +10,17 @@ use Gdbots\Pbj\Field;
 
 abstract class AbstractBinaryType extends AbstractType
 {
-    private $decodeFromBase64 = true;
-    private $encodeToBase64 = true;
+    private bool $decodeFromBase64 = true;
+    private bool $encodeToBase64 = true;
 
-    /**
-     * @param bool $useBase64
-     */
-    public function decodeFromBase64($useBase64)
+    public function decodeFromBase64(bool $useBase64)
     {
-        $this->decodeFromBase64 = (bool) $useBase64;
+        $this->decodeFromBase64 = $useBase64;
     }
 
-    /**
-     * @param bool $useBase64
-     */
-    public function encodeToBase64($useBase64)
+    public function encodeToBase64(bool $useBase64)
     {
-        $this->encodeToBase64 = (bool) $useBase64;
+        $this->encodeToBase64 = $useBase64;
     }
 
     /**

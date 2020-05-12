@@ -7,10 +7,7 @@ use Gdbots\Pbj\Enum\TypeName;
 
 abstract class AbstractType implements Type
 {
-    private static $instances = [];
-
-    /** @var TypeName */
-    private $typeName;
+    private TypeName $typeName;
 
     /**
      * Private constructor to ensure flyweight construction.
@@ -27,14 +24,14 @@ abstract class AbstractType implements Type
      */
     final public static function create()
     {
-        $type = get_called_class();
-        if (!isset(self::$instances[$type])) {
-            $a = explode('\\', $type);
+        static $instance;
+        if (null === $instance) {
+            $a = explode('\\', static::class);
             $typeName = StringUtils::toSlugFromCamel(str_replace('Type', '', end($a)));
-            self::$instances[$type] = new static(TypeName::create($typeName));
+            $instance = new static(TypeName::create($typeName));
         }
 
-        return self::$instances[$type];
+        return $instance;
     }
 
     /**

@@ -15,15 +15,12 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 
 final class EmailMessage extends AbstractMessage
 {
-    /**
-     * @return Schema
-     */
-    protected static function defineSchema()
+    protected static function defineSchema(): Schema
     {
         $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:email-message:1-0-0', __CLASS__,
             [
                 Fb::create('id', T\TimeUuidType::create())
-                    //->useTypeDefault(false)
+                    ->useTypeDefault(false)
                     ->required()
                     ->build(),
                 Fb::create('from_name', T\StringType::create())
@@ -87,18 +84,12 @@ final class EmailMessage extends AbstractMessage
         return $schema;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function generateMessageRef($tag = null)
+    public function generateMessageRef(?string $tag = null): MessageRef
     {
         return new MessageRef(static::schema()->getCurie(), $this->get('id'), $tag);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUriTemplateVars()
+    public function getUriTemplateVars(): array
     {
         return ['id' => $this->get('id')->toString()];
     }

@@ -195,7 +195,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
         if (!isset($data['name'])) {
             throw new InvalidArgumentException('DynamicField "name" property must be set.');
@@ -217,7 +217,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         $field = self::createField($this->kind);
         return ['name' => $this->name, $this->kind => $field->getType()->encode($this->value, $field)];

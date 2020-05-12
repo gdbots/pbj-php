@@ -6,113 +6,53 @@ use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\LogicException;
-use Gdbots\Pbj\Exception\SchemaNotDefined;
-use Gdbots\Pbj\Serializer\PhpArraySerializer;
-use Gdbots\Pbj\Serializer\YamlSerializer;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
+use Gdbots\Pbj\Serializer\PhpArraySerializer;
 
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
 {
-    /**
-     * An array of schemas per message type.
-     * ['Fully\Qualified\ClassName' => [ array of Schema objects ]
-     * @var array
-     */
-    private static $schemas = [];
-
-    /** @var PhpArraySerializer */
-    private static $serializer;
-
-    /** @var YamlSerializer */
-    private static $yamlSerializer;
-
-    /** @var array */
-    private $data = [];
+    private static ?PhpArraySerializer $serializer = null;
+    private array $data = [];
 
     /**
      * An array of fields that have been cleared or set to null that
      * must be included when serialized so it's clear that the
      * value has been unset.
-     *
-     * @var array
      */
-    private $clearedFields = [];
+    private array $clearedFields = [];
 
-    /**
-     * @see Message::freeze
-     * @var bool
-     */
-    private $isFrozen = false;
+    /** @see Message::freeze */
+    private bool $isFrozen = false;
 
-    /**
-     * @see Message::isReplay
-     * @var bool
-     */
-    private $isReplay;
+    /** @see Message::isReplay */
+    private ?bool $isReplay = null;
 
     /**
      * Nothing fancy on new messages... we let the serializers or application code get fancy.
      */
-    final public function __construct() {}
-
-    /**
-     * {@inheritdoc}
-     * @return Schema
-     */
-    final public static function schema()
+    final public function __construct()
     {
-        $type = get_called_class();
-        if (!isset(self::$schemas[$type])) {
+    }
+
+    final public static function schema(): Schema
+    {
+        static $schema;
+
+        if (null === $schema) {
             $schema = static::defineSchema();
-
-            if (!$schema instanceof Schema) {
-                throw new SchemaNotDefined(
-                    sprintf('Message [%s] must return a Schema from the defineSchema method.', $type)
-                );
-            }
-
-            if ($schema->getClassName() !== $type) {
-                throw new SchemaNotDefined(
-                    sprintf(
-                        'Schema [%s] returned from defineSchema must be for class [%s], not [%s]',
-                        $schema->getId()->toString(),
-                        $type,
-                        $schema->getClassName()
-                    )
-                );
-            }
-            self::$schemas[$type] = $schema;
         }
-        return self::$schemas[$type];
+
+        return $schema;
     }
 
-    /**
-     * @return Schema
-     * @throws SchemaNotDefined
-     */
-    protected static function defineSchema()
+    abstract protected static function defineSchema(): Schema;
+
+    final public static function create(): self
     {
-        throw new SchemaNotDefined(
-            sprintf('Message [%s] must return a Schema from the defineSchema method.', get_called_class())
-        );
+        return (new static())->populateDefaults();
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public static function create()
-    {
-        /** @var Message $message */
-        $message = new static();
-        return $message->populateDefaults();
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public static function fromArray(array $data = [])
+    final public static function fromArray(array $data = []): self
     {
         if (null === self::$serializer) {
             self::$serializer = new PhpArraySerializer();
@@ -122,14 +62,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             $data[Schema::PBJ_FIELD_NAME] = static::schema()->getId()->toString();
         }
 
-        $message = self::$serializer->deserialize($data);
-        return $message;
+        return self::$serializer->deserialize($data);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function toArray()
+    final public function toArray(): array
     {
         if (null === self::$serializer) {
             self::$serializer = new PhpArraySerializer();
@@ -137,44 +73,16 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return self::$serializer->serialize($this);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function toYaml(array $options = [])
-    {
-        try {
-            if (null === self::$yamlSerializer) {
-                self::$yamlSerializer = new YamlSerializer();
-            }
-            return self::$yamlSerializer->serialize($this, $options);
-        } catch (\Exception $e) {
-            return sprintf(
-                'Failed to render [%s] as a yaml string with error: %s',
-                self::schema()->toString(),
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     final public function __toString()
     {
-        return $this->toYaml();
+        return json_encode($this, JSON_PRETTY_PRINT);
     }
 
-    /**
-     * @return array
-     */
     final public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @return static
-     */
     final public function __clone()
     {
         $this->data = unserialize(serialize($this->data));
@@ -185,12 +93,13 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * {@inheritdoc}
      * todo: review performance
      */
-    final public function generateEtag(array $ignoredFields = [])
+    final public function generateEtag(array $ignoredFields = []): string
     {
         if (null === self::$serializer) {
             self::$serializer = new PhpArraySerializer();
         }
-        $array = self::$serializer->serialize($this, ['includeAllFields' => true]);
+
+        $array = self::$serializer->serialize($this);
 
         if (empty($ignoredFields)) {
             return md5(json_encode($array));
@@ -203,12 +112,20 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return md5(json_encode($array));
     }
 
+    public function generateMessageRef(?string $tag = null): MessageRef
+    {
+        return new MessageRef(static::schema()->getCurie(), null, $tag);
+    }
+
+    public function getUriTemplateVars(): array
+    {
+        return [];
+    }
+
     /**
      * todo: recursively validate nested messages?
-     * {@inheritdoc}
-     * @return static
      */
-    final public function validate()
+    final public function validate(): self
     {
         foreach (static::schema()->getRequiredFields() as $field) {
             if (!$this->has($field->getName())) {
@@ -219,11 +136,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function freeze()
+    final public function freeze(): self
     {
         if ($this->isFrozen()) {
             return $this;
@@ -259,7 +172,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * Recursively unfreezes this object and any of its children.
      * Used internally during the clone process.
      */
-    private function unFreeze()
+    private function unFreeze(): void
     {
         $this->isFrozen = false;
         $this->isReplay = null;
@@ -285,19 +198,17 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isFrozen()
+    final public function isFrozen(): bool
     {
         return $this->isFrozen;
     }
 
     /**
      * Ensures a frozen message can't be modified.
+     *
      * @throws FrozenMessageIsImmutable
      */
-    private function guardFrozenMessage()
+    private function guardFrozenMessage(): void
     {
         if ($this->isFrozen) {
             throw new FrozenMessageIsImmutable($this);
@@ -308,15 +219,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * {@inheritdoc}
      * This could probably use some work.  :)  low level serialization string match.
      */
-    public function equals(Message $other)
+    public function equals(Message $other): bool
     {
         return json_encode($this) === json_encode($other);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isReplay($replay = null)
+    final public function isReplay(?bool $replay = null): bool
     {
         if (null === $replay) {
             if (null === $this->isReplay) {
@@ -326,7 +234,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         }
 
         if (null === $this->isReplay) {
-            $this->isReplay = (bool) $replay;
+            $this->isReplay = (bool)$replay;
             if ($this->isReplay) {
                 $this->freeze();
             }
@@ -336,11 +244,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         throw new LogicException('You can only set the replay mode on one time.');
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function populateDefaults($fieldName = null)
+    final public function populateDefaults(string $fieldName = null): self
     {
         $this->guardFrozenMessage();
 
@@ -361,9 +265,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * and the default generated is not a null value or empty array.
      *
      * @param Field $field
+     *
      * @return bool Returns true if a non null/empty default was applied or already present.
      */
-    private function populateDefault(Field $field)
+    private function populateDefault(Field $field): bool
     {
         if ($this->has($field->getName())) {
             return true;
@@ -397,10 +302,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function has($fieldName)
+    final public function has(string $fieldName): bool
     {
         if (!isset($this->data[$fieldName])) {
             return false;
@@ -413,10 +315,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function get($fieldName, $default = null)
+    final public function get(string $fieldName, $default = null)
     {
         if (!$this->has($fieldName)) {
             return $default;
@@ -430,11 +329,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this->data[$fieldName];
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function clear($fieldName)
+    final public function clear(string $fieldName): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -444,36 +339,17 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function hasClearedField($fieldName)
+    final public function hasClearedField(string $fieldName): bool
     {
         return isset($this->clearedFields[$fieldName]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getClearedFields()
+    final public function getClearedFields(): array
     {
         return array_keys($this->clearedFields);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function setSingleValue($fieldName, $value)
-    {
-        return $this->set($fieldName, $value);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function set($fieldName, $value)
+    final public function set(string $fieldName, $value): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -489,17 +365,14 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isInSet($fieldName, $value)
+    final public function isInSet(string $fieldName, $value): bool
     {
         if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
             return false;
         }
 
         if (is_scalar($value) || (is_object($value) && method_exists($value, '__toString'))) {
-            $key = trim((string) $value);
+            $key = trim((string)$value);
         } else {
             return false;
         }
@@ -511,11 +384,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return isset($this->data[$fieldName][strtolower($key)]);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function addToSet($fieldName, array $values)
+    final public function addToSet(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -526,7 +395,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
                 continue;
             }
             $field->guardValue($value);
-            $key = strtolower(trim((string) $value));
+            $key = strtolower(trim((string)$value));
             $this->data[$fieldName][$key] = $value;
         }
 
@@ -537,11 +406,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function removeFromSet($fieldName, array $values)
+    final public function removeFromSet(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -551,7 +416,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             if (0 === strlen($value)) {
                 continue;
             }
-            $key = strtolower(trim((string) $value));
+            $key = strtolower(trim((string)$value));
             unset($this->data[$fieldName][$key]);
         }
 
@@ -562,10 +427,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isInList($fieldName, $value)
+    final public function isInList(string $fieldName, $value): bool
     {
         if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
             return false;
@@ -574,12 +436,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return in_array($value, $this->data[$fieldName]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getFromListAt($fieldName, $index, $default = null)
+    final public function getFromListAt(string $fieldName, int $index, $default = null)
     {
-        $index = (int) $index;
+        $index = (int)$index;
         if (empty($this->data[$fieldName])
             || !is_array($this->data[$fieldName])
             || !isset($this->data[$fieldName][$index])
@@ -589,11 +448,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this->data[$fieldName][$index];
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function addToList($fieldName, array $values)
+    final public function addToList(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -608,16 +463,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function removeFromListAt($fieldName, $index)
+    final public function removeFromListAt(string $fieldName, int $index): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
-        $index = (int) $index;
+        $index = (int)$index;
 
         if (empty($this->data[$fieldName])) {
             return $this;
@@ -635,10 +486,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isInMap($fieldName, $key)
+    final public function isInMap(string $fieldName, string $key): bool
     {
         if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName]) || !is_string($key)) {
             return false;
@@ -646,22 +494,16 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return isset($this->data[$fieldName][$key]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getFromMap($fieldName, $key, $default = null)
+    final public function getFromMap(string $fieldName, string $key, $default = null)
     {
         if (!$this->isInMap($fieldName, $key)) {
             return $default;
         }
+
         return $this->data[$fieldName][$key];
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function addToMap($fieldName, $key, $value)
+    final public function addToMap(string $fieldName, string $key, $value): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -678,11 +520,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function removeFromMap($fieldName, $key)
+    final public function removeFromMap(string $fieldName, string $key): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -697,9 +535,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __wakeup()
     {
         $this->isFrozen = false;

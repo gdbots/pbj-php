@@ -61,7 +61,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
         if (isset($data['curie'])) {
             $id = isset($data['id']) ? $data['id'] : 'null';
@@ -74,7 +74,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         if (null !== $this->tag) {
             return ['curie' => $this->curie->toString(), 'id' => $this->id, 'tag' => $this->tag];

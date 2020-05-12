@@ -2,20 +2,18 @@
 
 require 'speed-bootstrap.php';
 
-use Gdbots\Pbj\Serializer\YamlSerializer;
-
 $startTime = microtime(true);
 $i = 0;
-$message = createEmailMessage();
-$serializer = new YamlSerializer();
+$message = json_decode(file_get_contents(__DIR__ . '/Fixtures/email-message.json'), true);
 
 do {
     $i++;
-    $yaml = $serializer->serialize($message);
-    $message = $serializer->deserialize($yaml);
+    $json = json_encode($message);
+    $message = json_decode($json, true);
+    \Gdbots\Tests\Pbj\Fixtures\EmailMessage::create();
 } while ($i < numTimes());
 
-echo $serializer->serialize($message) . PHP_EOL;
+echo json_encode($message, JSON_PRETTY_PRINT) . PHP_EOL;
 
 // speed report
 $benchmark = microtime(true) - $startTime;
@@ -45,3 +43,4 @@ Rate:
 
 STRING;
 echo $report;
+

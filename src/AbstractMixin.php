@@ -46,7 +46,7 @@ abstract class AbstractMixin implements Mixin, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    final public function toArray()
+    final public function toArray(): array
     {
         return [
             'id'     => $this->getId(),

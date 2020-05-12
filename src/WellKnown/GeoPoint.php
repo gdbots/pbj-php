@@ -57,7 +57,7 @@ final class GeoPoint implements FromArray, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
         if (isset($data['coordinates'])) {
             return new self($data['coordinates'][1], $data['coordinates'][0]);
@@ -69,7 +69,7 @@ final class GeoPoint implements FromArray, ToArray, \JsonSerializable
     /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(): array
     {
         return ['type' => 'Point', 'coordinates' => [$this->longitude, $this->latitude]];
     }
