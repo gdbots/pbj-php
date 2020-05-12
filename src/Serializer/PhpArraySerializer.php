@@ -260,11 +260,13 @@ class PhpArraySerializer implements Serializer, Codec
                     break;
 
                 case FieldRule::A_MAP:
+                    /*
                     Assertion::true(
                         ArrayUtils::isAssoc($value),
                         sprintf('Field [%s] must be an associative array.', $fieldName),
                         $fieldName
                     );
+                    */
                     foreach ($value as $k => $v) {
                         $message->addToMap($fieldName, $k, $type->decode($v, $field, $this));
                     }
