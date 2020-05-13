@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
@@ -8,18 +9,13 @@ use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\LogicException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
 use Gdbots\Pbj\Serializer\PhpArraySerializer;
+use Gdbots\Pbj\WellKnown\MessageRef;
+use Gdbots\Pbj\WellKnown\NodeRef;
 
 abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
 {
     private static ?PhpArraySerializer $serializer = null;
     private array $data = [];
-
-    /**
-     * An array of fields that have been cleared or set to null that
-     * must be included when serialized so it's clear that the
-     * value has been unset.
-     */
-    private array $clearedFields = [];
 
     /** @see Message::freeze */
     private bool $isFrozen = false;
@@ -70,6 +66,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         if (null === self::$serializer) {
             self::$serializer = new PhpArraySerializer();
         }
+
         return self::$serializer->serialize($this);
     }
 
@@ -115,6 +112,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     public function generateMessageRef(?string $tag = null): MessageRef
     {
         return new MessageRef(static::schema()->getCurie(), null, $tag);
+    }
+
+    public function generateNodeRef(): NodeRef
+    {
+        return NodeRef::fromNode($this);
     }
 
     public function getUriTemplateVars(): array
@@ -244,7 +246,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         throw new LogicException('You can only set the replay mode on one time.');
     }
 
-    final public function populateDefaults(string $fieldName = null): self
+    final public function populateDefaults(?string $fieldName = null): self
     {
         $this->guardFrozenMessage();
 
@@ -281,7 +283,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         if ($field->isASingleValue()) {
             $this->data[$field->getName()] = $default;
-            unset($this->clearedFields[$field->getName()]);
             return true;
         }
 
@@ -298,7 +299,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         }
 
         $this->data[$field->getName()] = $default;
-        unset($this->clearedFields[$field->getName()]);
         return true;
     }
 
@@ -334,19 +334,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         unset($this->data[$fieldName]);
-        $this->clearedFields[$fieldName] = true;
         $this->populateDefault($field);
         return $this;
-    }
-
-    final public function hasClearedField(string $fieldName): bool
-    {
-        return isset($this->clearedFields[$fieldName]);
-    }
-
-    final public function getClearedFields(): array
-    {
-        return array_keys($this->clearedFields);
     }
 
     final public function set(string $fieldName, $value): self
@@ -361,7 +350,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         $field->guardValue($value);
         $this->data[$fieldName] = $value;
-        unset($this->clearedFields[$fieldName]);
         return $this;
     }
 
@@ -394,13 +382,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             if (0 === strlen($value)) {
                 continue;
             }
+
             $field->guardValue($value);
             $key = strtolower(trim((string)$value));
             $this->data[$fieldName][$key] = $value;
-        }
-
-        if (!empty($this->data[$fieldName])) {
-            unset($this->clearedFields[$fieldName]);
         }
 
         return $this;
@@ -416,12 +401,9 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             if (0 === strlen($value)) {
                 continue;
             }
+
             $key = strtolower(trim((string)$value));
             unset($this->data[$fieldName][$key]);
-        }
-
-        if (empty($this->data[$fieldName])) {
-            $this->clearedFields[$fieldName] = true;
         }
 
         return $this;
@@ -438,13 +420,13 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     final public function getFromListAt(string $fieldName, int $index, $default = null)
     {
-        $index = (int)$index;
         if (empty($this->data[$fieldName])
             || !is_array($this->data[$fieldName])
             || !isset($this->data[$fieldName][$index])
         ) {
             return $default;
         }
+
         return $this->data[$fieldName][$index];
     }
 
@@ -459,7 +441,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
             $this->data[$fieldName][] = $value;
         }
 
-        unset($this->clearedFields[$fieldName]);
         return $this;
     }
 
@@ -468,7 +449,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
-        $index = (int)$index;
 
         if (empty($this->data[$fieldName])) {
             return $this;
@@ -476,12 +456,10 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         array_splice($this->data[$fieldName], $index, 1);
         if (empty($this->data[$fieldName])) {
-            $this->clearedFields[$fieldName] = true;
             return $this;
         }
 
         // reset the numerical indexes
-        // todo: review, does this need to be optimized?
         $this->data[$fieldName] = array_values($this->data[$fieldName]);
         return $this;
     }
@@ -491,6 +469,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName]) || !is_string($key)) {
             return false;
         }
+
         return isset($this->data[$fieldName][$key]);
     }
 
@@ -515,7 +494,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
         $field->guardValue($value);
         $this->data[$fieldName][$key] = $value;
-        unset($this->clearedFields[$fieldName]);
 
         return $this;
     }
@@ -527,11 +505,6 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
 
         unset($this->data[$fieldName][$key]);
-
-        if (empty($this->data[$fieldName])) {
-            $this->clearedFields[$fieldName] = true;
-        }
-
         return $this;
     }
 
@@ -539,6 +512,5 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
     {
         $this->isFrozen = false;
         $this->isReplay = null;
-        $this->clearedFields = [];
     }
 }

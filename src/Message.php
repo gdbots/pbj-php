@@ -6,6 +6,8 @@ namespace Gdbots\Pbj;
 use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Exception\LogicException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
+use Gdbots\Pbj\WellKnown\MessageRef;
+use Gdbots\Pbj\WellKnown\NodeRef;
 
 interface Message
 {
@@ -19,21 +21,22 @@ interface Message
     public static function create(): self;
 
     /**
-     * Returns a new message from the provided array using the PhpArray Serializer.
+     * Returns a new message from the provided array.
      *
      * @param array $data
      *
      * @return static
-     * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::deserialize
      *
+     * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::deserialize
      */
     public static function fromArray(array $data = []): self;
 
     /**
      * Returns the message as an associative array using the PhpArray Serializer.
-     * @return array
-     * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::serialize
      *
+     * @return array
+     *
+     * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::serialize
      */
     public function toArray(): array;
 
@@ -54,7 +57,7 @@ interface Message
     public function generateEtag(array $ignoredFields = []): string;
 
     /**
-     * Generates a reference to this message with an optional tag.
+     * Generates a MessageRef of the current message with an optional tag.
      *
      * @param string $tag
      *
@@ -63,13 +66,16 @@ interface Message
     public function generateMessageRef(?string $tag = null): MessageRef;
 
     /**
+     * Generates a NodeRef of the current message.
+     */
+    public function generateNodeRef(): NodeRef;
+
+    /**
      * Returns an array that can be used in a uri template to generate
      * a uri/url for this message.
      *
      * @link https://tools.ietf.org/html/rfc6570
      * @link https://github.com/gdbots/uri-template-php
-     *
-     * @return array
      */
     public function getUriTemplateVars(): array;
 
@@ -117,7 +123,7 @@ interface Message
      * will set the flag but this can only be done once.  Note that
      * setting a message as being "replayed" will also freeze the message.
      *
-     * @param bool|null $replay
+     * @param bool $replay
      *
      * @return bool
      *
@@ -178,22 +184,6 @@ interface Message
      * @throws RequiredFieldNotSet
      */
     public function clear(string $fieldName): self;
-
-    /**
-     * Returns true if the field has been cleared.
-     *
-     * @param string $fieldName
-     *
-     * @return bool
-     */
-    public function hasClearedField(string $fieldName): bool;
-
-    /**
-     * Returns an array of field names that have been cleared.
-     *
-     * @return array
-     */
-    public function getClearedFields(): array;
 
     /**
      * Sets a single value field.

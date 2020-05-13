@@ -156,12 +156,6 @@ final class DocumentMarshaler implements Codec
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {
-                /*
-                if ($message->hasClearedField($fieldName)) {
-                    $payload[$fieldName] = null;
-                }
-                */
-
                 continue;
             }
 

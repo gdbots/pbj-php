@@ -6,10 +6,10 @@ use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
+use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 

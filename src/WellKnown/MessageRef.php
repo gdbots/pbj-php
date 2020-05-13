@@ -1,11 +1,13 @@
 <?php
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\FromArray;
 use Gdbots\Common\ToArray;
+use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Exception\LogicException;
+use Gdbots\Pbj\SchemaCurie;
 
 /**
  * Represents a reference to a message.  Typically used to link messages
@@ -14,29 +16,21 @@ use Gdbots\Pbj\Exception\LogicException;
  */
 final class MessageRef implements FromArray, ToArray, \JsonSerializable
 {
-    /** @var SchemaCurie */
-    private $curie;
+    private SchemaCurie $curie;
 
     /**
      * Any string matching pattern /^[\w\/\.:-]+$/
-     * @var string
      */
-    private $id;
-
-    /** @var string */
-    private $tag;
+    private string $id;
+    private ?string $tag;
 
     /**
      * When serialized we store the curie as a string so we can
      * restore the singleton instance upon wakeup.
-     *
-     * @var string
      */
-    private $cs;
+    private string $cs;
 
     /**
-     * todo: review random failures from YamlSerializer on $id when no tag is present.
-     *
      * @param SchemaCurie $curie
      * @param string      $id
      * @param string      $tag The tag will be automatically fixed to a slug-formatted-string.

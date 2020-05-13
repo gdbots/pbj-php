@@ -2,7 +2,6 @@
 
 namespace Gdbots\Pbj\Serializer;
 
-use Gdbots\Common\Util\ArrayUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\FieldRule;
@@ -60,7 +59,7 @@ class PhpArraySerializer implements Serializer, Codec
 
     /**
      * @param Message $message
-     * @param Field $field
+     * @param Field   $field
      *
      * @return mixed
      */
@@ -82,7 +81,7 @@ class PhpArraySerializer implements Serializer, Codec
 
     /**
      * @param MessageRef $messageRef
-     * @param Field $field
+     * @param Field      $field
      *
      * @return mixed
      */
@@ -104,7 +103,7 @@ class PhpArraySerializer implements Serializer, Codec
 
     /**
      * @param GeoPoint $geoPoint
-     * @param Field $field
+     * @param Field    $field
      *
      * @return mixed
      */
@@ -126,7 +125,7 @@ class PhpArraySerializer implements Serializer, Codec
 
     /**
      * @param DynamicField $dynamicField
-     * @param Field $field
+     * @param Field        $field
      *
      * @return mixed
      */
@@ -163,13 +162,6 @@ class PhpArraySerializer implements Serializer, Codec
             $fieldName = $field->getName();
 
             if (!$message->has($fieldName)) {
-                // suspect this may not be needed at all.
-                /*
-                if ($includeAllFields || $message->hasClearedField($fieldName)) {
-                    $payload[$fieldName] = null;
-                }
-                */
-
                 continue;
             }
 
@@ -206,6 +198,7 @@ class PhpArraySerializer implements Serializer, Codec
 
     /**
      * @param array $data
+     *
      * @return Message
      *
      * @throws \Exception
@@ -213,7 +206,7 @@ class PhpArraySerializer implements Serializer, Codec
      */
     private function doDeserialize(array $data)
     {
-        $schemaId = SchemaId::fromString((string) $data[Schema::PBJ_FIELD_NAME]);
+        $schemaId = SchemaId::fromString((string)$data[Schema::PBJ_FIELD_NAME]);
         $className = MessageResolver::resolveId($schemaId);
 
         /** @var Message $message */
