@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj;
 
@@ -40,7 +41,7 @@ class AddTypesTest extends TestCase
             'MediumBlob'      => 'aG9tZXIgc2ltcHNvbg==',
             'MediumText'      => 'medium text',
             'Message'         => NestedMessage::create(),
-            'MessageRef'      => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()),
+            'MessageRef'      => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()->toString()),
             'Microtime'       => Microtime::create(),
             'SignedBigInt'    => [BigInteger::of('-9223372036854775808'), BigInteger::of('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],

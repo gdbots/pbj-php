@@ -11,11 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 class MappingFactoryTest extends TestCase
 {
-    /** @var MappingFactory */
-    protected $factory;
-
-    /** @var string */
-    protected $indexName;
+    protected MappingFactory $factory;
+    protected string $indexName;
 
     public function setup(): void
     {
@@ -23,8 +20,10 @@ class MappingFactoryTest extends TestCase
         $this->indexName = getenv('ELASTICA_INDEX') ?: 'pbj_tests';
     }
 
-    public function xxtestCreate()
+    public function testCreate()
     {
+        $this->markTestIncomplete();
+
         $index = new Index(new Client(), $this->indexName);
         $schema = EmailMessage::schema();
         $mapping = $this->factory->create($schema, 'english');

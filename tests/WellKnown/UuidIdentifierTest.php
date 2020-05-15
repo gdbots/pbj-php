@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\UuidIdentifier;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
 
 class UuidIdentifierTest extends TestCase
@@ -11,10 +13,10 @@ class UuidIdentifierTest extends TestCase
     public function testGenerate()
     {
         $id = UuidIdentifier::generate();
-        $this->assertTrue(Uuid::isValid($id));
+        $this->assertTrue(Uuid::isValid((string)$id));
 
         $uuid = Uuid::fromString($id->toString());
-        $this->assertTrue($uuid->getVersion() == 4);
+        $this->assertInstanceOf(UuidV4::class, $uuid);
     }
 
     public function testFromString()

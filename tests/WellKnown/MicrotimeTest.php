@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\WellKnown;
 
@@ -11,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  */
 class MicrotimeTest extends TestCase
 {
-    protected $testCount = 2500;
+    protected int $testCount = 2500;
 
     public function testFromTimeOfDay()
     {
@@ -20,7 +21,7 @@ class MicrotimeTest extends TestCase
             $tod = gettimeofday();
             $sec = $tod['sec'];
             $usec = $tod['usec'];
-            $str = $sec . str_pad($tod['usec'], 6, '0', STR_PAD_LEFT);
+            $str = $sec . str_pad((string)$tod['usec'], 6, '0', STR_PAD_LEFT);
             $m = Microtime::fromTimeOfDay($tod);
 
             $this->assertSame($sec, $m->getSeconds());
@@ -38,7 +39,7 @@ class MicrotimeTest extends TestCase
             $tod = gettimeofday();
             $sec = $tod['sec'];
             $usec = $tod['usec'];
-            $str = $sec . str_pad($tod['usec'], 6, '0', STR_PAD_LEFT);
+            $str = $sec . str_pad((string)$tod['usec'], 6, '0', STR_PAD_LEFT);
             $m = Microtime::fromString($str);
 
             $this->assertSame($sec, $m->getSeconds());
@@ -60,7 +61,7 @@ class MicrotimeTest extends TestCase
         $i = 6;
         do {
             $usec = str_repeat('1', $i);
-            $usecFixed = (int)str_pad($usec, 6, '0');
+            $usecFixed = (int)str_pad((string)$usec, 6, '0');
             $str = $sec . $usecFixed;
             $m = Microtime::fromString($sec . $usec);
             $this->assertSame($sec, $m->getSeconds());
@@ -74,8 +75,8 @@ class MicrotimeTest extends TestCase
     public function testToDateTime()
     {
         $microtime = microtime(true);
-        list($sec, $usec) = explode('.', $microtime);
-        $usec = str_pad($usec, 6, '0');
+        [$sec, $usec] = explode('.', (string)$microtime);
+        $usec = str_pad((string)$usec, 6, '0');
         $date = \DateTime::createFromFormat('U.u', $sec . '.' . $usec);
         $m = Microtime::fromString($sec . $usec);
         $this->assertSame($date->format('Y-m-d H:i:s.u'), $m->toDateTime()->format('Y-m-d H:i:s.u'));
@@ -88,8 +89,8 @@ class MicrotimeTest extends TestCase
     public function testDateTimeComparison()
     {
         $microtime = microtime(true);
-        list($sec, $usec) = explode('.', $microtime);
-        $usec = str_pad($usec, 6, '0');
+        [$sec, $usec] = explode('.', (string)$microtime);
+        $usec = str_pad((string)$usec, 6, '0');
         $date = \DateTime::createFromFormat('U.u', $sec . '.' . $usec);
         $m = Microtime::fromString($sec . $usec);
         $this->assertSame($date->format('Y-m-d H:i:s.u'), $m->toDateTime()->format('Y-m-d H:i:s.u'));

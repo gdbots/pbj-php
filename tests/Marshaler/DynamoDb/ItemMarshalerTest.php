@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Marshaler\DynamoDb;
 
@@ -10,8 +11,7 @@ class ItemMarshalerTest extends TestCase
 {
     use FixtureLoader;
 
-    /** @var ItemMarshaler */
-    protected $marshaler;
+    protected ItemMarshaler $marshaler;
 
     public function setup(): void
     {

@@ -10,6 +10,7 @@ __BREAKING CHANGES__
 * Uses php7 type hinting throughout with `declare(strict_types=1);`
 * Uses `"ramsey/uuid": "^4.0"`
 * Replaces `moontoast/math` with `brick/math`
+* Removes `Gdbots\Pbj\WellKnown\BigNumber`, we are just using `BigInt` direct from `brick/math` now.
 * Removes `Mixin` and `AbstractMixin` since the `gdbots/pbjc` no longer uses them.
 * Removes `MessageResolver::findOneUsingMixin` and `MessageResolver::findAllUsingMixin`.  Mixin lookup resolution no longer used and the mixin mostly disappears once schema is compiled.
 * Simplifies `Schema` so the mixins are just the curies in string form, not objects.

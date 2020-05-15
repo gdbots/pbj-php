@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Marshaler\Elastica;
 
@@ -10,8 +11,7 @@ class DocumentMarshalerTest extends TestCase
 {
     use FixtureLoader;
 
-    /** @var DocumentMarshaler */
-    protected $marshaler;
+    protected DocumentMarshaler $marshaler;
 
     public function setup(): void
     {
