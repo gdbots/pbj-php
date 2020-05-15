@@ -22,4 +22,16 @@ class MessageResolverTest extends TestCase
         $this->expectException(NoMessageForQName::class);
         MessageResolver::resolveQName(SchemaQName::fromString('acme:video'));
     }
+
+    public function testHasCurie()
+    {
+        $this->assertFalse(MessageResolver::hasCurie('vendor:package:category:message'));
+        $this->assertTrue(MessageResolver::hasCurie(EmailMessage::schema()->getCurie()));
+    }
+
+    public function testHasQName()
+    {
+        $this->assertFalse(MessageResolver::hasQName('acme:nope'));
+        $this->assertTrue(MessageResolver::hasQName('*:email-message'));
+    }
 }

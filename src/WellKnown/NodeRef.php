@@ -26,28 +26,24 @@ use Gdbots\Pbj\SchemaQName;
  *  youtube:video:EG0wQRsXLi4
  *
  */
-class NodeRef implements Identifier
+final class NodeRef implements Identifier
 {
-    private SchemaQName $qname;
-
     /**
-     * Any string matching pattern /^[\w\/\.:-]+$/
-     * @var string
+     * Regular expression pattern for matching a valid NodeRef id string.
+     * @constant string
      */
+    const VALID_ID_PATTERN = '/^[\w\/\.:-]+$/';
+
+    private SchemaQName $qname;
     private string $id;
 
     public function __construct(SchemaQName $qname, string $id)
     {
         $this->qname = $qname;
         $this->id = trim($id);
-        Assertion::regex($this->id, '/^[\w\/\.:-]+$/', null, 'NodeRef.id');
+        Assertion::regex($this->id, self::VALID_ID_PATTERN, null, 'NodeRef.id');
     }
 
-    /**
-     * @param string $string A string with format vendor:label:id
-     *
-     * @return self
-     */
     public static function fromString(string $string): self
     {
         $parts = explode(':', $string, 3);
@@ -57,11 +53,6 @@ class NodeRef implements Identifier
         return new self($qname, $id);
     }
 
-    /**
-     * @param Message $node
-     *
-     * @return self
-     */
     public static function fromNode(Message $node): self
     {
         if ($node->has('_id')) {
@@ -71,11 +62,6 @@ class NodeRef implements Identifier
         return self::fromMessageRef($node->generateMessageRef());
     }
 
-    /**
-     * @param MessageRef $messageRef
-     *
-     * @return self
-     */
     public static function fromMessageRef(MessageRef $messageRef): self
     {
         return new self(SchemaQName::fromCurie($messageRef->getCurie()), $messageRef->getId());

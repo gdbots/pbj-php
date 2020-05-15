@@ -59,11 +59,6 @@ final class GeoPoint implements FromArray, ToArray, \JsonSerializable
         return $this->toArray();
     }
 
-    /**
-     * @param string $string A string with format lat,long
-     *
-     * @return self
-     */
     public static function fromString(string $string): self
     {
         [$lat, $long] = explode(',', $string);

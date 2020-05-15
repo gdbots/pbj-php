@@ -57,15 +57,8 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
 
     private string $name;
     private string $kind;
-
-    /** @var mixed */
     private $value;
 
-    /**
-     * @param string           $name
-     * @param DynamicFieldKind $kind
-     * @param mixed            $value
-     */
     private function __construct(string $name, DynamicFieldKind $kind, $value)
     {
         Assertion::betweenLength($name, 1, 127);
@@ -204,9 +197,6 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
         return self::createField($this->kind);
     }
 
-    /**
-     * @return mixed
-     */
     public function getValue()
     {
         return $this->value;

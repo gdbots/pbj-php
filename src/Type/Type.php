@@ -32,7 +32,7 @@ interface Type
      * @param mixed $value
      * @param Field $field
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
     public function guard($value, Field $field);
 

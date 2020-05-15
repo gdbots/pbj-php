@@ -90,6 +90,44 @@ final class MessageResolver
     }
 
     /**
+     * Returns true if the provided curie exists.
+     *
+     * @param SchemaCurie|string $curie
+     *
+     * @return bool
+     */
+    public static function hasCurie($curie): bool
+    {
+        try {
+            self::resolveCurie($curie);
+        } catch (NoMessageForCurie $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if the provided qname exists.
+     *
+     * @param SchemaQName|string $qname
+     *
+     * @return bool
+     */
+    public static function hasQName($qname): bool
+    {
+        try {
+            self::resolveQName($qname);
+        } catch (NoMessageForCurie $e) {
+            return false;
+        } catch (NoMessageForQName $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns the fully qualified php class name to be used for the provided curie.
      *
      * @param SchemaCurie|string $curie

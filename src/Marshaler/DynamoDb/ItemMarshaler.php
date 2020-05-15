@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Marshaler\DynamoDb;
 
@@ -7,17 +8,16 @@ use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
-use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
-use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
+use Gdbots\Pbj\WellKnown\MessageRef;
 
 /**
  * Creates an array in the DynamoDb expected attribute value format.
@@ -42,19 +42,10 @@ final class ItemMarshaler implements Codec
     const TYPE_NUMBER_SET = 'NS';
     const TYPE_BINARY_SET = 'BS';
 
-    /**
-     * @param Message $message
-     *
-     * @return array
-     *
-     * @throws \Exception
-     * @throws GdbotsPbjException
-     */
-    public function marshal(Message $message)
+    public function marshal(Message $message): array
     {
         $schema = $message::schema();
         $message->validate();
-
         $payload = [];
 
         foreach ($schema->getFields() as $field) {
@@ -99,81 +90,32 @@ final class ItemMarshaler implements Codec
         return $payload;
     }
 
-    /**
-     * Pass the Item of a result.  $result['Item']
-     *
-     * @param array $data
-     *
-     * @return Message
-     *
-     * @throws \Exception
-     * @throws GdbotsPbjException
-     */
-    public function unmarshal(array $data)
+    public function unmarshal(array $data): Message
     {
         return $this->doUnmarshal(['M' => $data]);
     }
 
-    /**
-     * @param Message $message
-     * @param Field   $field
-     *
-     * @return mixed
-     */
-    public function encodeMessage(Message $message, Field $field)
-    {
-        return ['M' => $this->marshal($message)];
-    }
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return Message
-     */
-    public function decodeMessage($value, Field $field)
-    {
-        return $this->unmarshal($value);
-    }
-
-    /**
-     * @param MessageRef $messageRef
-     * @param Field      $field
-     *
-     * @return mixed
-     */
-    public function encodeMessageRef(MessageRef $messageRef, Field $field)
+    public function encodeDynamicField(DynamicField $dynamicField, Field $field)
     {
         return [
             'M' => [
-                'curie' => [self::TYPE_STRING => $messageRef->getCurie()->toString()],
-                'id'    => [self::TYPE_STRING => $messageRef->getId()],
-                'tag'   => $messageRef->hasTag() ? [self::TYPE_STRING => $messageRef->getTag()] : ['NULL' => true],
+                'name'                   => [self::TYPE_STRING => $dynamicField->getName()],
+                $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
             ],
         ];
     }
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return MessageRef
-     */
-    public function decodeMessageRef($value, Field $field)
+    public function decodeDynamicField($value, Field $field): DynamicField
     {
-        return new MessageRef(
-            SchemaCurie::fromString($value['curie']['S']),
-            $value['id']['S'],
-            isset($value['tag']['NULL']) ? null : $value['tag']['S']
-        );
+        $data = ['name' => $value['name']['S']];
+        unset($value['name']);
+
+        $kind = key($value);
+        $data[$kind] = current($value[$kind]);
+
+        return DynamicField::fromArray($data);
     }
 
-    /**
-     * @param GeoPoint $geoPoint
-     * @param Field    $field
-     *
-     * @return mixed
-     */
     public function encodeGeoPoint(GeoPoint $geoPoint, Field $field)
     {
         return [
@@ -189,66 +131,49 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return GeoPoint
-     */
-    public function decodeGeoPoint($value, Field $field)
+    public function decodeGeoPoint($value, Field $field): GeoPoint
     {
-        return new GeoPoint($value['coordinates']['L'][1]['N'], $value['coordinates']['L'][0]['N']);
+        return new GeoPoint((float)$value['coordinates']['L'][1]['N'], (float)$value['coordinates']['L'][0]['N']);
     }
 
-    /**
-     * @param DynamicField $dynamicField
-     * @param Field        $field
-     *
-     * @return mixed
-     */
-    public function encodeDynamicField(DynamicField $dynamicField, Field $field)
+    public function encodeMessage(Message $message, Field $field)
+    {
+        return ['M' => $this->marshal($message)];
+    }
+
+    public function decodeMessage($value, Field $field): Message
+    {
+        return $this->unmarshal($value);
+    }
+
+    public function encodeMessageRef(MessageRef $messageRef, Field $field)
     {
         return [
             'M' => [
-                'name'                   => [self::TYPE_STRING => $dynamicField->getName()],
-                $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
+                'curie' => [self::TYPE_STRING => $messageRef->getCurie()->toString()],
+                'id'    => [self::TYPE_STRING => $messageRef->getId()],
+                'tag'   => $messageRef->hasTag() ? [self::TYPE_STRING => $messageRef->getTag()] : ['NULL' => true],
             ],
         ];
     }
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return DynamicField
-     */
-    public function decodeDynamicField($value, Field $field)
+    public function decodeMessageRef($value, Field $field): MessageRef
     {
-        $data = ['name' => $value['name']['S']];
-        unset($value['name']);
-
-        $kind = key($value);
-        $data[$kind] = current($value[$kind]);
-
-        return DynamicField::fromArray($data);
+        return new MessageRef(
+            SchemaCurie::fromString($value['curie']['S']),
+            $value['id']['S'],
+            isset($value['tag']['NULL']) ? null : $value['tag']['S']
+        );
     }
 
-    /**
-     * @param array $data
-     *
-     * @return Message
-     *
-     * @throws \Exception
-     * @throws GdbotsPbjException
-     */
-    private function doUnmarshal(array $data)
+    private function doUnmarshal(array $data): Message
     {
         Assertion::keyIsset(
             $data['M'],
             Schema::PBJ_FIELD_NAME,
             sprintf(
                 '[%s::%s] Array provided must contain the [%s] key.',
-                get_called_class(),
+                static::class,
                 __FUNCTION__,
                 Schema::PBJ_FIELD_NAME
             )
@@ -256,16 +181,13 @@ final class ItemMarshaler implements Codec
 
         $schemaId = SchemaId::fromString((string)$data['M'][Schema::PBJ_FIELD_NAME]['S']);
         $className = MessageResolver::resolveId($schemaId);
-
-        /** @var Message $message */
         $message = new $className();
         Assertion::isInstanceOf($message, Message::class);
-
-        if ($message::schema()->getCurieMajor() !== $schemaId->getCurieMajor()) {
-            throw new InvalidResolvedSchema($message::schema(), $schemaId, $className);
-        }
-
         $schema = $message::schema();
+
+        if ($schema->getCurieMajor() !== $schemaId->getCurieMajor()) {
+            throw new InvalidResolvedSchema($schema, $schemaId, $className);
+        }
 
         foreach ($data['M'] as $fieldName => $dynamoValue) {
             if (!$schema->hasField($fieldName)) {
@@ -322,15 +244,7 @@ final class ItemMarshaler implements Codec
         return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return mixed
-     *
-     * @throws EncodeValueFailed
-     */
-    private function encodeValue($value, Field $field)
+    private function encodeValue($value, Field $field): array
     {
         $type = $field->getType();
 
@@ -355,21 +269,13 @@ final class ItemMarshaler implements Codec
                 }
             }
 
-            throw new EncodeValueFailed($value, $field, get_called_class() . ' has no handling for this value.');
+            throw new EncodeValueFailed($value, $field, static::class . ' has no handling for this value.');
         }
 
         return $type->encode($value, $field, $this);
     }
 
-    /**
-     * @param array $value
-     * @param Field $field
-     *
-     * @return mixed
-     *
-     * @throws EncodeValueFailed
-     */
-    private function encodeASetValue(array $value, Field $field)
+    private function encodeASetValue(array $value, Field $field): array
     {
         $type = $field->getType();
 
@@ -396,7 +302,7 @@ final class ItemMarshaler implements Codec
             throw new EncodeValueFailed(
                 $value,
                 $field,
-                sprintf('%s::%s has no handling for this value.', get_called_class(), __FUNCTION__)
+                sprintf('%s::%s has no handling for this value.', static::class, __FUNCTION__)
             );
         }
 

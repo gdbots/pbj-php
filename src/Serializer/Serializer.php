@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Serializer;
 
@@ -9,7 +10,7 @@ interface Serializer
 {
     /**
      * @param Message $message
-     * @param array $options
+     * @param array   $options
      *
      * @return mixed
      */
@@ -21,8 +22,8 @@ interface Serializer
      *
      * @return Message
      *
-     * @throws \Exception
+     * @throws \Throwable
      * @throws GdbotsPbjException
      */
-    public function deserialize($data, array $options = []);
+    public function deserialize($data, array $options = []): Message;
 }
