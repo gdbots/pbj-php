@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
@@ -7,18 +8,10 @@ use Gdbots\Pbj\Field;
 
 class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
 {
-    /** @var mixed */
     private $value;
+    private Field $field;
 
-    /** @var Field */
-    private $field;
-
-    /**
-     * @param mixed $value
-     * @param string Field $field
-     * @param string $message
-     */
-    public function __construct($value, Field $field, $message = null)
+    public function __construct($value, Field $field, ?string $message = null)
     {
         $this->value = $value;
         $this->field = $field;
@@ -31,26 +24,17 @@ class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjEx
         parent::__construct($message);
     }
 
-    /**
-     * @return mixed
-     */
     public function getValue()
     {
         return $this->value;
     }
 
-    /**
-     * @return Field
-     */
-    public function getField()
+    public function getField(): Field
     {
         return $this->field;
     }
 
-    /**
-     * @return string
-     */
-    public function getFieldName()
+    public function getFieldName(): string
     {
         return $this->field->getName();
     }

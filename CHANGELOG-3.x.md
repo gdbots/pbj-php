@@ -13,4 +13,5 @@ __BREAKING CHANGES__
 * Removes `Gdbots\Pbj\WellKnown\BigNumber`, we are just using `BigInt` direct from `brick/math` now.
 * Removes `Mixin` and `AbstractMixin` since the `gdbots/pbjc` no longer uses them.
 * Removes `MessageResolver::findOneUsingMixin` and `MessageResolver::findAllUsingMixin`.  Mixin lookup resolution no longer used and the mixin mostly disappears once schema is compiled.
+* Removes `Gdbots\Pbj\Exception\HasEndUserMessage`.
 * Simplifies `Schema` so the mixins are just the curies in string form, not objects.

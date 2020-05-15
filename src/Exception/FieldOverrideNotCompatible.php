@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
@@ -7,18 +8,10 @@ use Gdbots\Pbj\Schema;
 
 class FieldOverrideNotCompatible extends SchemaException
 {
-    /** @var Field */
-    private $existingField;
+    private Field $existingField;
+    private Field $overrideField;
 
-    /** @var Field */
-    private $overrideField;
-
-    /**
-     * @param Schema $schema
-     * @param string $fieldName
-     * @param Field $overrideField
-     */
-    public function __construct(Schema $schema, $fieldName, Field $overrideField)
+    public function __construct(Schema $schema, string $fieldName, Field $overrideField)
     {
         $this->schema = $schema;
         $this->existingField = $this->schema->getField($fieldName);
@@ -32,26 +25,17 @@ class FieldOverrideNotCompatible extends SchemaException
         );
     }
 
-    /**
-     * @return Field
-     */
-    public function getExistingField()
+    public function getExistingField(): Field
     {
         return $this->existingField;
     }
 
-    /**
-     * @return string
-     */
-    public function getFieldName()
+    public function getFieldName(): string
     {
         return $this->existingField->getName();
     }
 
-    /**
-     * @return Field
-     */
-    public function getOverrideField()
+    public function getOverrideField(): Field
     {
         return $this->overrideField;
     }

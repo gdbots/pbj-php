@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
@@ -6,12 +7,8 @@ use Gdbots\Pbj\SchemaQName;
 
 class NoMessageForQName extends \LogicException implements GdbotsPbjException
 {
-    /** @var SchemaQName */
-    private $qname;
+    private SchemaQName $qname;
 
-    /**
-     * @param SchemaQName $qname
-     */
     public function __construct(SchemaQName $qname)
     {
         $this->qname = $qname;
@@ -20,10 +17,7 @@ class NoMessageForQName extends \LogicException implements GdbotsPbjException
         );
     }
 
-    /**
-     * @return SchemaQName
-     */
-    public function getQName()
+    public function getQName(): SchemaQName
     {
         return $this->qname;
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
@@ -7,16 +8,9 @@ use Gdbots\Pbj\Message;
 
 class RequiredFieldNotSet extends SchemaException
 {
-    /** @var Message */
-    private $type;
+    private Message $type;
+    private Field $field;
 
-    /** @var Field */
-    private $field;
-
-    /**
-     * @param Message $type
-     * @param string Field $field
-     */
     public function __construct(Message $type, Field $field)
     {
         $this->type = $type;
@@ -31,26 +25,17 @@ class RequiredFieldNotSet extends SchemaException
         );
     }
 
-    /**
-     * @return Message
-     */
-    public function getType()
+    public function getType(): Message
     {
         return $this->type;
     }
 
-    /**
-     * @return Field
-     */
-    public function getField()
+    public function getField(): Field
     {
         return $this->field;
     }
 
-    /**
-     * @return string
-     */
-    public function getFieldName()
+    public function getFieldName(): string
     {
         return $this->field->getName();
     }

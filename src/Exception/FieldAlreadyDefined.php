@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
@@ -7,14 +8,9 @@ use Gdbots\Pbj\Schema;
 
 class FieldAlreadyDefined extends SchemaException
 {
-    /** @var Field */
-    private $field;
+    private Field $field;
 
-    /**
-     * @param Schema $schema
-     * @param string $fieldName
-     */
-    public function __construct(Schema $schema, $fieldName)
+    public function __construct(Schema $schema, string $fieldName)
     {
         $this->schema = $schema;
         $this->field = $this->schema->getField($fieldName);
@@ -27,18 +23,12 @@ class FieldAlreadyDefined extends SchemaException
         );
     }
 
-    /**
-     * @return Field
-     */
-    public function getField()
+    public function getField(): Field
     {
         return $this->field;
     }
 
-    /**
-     * @return string
-     */
-    public function getFieldName()
+    public function getFieldName(): string
     {
         return $this->field->getName();
     }
