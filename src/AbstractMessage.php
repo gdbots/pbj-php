@@ -111,7 +111,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
 
     public function generateMessageRef(?string $tag = null): MessageRef
     {
-        return new MessageRef(static::schema()->getCurie(), null, $tag);
+        return new MessageRef(static::schema()->getCurie(), 'null', $tag);
     }
 
     public function generateNodeRef(): NodeRef

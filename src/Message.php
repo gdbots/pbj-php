@@ -181,7 +181,6 @@ interface Message
      * @return static
      *
      * @throws GdbotsPbjException
-     * @throws RequiredFieldNotSet
      */
     public function clear(string $fieldName): self;
 

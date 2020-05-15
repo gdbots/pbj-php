@@ -77,6 +77,10 @@ final class EmailMessage extends AbstractMessage
                 Fb::create('dynamic_fields', T\DynamicFieldType::create())
                     ->asAList()
                     ->build(),
+            ],
+            [
+                'gdbots:tests.pbj:mixin:fake-mixin:v1',
+                'gdbots:tests.pbj:mixin:fake-mixin',
             ]
         );
 
