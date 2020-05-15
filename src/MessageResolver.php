@@ -3,21 +3,21 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Pbj\Exception\MoreThanOneMessageForMixin;
 use Gdbots\Pbj\Exception\NoMessageForCurie;
-use Gdbots\Pbj\Exception\NoMessageForMixin;
 use Gdbots\Pbj\Exception\NoMessageForQName;
 use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 
 final class MessageResolver
 {
+    private static string $defaultVendor = '';
+
     /**
      * An array of all the available schemas keyed by a curie or curie major.
      * The value is an int used to correlate with the other maps.
      *
      * @var int[]
      */
-    private static $curies = [];
+    private static array $curies = [];
 
     /**
      * An array of all the classes, the numeric key relates to the int
@@ -25,24 +25,7 @@ final class MessageResolver
      *
      * @var string[]
      */
-    private static $classes = [];
-
-    /**
-     * An array of ints keyed by the mixin curie. The value is a list of
-     * ints which relate to the curies that are using the mixin.
-     *
-     * @var array
-     */
-    private static $mixins = [];
-
-    /**
-     * An array of resolved lookups by mixin, keyed by the mixin id with major rev
-     *
-     * @see SchemaId::getCurieMajor
-     *
-     * @var Schema[]
-     */
-    private static $resolvedMixins = [];
+    private static array $classes = [];
 
     /**
      * An array of resolved lookups by qname.
@@ -51,7 +34,7 @@ final class MessageResolver
      *
      * @var SchemaCurie[]
      */
-    private static $resolvedQnames = [];
+    private static array $resolvedQnames = [];
 
     /**
      * An array with the following structure (gdbots/pbjc-php automatically creates this)
@@ -62,9 +45,6 @@ final class MessageResolver
      *     'classes' => [
      *         1 => 'Vendor\Package\Category\MessageV1', // 1 refers to the value of the curies entry
      *     ],
-     *     'mixins' => [
-     *         'gdbots:pbjx:mixin:command:v1' => [1] // 1 refers to the value of the curies entry
-     *     ],
      * ]
      *
      * @param array $manifest
@@ -73,11 +53,10 @@ final class MessageResolver
     {
         self::$curies = $manifest['curies'] ?? [];
         self::$classes = $manifest['classes'] ?? [];
-        self::$mixins = $manifest['mixins'] ?? [];
     }
 
     /**
-     * Returns all of the registed schemas.
+     * Returns all of the registered messages.
      *
      * @return Message[]
      */
@@ -122,6 +101,7 @@ final class MessageResolver
     public static function resolveCurie($curie): string
     {
         $key = (string)$curie;
+        $key = str_replace('*', self::$defaultVendor, $key);
         if (isset(self::$curies[$key])) {
             return self::$classes[self::$curies[$key]];
         }
@@ -132,29 +112,31 @@ final class MessageResolver
     /**
      * @param SchemaQName|string $qname
      *
-     * @return SchemaCurie
+     * @return Message
      *
      * @throws NoMessageForQName
      */
-    public static function resolveQName($qname): SchemaCurie
+    public static function resolveQName($qname): string
     {
         if (!$qname instanceof SchemaQName) {
-            $qname = SchemaQName::fromString((string)$qname);
+            $qname = str_replace('*', self::$defaultVendor, (string)$qname);
+            $qname = SchemaQName::fromString($qname);
         }
 
         $key = $qname->toString();
 
         if (isset(self::$resolvedQnames[$key])) {
-            return self::$resolvedQnames[$key];
+            return self::resolveCurie(self::$resolvedQnames[$key]);
         }
 
         $qvendor = $qname->getVendor();
         $qmessage = $qname->getMessage();
 
         foreach (self::$curies as $curie => $id) {
-            list($vendor, $package, $category, $message) = explode(':', $curie);
+            [$vendor, $package, $category, $message] = explode(':', $curie);
             if ($qvendor === $vendor && $qmessage === $message) {
-                return self::$resolvedQnames[$key] = SchemaCurie::fromString($vendor . ':' . $package . ':' . $category . ':' . $message);
+                self::$resolvedQnames[$key] = SchemaCurie::fromString("{$vendor}:{$package}:{$category}:{$message}");
+                return self::resolveCurie(self::$resolvedQnames[$key]);
             }
         }
 
@@ -169,104 +151,30 @@ final class MessageResolver
      */
     public static function registerSchema(Schema $schema): void
     {
+        $id = $schema->getId();
         $nextId = count(self::$curies) + 10000;
-        self::$curies[$schema->getId()->getCurieMajor()] = $nextId;
+        self::$curies[$id->getCurieMajor()] = $nextId;
         self::$classes[$nextId] = $schema->getClassName();
-        foreach ($schema->getMixinIds() as $mixin) {
-            unset(self::$resolvedMixins[$mixin]);
-            if (!isset(self::$mixins[$mixin])) {
-                self::$mixins[$mixin] = [];
-            }
 
-            self::$mixins[$mixin][] = $nextId;
+        $curie = $id->getCurie()->toString();
+        if (isset(self::$curies[$curie])) {
+            return;
         }
+
+        ++$nextId;
+        self::$curies[$curie] = $nextId;
+        self::$classes[$nextId] = $schema->getClassName();
     }
 
     /**
-     * Adds a single schema id and class name.
-     * @see SchemaId::getCurieMajor
+     * Resolving a curie or qname can be done without knowing the vendor ahead of time
+     * by using an '*' in a (qname) '*:article' or '*:news:node:article' (curie).
+     * The '*' will get replaced with the default vendor, .e.g 'acme:article'.
      *
-     * @param SchemaId|string $id
-     * @param string          $className
+     * @param string $vendor
      */
-    public static function register($id, string $className): void
+    public static function setDefaultVendor(string $vendor): void
     {
-        @trigger_error(sprintf('"%s" is deprecated. Use "registerManifest" instead.', __CLASS__), E_USER_DEPRECATED);
-
-        if ($id instanceof SchemaId) {
-            $id = $id->getCurieMajor();
-        }
-
-        $nextId = count(self::$curies) + 20000;
-        self::$curies[$id] = $nextId;
-        self::$classes[$nextId] = $className;
-    }
-
-    /**
-     * Registers an array of id => className values to the resolver.
-     *
-     * @param array $map
-     */
-    public static function registerMap(array $map)
-    {
-        @trigger_error(sprintf('"%s" is deprecated. Use "registerManifest" instead.', __CLASS__), E_USER_DEPRECATED);
-        $nextId = count(self::$curies) + 30000;
-        foreach ($map as $curie => $class) {
-            ++$nextId;
-            self::$curies[$curie] = $nextId;
-            self::$classes[$nextId] = $class;
-        }
-    }
-
-    /**
-     * Return the one schema expected to be using the provided mixin.
-     *
-     * @param Mixin|string $mixin Mixin or curie major
-     *
-     * @return Schema
-     *
-     * @throws MoreThanOneMessageForMixin
-     * @throws NoMessageForMixin
-     */
-    public static function findOneUsingMixin($mixin): Schema
-    {
-        $schemas = self::findAllUsingMixin($mixin);
-        if (1 !== count($schemas)) {
-            throw new MoreThanOneMessageForMixin($mixin, $schemas);
-        }
-
-        return current($schemas);
-    }
-
-    /**
-     * Returns an array of Schemas using the provided mixin.
-     *
-     * @param Mixin|string $mixin Mixin or curie major
-     *
-     * @return Schema[]
-     *
-     * @throws NoMessageForMixin
-     */
-    public static function findAllUsingMixin($mixin): array
-    {
-        if ($mixin instanceof Mixin) {
-            $key = $mixin->getId()->getCurieMajor();
-        } else {
-            $key = $mixin;
-        }
-
-        if (!isset(self::$resolvedMixins[$key])) {
-            $schemas = [];
-            foreach ((self::$mixins[$key] ?? []) as $id) {
-                $schemas[] = self::$classes[$id]::schema();
-            }
-            self::$resolvedMixins[$key] = $schemas;
-        }
-
-        if (empty(self::$resolvedMixins[$key])) {
-            throw new NoMessageForMixin($mixin);
-        }
-
-        return self::$resolvedMixins[$key];
+        self::$defaultVendor = $vendor;
     }
 }

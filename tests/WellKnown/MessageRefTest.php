@@ -1,8 +1,8 @@
 <?php
 
-namespace Gdbots\Tests\Pbj;
+namespace Gdbots\Tests\Pbj\WellKnown;
 
-use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\MessageRef;
 use PHPUnit\Framework\TestCase;
 
 class MessageRefTest extends TestCase

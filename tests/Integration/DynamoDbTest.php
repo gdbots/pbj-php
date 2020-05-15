@@ -26,7 +26,7 @@ class DynamoDbTest extends TestCase
     /** @var EmailMessage */
     protected $message;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $key = getenv('AWS_KEY');
         $secret = getenv('AWS_SECRET');
@@ -45,7 +45,7 @@ class DynamoDbTest extends TestCase
         self::createTable();
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         if (null === self::$client) {
             return;
@@ -92,7 +92,7 @@ class DynamoDbTest extends TestCase
         self::$client->waitUntil('TableNotExists', ['TableName' => self::$tableName]);
     }
 
-    public function setup()
+    public function setup(): void
     {
         if (null === self::$client) {
             $this->markTestSkipped('AWS_KEY or AWS_SECRET was not supplied, skipping integration test.');

@@ -379,7 +379,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
 
         foreach ($values as $value) {
-            if (0 === strlen($value)) {
+            if (0 === strlen((string)$value)) {
                 continue;
             }
 

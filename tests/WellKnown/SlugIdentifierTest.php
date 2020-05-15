@@ -37,11 +37,9 @@ class SlugIdentifierTest extends TestCase
         $this->assertTrue($slug->equals($slug2));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testFromStringInvalid()
     {
-        $slug = SampleSlugIdentifier::fromString('!invalid Slug');
+        $this->expectException(\InvalidArgumentException::class);
+        SampleSlugIdentifier::fromString('!invalid Slug');
     }
 }

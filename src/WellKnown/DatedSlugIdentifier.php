@@ -1,28 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
 use Gdbots\Common\Util\SlugUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 abstract class DatedSlugIdentifier implements Identifier
 {
-    /** @var string */
-    protected $slug;
+    protected string $slug;
 
-    /**
-     * @param string $slug
-     * @throws InvalidArgumentException
-     */
-    protected function __construct($slug)
+    protected function __construct(string $slug)
     {
-        if (!is_string($slug)) {
-            throw new InvalidArgumentException(
-                sprintf('String expected but got [%s].', StringUtils::varToString($slug))
-            );
-        }
-
         if (!SlugUtils::isValid($slug, true) || !SlugUtils::containsDate($slug)) {
             throw new InvalidArgumentException(
                 sprintf('The value [%s] is not a valid dated slug.', $slug)
@@ -33,11 +22,12 @@ abstract class DatedSlugIdentifier implements Identifier
     }
 
     /**
-     * @param string $string
-     * @param \DateTime $date
+     * @param string             $string
+     * @param \DateTimeInterface $date
+     *
      * @return static
      */
-    public static function create($string, \DateTime $date = null)
+    public static function create(string $string, ?\DateTimeInterface $date = null): self
     {
         $slug = SlugUtils::create($string, true);
 
@@ -50,43 +40,27 @@ abstract class DatedSlugIdentifier implements Identifier
         return new static($slug);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    public static function fromString($string)
+    public static function fromString(string $string): self
     {
         return new static($string);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->slug;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(Identifier $other)
+    public function equals(Identifier $other): bool
     {
         return $this == $other;
     }

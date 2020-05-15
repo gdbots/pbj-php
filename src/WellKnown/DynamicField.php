@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
@@ -52,23 +53,20 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
      *
      * @var Field[]
      */
-    private static $fields;
+    private static array $fields;
 
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $kind;
+    private string $name;
+    private string $kind;
 
     /** @var mixed */
     private $value;
 
     /**
-     * @param string $name
+     * @param string           $name
      * @param DynamicFieldKind $kind
-     * @param mixed $value
+     * @param mixed            $value
      */
-    private function __construct($name, DynamicFieldKind $kind, $value)
+    private function __construct(string $name, DynamicFieldKind $kind, $value)
     {
         Assertion::betweenLength($name, 1, 127);
         Assertion::regex($name, self::VALID_NAME_PATTERN,
@@ -83,12 +81,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
         $field->guardValue($this->value);
     }
 
-    /**
-     * @param string $kind
-     *
-     * @return Field
-     */
-    private static function createField($kind)
+    private static function createField(string $kind): Field
     {
         if (!isset(self::$fields[$kind])) {
             switch ($kind) {
@@ -126,75 +119,36 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
         return self::$fields[$kind];
     }
 
-    /**
-     * @param string $name
-     * @param bool $value
-     *
-     * @return self
-     */
-    public static function createBoolVal($name, $value = false)
+    public static function createBoolVal(string $name, bool $value = false): self
     {
         return new self($name, DynamicFieldKind::BOOL_VAL(), $value);
     }
 
-    /**
-     * @param string $name
-     * @param \DateTime $value
-     *
-     * @return self
-     */
-    public static function createDateVal($name, \DateTime $value)
+    public static function createDateVal(string $name, \DateTimeInterface $value): self
     {
         return new self($name, DynamicFieldKind::DATE_VAL(), $value);
     }
 
-    /**
-     * @param string $name
-     * @param float $value
-     *
-     * @return self
-     */
-    public static function createFloatVal($name, $value = 0.0)
+    public static function createFloatVal(string $name, float $value = 0.0): self
     {
         return new self($name, DynamicFieldKind::FLOAT_VAL(), $value);
     }
 
-    /**
-     * @param string $name
-     * @param int $value
-     *
-     * @return self
-     */
-    public static function createIntVal($name, $value = 0)
+    public static function createIntVal(string $name, int $value = 0): self
     {
         return new self($name, DynamicFieldKind::INT_VAL(), $value);
     }
 
-    /**
-     * @param string $name
-     * @param string $value
-     *
-     * @return self
-     */
-    public static function createStringVal($name, $value)
+    public static function createStringVal(string $name, string $value): self
     {
         return new self($name, DynamicFieldKind::STRING_VAL(), $value);
     }
 
-    /**
-     * @param string $name
-     * @param string $value
-     *
-     * @return self
-     */
-    public static function createTextVal($name, $value)
+    public static function createTextVal(string $name, string $value): self
     {
         return new self($name, DynamicFieldKind::TEXT_VAL(), $value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function fromArray(array $data = []): self
     {
         if (!isset($data['name'])) {
@@ -214,59 +168,38 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
         return new self($name, $kind, $data[$kind->getValue()]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function toArray(): array
     {
         $field = self::createField($this->kind);
         return ['name' => $this->name, $this->kind => $field->getType()->encode($this->value, $field)];
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return json_encode($this);
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
-    public function getKind()
+    public function getKind(): string
     {
         return $this->kind;
     }
 
-    /**
-     * @return Field
-     */
-    public function getField()
+    public function getField(): Field
     {
         return self::createField($this->kind);
     }
@@ -279,12 +212,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
         return $this->value;
     }
 
-    /**
-     * @param DynamicField $other
-     *
-     * @return bool
-     */
-    public function equals(DynamicField $other)
+    public function equals(DynamicField $other): bool
     {
         return $this->name === $other->name
             && $this->kind === $other->kind

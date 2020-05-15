@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
@@ -17,16 +18,10 @@ final class Microtime implements \JsonSerializable
 {
     /**
      * The microtime is stored as a 16 digit integer.
-     *
-     * @var int
      */
-    private $int;
-
-    /** @var int */
-    private $sec;
-
-    /** @var int */
-    private $usec;
+    private int $int;
+    private int $sec;
+    private int $usec;
 
     /**
      * Private constructor to ensure static methods are used.
@@ -40,7 +35,7 @@ final class Microtime implements \JsonSerializable
      *
      * @return self
      */
-    public static function create()
+    public static function create(): self
     {
         return self::fromTimeOfDay(gettimeofday());
     }
@@ -55,7 +50,7 @@ final class Microtime implements \JsonSerializable
      *
      * @return self
      */
-    public static function fromFloat($float)
+    public static function fromFloat(float $float): self
     {
         $str = substr(str_pad(str_replace('.', '', $float), 16, '0'), 0, 16);
         $m = new self();
@@ -75,9 +70,9 @@ final class Microtime implements \JsonSerializable
      *
      * @return self
      */
-    public static function fromTimeOfDay(array $tod)
+    public static function fromTimeOfDay(array $tod): self
     {
-        $str = $tod['sec'] . str_pad($tod['usec'], 6, '0', STR_PAD_LEFT);
+        $str = $tod['sec'] . str_pad((string)$tod['usec'], 6, '0', STR_PAD_LEFT);
         $m = new self();
         $m->int = (int)$str;
         $m->sec = (int)substr($str, 0, 10);
@@ -96,10 +91,10 @@ final class Microtime implements \JsonSerializable
      * @return self
      * @throws InvalidArgumentException
      */
-    public static function fromString($stringOrInteger)
+    public static function fromString($stringOrInteger): self
     {
         $int = (int)$stringOrInteger;
-        $len = strlen($int);
+        $len = strlen((string)$int);
         if ($len < 13 || $len > 16) {
             throw new InvalidArgumentException(
                 sprintf(
@@ -111,13 +106,13 @@ final class Microtime implements \JsonSerializable
         }
 
         if ($len < 16) {
-            $int = (int)str_pad($int, 16, '0');
+            $int = (int)str_pad((string)$int, 16, '0');
         }
 
         $m = new self();
         $m->int = $int;
-        $m->sec = (int)substr($int, 0, 10);
-        $m->usec = (int)substr($int, -6);
+        $m->sec = (int)substr((string)$int, 0, 10);
+        $m->usec = (int)substr((string)$int, -6);
         return $m;
     }
 
@@ -129,7 +124,7 @@ final class Microtime implements \JsonSerializable
      *
      * @return self
      */
-    public static function fromDateTime(\DateTimeInterface $date)
+    public static function fromDateTime(\DateTimeInterface $date): self
     {
         $str = $date->format('U') . str_pad($date->format('u'), 6, '0');
         $m = new self();
@@ -139,61 +134,38 @@ final class Microtime implements \JsonSerializable
         return $m;
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return (string)$this->int;
     }
 
-    /**
-     * @return string
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return int
-     */
-    public function getSeconds()
+    public function getSeconds(): int
     {
         return $this->sec;
     }
 
-    /**
-     * @return int
-     */
-    public function getMicroSeconds()
+    public function getMicroSeconds(): int
     {
         return $this->usec;
     }
 
-    /**
-     * todo: shall we return \DateTimeImmutable here too?
-     *
-     * @return \DateTimeInterface
-     */
-    public function toDateTime()
+    public function toDateTime(): \DateTimeInterface
     {
-        return \DateTime::createFromFormat('U.u', $this->sec . '.' . str_pad($this->usec, 6, '0', STR_PAD_LEFT));
+        return \DateTime::createFromFormat('U.u', $this->sec . '.' . str_pad((string)$this->usec, 6, '0', STR_PAD_LEFT));
     }
 
-    /**
-     * @return float
-     */
-    public function toFloat()
+    public function toFloat(): float
     {
-        return (float)($this->sec . '.' . str_pad($this->usec, 6, '0', STR_PAD_LEFT));
+        return (float)($this->sec . '.' . str_pad((string)$this->usec, 6, '0', STR_PAD_LEFT));
     }
 }

@@ -23,7 +23,7 @@ class ElasticaTest extends TestCase
     /** @var EmailMessage */
     protected $message;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $host = getenv('ELASTIC_HOST');
         $port = getenv('ELASTIC_PORT') ?: 9200;
@@ -38,7 +38,7 @@ class ElasticaTest extends TestCase
         self::createIndex();
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         if (null === self::$index) {
             return;
@@ -66,7 +66,7 @@ class ElasticaTest extends TestCase
         self::$index->delete();
     }
 
-    public function setup()
+    public function setup(): void
     {
         if (null === self::$index) {
             $this->markTestSkipped('ELASTIC_HOST or ELASTIC_PORT was not supplied, skipping integration test.');

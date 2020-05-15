@@ -1,28 +1,25 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj;
 
+use Gdbots\Pbj\Exception\NoMessageForQName;
 use Gdbots\Pbj\MessageResolver;
-use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\SchemaQName;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use PHPUnit\Framework\TestCase;
 
 class MessageResolverTest extends TestCase
 {
     public function testResolveQName()
     {
-        $schemaId = SchemaId::fromString('pbj:acme:blog:node:article:1-0-0');
-        MessageResolver::register($schemaId, 'Fake');
-
-        $curie = MessageResolver::resolveQName(SchemaQName::fromString('acme:article'));
-        $this->assertSame($schemaId->getCurie(), $curie);
+        $class = MessageResolver::resolveQName('*:email-message');
+        $this->assertSame(EmailMessage::class, $class);
     }
 
-    /**
-     * @expectedException \Gdbots\Pbj\Exception\NoMessageForQName
-     */
     public function testResolveInvalidQName()
     {
-        $curie = MessageResolver::resolveQName(SchemaQName::fromString('acme:video'));
+        $this->expectException(NoMessageForQName::class);
+        MessageResolver::resolveQName(SchemaQName::fromString('acme:video'));
     }
 }

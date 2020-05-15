@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Type;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
-use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\MessageRef;
 
 final class MessageRefType extends AbstractType
 {
@@ -14,7 +14,6 @@ final class MessageRefType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var MessageRef $value */
         Assertion::isInstanceOf($value, MessageRef::class, null, $field->getName());
     }
 

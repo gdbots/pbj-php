@@ -2,7 +2,7 @@
 
 namespace Gdbots\Pbj\Marshaler\Elastica;
 
-use Elastica\Type\Mapping;
+use Elastica\Mapping;
 use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Enum\Format;
@@ -16,15 +16,13 @@ class MappingFactory
      * During the creation of a mapping any string types that are indexed will
      * use the "standard" analyzer unless something else is specified.
      * @link https://www.elastic.co/guide/en/elasticsearch/guide/current/custom-analyzers.html
-     * @var string
      */
-    protected $defaultAnalyzer = null;
+    protected ?string $defaultAnalyzer = null;
 
     /**
      * Map of pbj type -> elastica mapping types.
-     * @var array
      */
-    protected $types = [
+    protected array $types = [
         'big-int'           => ['type' => 'long', 'include_in_all' => false],
         'binary'            => ['type' => 'binary'],
         'blob'              => ['type' => 'binary'],
@@ -124,12 +122,12 @@ class MappingFactory
      *
      * @return Mapping
      */
-    public function create(Schema $schema, $defaultAnalyzer = null)
+    public function create(Schema $schema, ?string $defaultAnalyzer = null): Mapping
     {
         $this->defaultAnalyzer = $defaultAnalyzer;
         $rootObject = new \stdClass();
         $rootObject->dynamic_templates = [];
-        $mapping = new Mapping(null, $this->mapSchema($schema, $rootObject));
+        $mapping = new Mapping($this->mapSchema($schema, $rootObject));
         foreach (get_object_vars($rootObject) as $k => $v) {
             if (!empty($v)) {
                 $mapping->setParam($k, $v);

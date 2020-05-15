@@ -11,7 +11,7 @@ use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaCurie;

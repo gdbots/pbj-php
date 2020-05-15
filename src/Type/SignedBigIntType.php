@@ -2,10 +2,10 @@
 
 namespace Gdbots\Pbj\Type;
 
+use Brick\Math\BigInteger;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
-use Gdbots\Pbj\WellKnown\BigNumber;
 
 final class SignedBigIntType extends AbstractType
 {
@@ -14,8 +14,8 @@ final class SignedBigIntType extends AbstractType
      */
     public function guard($value, Field $field)
     {
-        /** @var BigNumber $value */
-        Assertion::isInstanceOf($value, BigNumber::class, null, $field->getName());
+        /** @var BigInteger $value */
+        Assertion::isInstanceOf($value, BigInteger::class, null, $field->getName());
         Assertion::true(
             $value->isGreaterThanOrEqualTo('-9223372036854775808'),
             sprintf('Field [%s] cannot be less than [-9223372036854775808].', $field->getName()),
@@ -33,8 +33,8 @@ final class SignedBigIntType extends AbstractType
      */
     public function encode($value, Field $field, Codec $codec = null)
     {
-        if ($value instanceof BigNumber) {
-            return $value->getValue();
+        if ($value instanceof BigInteger) {
+            return (string)$value;
         }
 
         return '0';
@@ -45,11 +45,11 @@ final class SignedBigIntType extends AbstractType
      */
     public function decode($value, Field $field, Codec $codec = null)
     {
-        if (null === $value || $value instanceof BigNumber) {
+        if (null === $value || $value instanceof BigInteger) {
             return $value;
         }
 
-        return new BigNumber((string) $value);
+        return BigInteger::of((string)$value);
     }
 
     /**
@@ -65,7 +65,7 @@ final class SignedBigIntType extends AbstractType
      */
     public function getDefault()
     {
-        return new BigNumber(0);
+        return BigInteger::zero();
     }
 
     /**

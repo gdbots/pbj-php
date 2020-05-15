@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
+use Gdbots\Pbj\WellKnown\MessageRef;
 
 interface Codec
 {

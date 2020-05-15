@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
@@ -8,8 +9,7 @@ use Ramsey\Uuid\UuidInterface;
 
 class UuidIdentifier implements Identifier, GeneratesIdentifier
 {
-    /** @var string */
-    protected $uuid;
+    protected string $uuid;
 
     /**
      * @param UuidInterface|string $uuid
@@ -23,52 +23,32 @@ class UuidIdentifier implements Identifier, GeneratesIdentifier
         $this->uuid = (string)$uuid;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    public static function generate()
+    public static function generate(): self
     {
         return new static(Uuid::uuid4());
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    public static function fromString($string)
+    public static function fromString(string $string): self
     {
         return new static($string);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->uuid;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(Identifier $other)
+    public function equals(Identifier $other): bool
     {
         return $this == $other;
     }

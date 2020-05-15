@@ -13,7 +13,7 @@ class DocumentMarshalerTest extends TestCase
     /** @var DocumentMarshaler */
     protected $marshaler;
 
-    public function setup()
+    public function setup(): void
     {
         $this->marshaler = new DocumentMarshaler();
     }

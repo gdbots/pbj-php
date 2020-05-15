@@ -64,7 +64,11 @@ class NodeRef implements Identifier
      */
     public static function fromNode(Message $node): self
     {
-        return new self($node::schema()->getQName(), (string)$node->get('_id'));
+        if ($node->has('_id')) {
+            return new self($node::schema()->getQName(), (string)$node->get('_id'));
+        }
+
+        return self::fromMessageRef($node->generateMessageRef());
     }
 
     /**
@@ -77,66 +81,42 @@ class NodeRef implements Identifier
         return new self(SchemaQName::fromCurie($messageRef->getCurie()), $messageRef->getId());
     }
 
-    /**
-     * @return SchemaQName
-     */
     public function getQName(): SchemaQName
     {
         return $this->qname;
     }
 
-    /**
-     * @return string
-     */
     public function getVendor(): string
     {
         return $this->qname->getVendor();
     }
 
-    /**
-     * @return string
-     */
     public function getLabel(): string
     {
         return $this->qname->getMessage();
     }
 
-    /**
-     * @return string
-     */
     public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->qname->toString() . ':' . $this->id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(Identifier $other)
+    public function equals(Identifier $other): bool
     {
         return $this == $other;
     }
@@ -164,8 +144,6 @@ class NodeRef implements Identifier
      * in the id, colon and forward slash, are replaced with "__CLN__" and "__FS__"
      * respectively.  The path is also hashed so for large repositories all files
      * don't end up in the same directory.
-     *
-     * @return string
      */
     public function toFilePath(): string
     {

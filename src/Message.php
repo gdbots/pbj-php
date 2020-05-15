@@ -32,7 +32,7 @@ interface Message
     public static function fromArray(array $data = []): self;
 
     /**
-     * Returns the message as an associative array using the PhpArray Serializer.
+     * Returns the message as an associative array.
      *
      * @return array
      *
