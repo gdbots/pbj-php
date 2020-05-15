@@ -28,7 +28,6 @@ use Gdbots\Pbj\Exception\InvalidSchemaVersion;
  * @link http://snowplowanalytics.com/blog/2014/05/13/introducing-schemaver-for-semantic-versioning-of-schemas/
  *
  */
-
 final class SchemaVersion implements \JsonSerializable
 {
     /**
@@ -42,36 +41,28 @@ final class SchemaVersion implements \JsonSerializable
      *
      * @var string
      */
-    private $version;
+    private string $version;
 
-    /** @var int */
-    private $major;
+    private int $major;
+    private int $minor;
+    private int $patch;
 
-    /** @var int */
-    private $minor;
-
-    /** @var int */
-    private $patch;
-
-    /**
-     * @param int $major
-     * @param int $minor
-     * @param int $patch
-     */
-    private function __construct($major = 1, $minor = 0, $patch = 0)
+    private function __construct(int $major = 1, int $minor = 0, int $patch = 0)
     {
-        $this->major = (int) $major;
-        $this->minor = (int) $minor;
-        $this->patch = (int) $patch;
+        $this->major = $major;
+        $this->minor = $minor;
+        $this->patch = $patch;
         $this->version = sprintf('%d-%d-%d', $this->major, $this->minor, $this->patch);
     }
 
     /**
-     * @param string $version   SchemaVersion string, e.g. 1-0-0
-     * @return SchemaVersion
+     * @param string $version SchemaVersion string, e.g. 1-0-0
+     *
+     * @return self
+     *
      * @throws InvalidSchemaVersion
      */
-    public static function fromString($version = '1-0-0')
+    public static function fromString(string $version = '1-0-0'): self
     {
         if (!preg_match(self::VALID_PATTERN, $version, $matches)) {
             throw new InvalidSchemaVersion(
@@ -83,53 +74,35 @@ final class SchemaVersion implements \JsonSerializable
             );
         }
 
-        return new self($matches[1], $matches[2], $matches[3]);
+        return new self((int)$matches[1], (int)$matches[2], (int)$matches[3]);
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->version;
     }
 
-    /**
-     * @return string
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return int
-     */
-    public function getMajor()
+    public function getMajor(): int
     {
         return $this->major;
     }
 
-    /**
-     * @return int
-     */
-    public function getMinor()
+    public function getMinor(): int
     {
         return $this->minor;
     }
 
-    /**
-     * @return int
-     */
-    public function getPatch()
+    public function getPatch(): int
     {
         return $this->patch;
     }

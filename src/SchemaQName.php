@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
@@ -13,8 +14,8 @@ use Gdbots\Pbj\Exception\InvalidSchemaQName;
  * Schema QName Format:
  *  vendor:message
  *
- * @see SchemaId
- * @see SchemaCurie
+ * @see  SchemaId
+ * @see  SchemaCurie
  *
  */
 final class SchemaQName implements \JsonSerializable
@@ -25,42 +26,25 @@ final class SchemaQName implements \JsonSerializable
      */
     const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9-]+)$/';
 
-    private static $instances = [];
+    private static array $instances = [];
 
-    /** @var string */
-    private $qname;
+    private string $qname;
+    private string $vendor;
+    private string $message;
 
-    /** @var string */
-    private $vendor;
-
-    /** @var string */
-    private $message;
-
-    /**
-     * @param string $vendor
-     * @param string $message
-     */
-    private function __construct($vendor, $message)
+    private function __construct(string $vendor, string $message)
     {
         $this->vendor = $vendor;
         $this->message = $message;
         $this->qname = sprintf('%s:%s', $this->vendor, $this->message);
     }
 
-    /**
-     * @param SchemaId $id
-     * @return SchemaQName
-     */
-    public static function fromId(SchemaId $id)
+    public static function fromId(SchemaId $id): self
     {
         return self::fromCurie($id->getCurie());
     }
 
-    /**
-     * @param SchemaCurie $curie
-     * @return SchemaQName
-     */
-    public static function fromCurie(SchemaCurie $curie)
+    public static function fromCurie(SchemaCurie $curie): self
     {
         $qname = sprintf('%s:%s', $curie->getVendor(), $curie->getMessage());
 
@@ -74,10 +58,12 @@ final class SchemaQName implements \JsonSerializable
 
     /**
      * @param string $qname
-     * @return SchemaQName
+     *
+     * @return self
+     *
      * @throws InvalidSchemaQName
      */
-    public static function fromString($qname)
+    public static function fromString(string $qname): self
     {
         if (isset(self::$instances[$qname])) {
             return self::$instances[$qname];
@@ -93,42 +79,27 @@ final class SchemaQName implements \JsonSerializable
         return self::$instances[$qname];
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->qname;
     }
 
-    /**
-     * @return string
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
-    public function getVendor()
+    public function getVendor(): string
     {
         return $this->vendor;
     }
 
-    /**
-     * @return string
-     */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
