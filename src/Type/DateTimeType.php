@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -10,22 +11,14 @@ use Gdbots\Pbj\Field;
 
 final class DateTimeType extends AbstractType
 {
-    /** @var \DateTimeZone */
-    private $utc;
+    private ?\DateTimeZone $utc = null;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        /** @var \DateTimeInterface $value */
         Assertion::isInstanceOf($value, \DateTimeInterface::class, null, $field->getName());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof \DateTimeInterface) {
             return $this->convertToUtc($value)->format(DateUtils::ISO8601_ZULU);
@@ -34,10 +27,7 @@ final class DateTimeType extends AbstractType
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (empty($value)) {
             return null;
@@ -64,36 +54,22 @@ final class DateTimeType extends AbstractType
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return false;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     *
-     * @return \DateTimeInterface
-     */
-    private function convertToUtc(\DateTimeInterface $date)
+    private function convertToUtc(\DateTimeInterface $date): \DateTimeInterface
     {
         if ($date->getOffset() !== 0) {
             if (null === $this->utc) {

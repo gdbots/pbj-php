@@ -154,7 +154,7 @@ final class DynamicField implements FromArray, ToArray, \JsonSerializable
 
         try {
             $kind = DynamicFieldKind::create($kind);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid kind.', $kind));
         }
 

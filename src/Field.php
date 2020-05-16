@@ -160,7 +160,7 @@ final class Field implements ToArray, \JsonSerializable
      *
      * @throws AssertionFailed
      */
-    private function applyFieldRule(FieldRule $rule = null)
+    private function applyFieldRule(FieldRule $rule = null): void
     {
         $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         if ($this->isASet()) {
@@ -181,7 +181,7 @@ final class Field implements ToArray, \JsonSerializable
      * @param null|string $pattern
      * @param null|string $format
      */
-    private function applyStringOptions($minLength = null, $maxLength = null, $pattern = null, $format = null)
+    private function applyStringOptions($minLength = null, $maxLength = null, $pattern = null, $format = null): void
     {
         $minLength = (int)$minLength;
         $maxLength = (int)$maxLength;
@@ -210,7 +210,7 @@ final class Field implements ToArray, \JsonSerializable
      * @param int      $precision
      * @param int      $scale
      */
-    private function applyNumericOptions($min = null, $max = null, $precision = 10, $scale = 2)
+    private function applyNumericOptions($min = null, $max = null, $precision = 10, $scale = 2): void
     {
         if (null !== $max) {
             $this->max = (int)$max;
@@ -235,7 +235,7 @@ final class Field implements ToArray, \JsonSerializable
      * @throws AssertionFailed
      * @throws \Exception
      */
-    private function applyDefault($default = null)
+    private function applyDefault($default = null): void
     {
         $this->default = $default;
 

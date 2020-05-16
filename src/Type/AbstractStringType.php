@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -12,10 +13,7 @@ use Gdbots\Pbj\Field;
 
 abstract class AbstractStringType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         Assertion::string($value, null, $field->getName());
 
@@ -136,10 +134,7 @@ abstract class AbstractStringType extends AbstractType
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         $value = trim($value);
         if ($value === '') {
@@ -149,10 +144,7 @@ abstract class AbstractStringType extends AbstractType
         return $value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         $value = trim((string)$value);
         if ($value === '') {
@@ -162,10 +154,7 @@ abstract class AbstractStringType extends AbstractType
         return $value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }

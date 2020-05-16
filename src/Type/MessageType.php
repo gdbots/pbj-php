@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,10 +10,7 @@ use Gdbots\Pbj\Message;
 
 final class MessageType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         /** @var Message $value */
         Assertion::isInstanceOf($value, Message::class, null, $field->getName());
@@ -40,50 +38,32 @@ final class MessageType extends AbstractType
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         return $codec->encodeMessage($value, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         return $codec->decodeMessage($value, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encodesToScalar()
+    public function encodesToScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isMessage()
+    public function isMessage(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return false;
     }

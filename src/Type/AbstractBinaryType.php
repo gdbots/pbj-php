@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -13,20 +14,17 @@ abstract class AbstractBinaryType extends AbstractType
     private bool $decodeFromBase64 = true;
     private bool $encodeToBase64 = true;
 
-    public function decodeFromBase64(bool $useBase64)
+    public function decodeFromBase64(bool $useBase64): void
     {
         $this->decodeFromBase64 = $useBase64;
     }
 
-    public function encodeToBase64(bool $useBase64)
+    public function encodeToBase64(bool $useBase64): void
     {
         $this->encodeToBase64 = $useBase64;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         Assertion::string($value, null, $field->getName());
 
@@ -49,10 +47,7 @@ abstract class AbstractBinaryType extends AbstractType
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         $value = trim($value);
         if ($value === '') {
@@ -62,12 +57,9 @@ abstract class AbstractBinaryType extends AbstractType
         return $this->encodeToBase64 ? base64_encode($value) : $value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        $value = trim((string) $value);
+        $value = trim((string)$value);
         if ($value === '') {
             return null;
         }
@@ -85,18 +77,12 @@ abstract class AbstractBinaryType extends AbstractType
         return $value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isBinary()
+    public function isBinary(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }

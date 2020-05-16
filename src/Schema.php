@@ -249,4 +249,28 @@ final class Schema implements ToArray, \JsonSerializable
     {
         return $this->mixins;
     }
+
+    /**
+     * @param SchemaCurie|string $curie
+     *
+     * @return bool
+     */
+    public function supportsCurie($curie): bool
+    {
+        $curie = (string)$curie;
+
+        if ($this->hasMixin($curie)) {
+            return true;
+        }
+
+        if ($this->getCurie()->toString() === $curie) {
+            return true;
+        }
+
+        if ($this->getCurieMajor() === $curie) {
+            return true;
+        }
+
+        return false;
+    }
 }

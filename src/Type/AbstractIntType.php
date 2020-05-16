@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,10 +10,7 @@ use Gdbots\Pbj\Field;
 
 abstract class AbstractIntType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         Assertion::integer($value, null, $field->getName());
         $intMin = $this->getMin();
@@ -22,34 +20,22 @@ abstract class AbstractIntType extends AbstractType
         Assertion::range($value, $min, $max, null, $field->getName());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
-        return (int) $value;
+        return (int)$value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        return (int) $value;
+        return (int)$value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return 0;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return true;
     }

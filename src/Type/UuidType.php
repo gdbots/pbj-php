@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,10 +10,7 @@ use Gdbots\Pbj\WellKnown\UuidIdentifier;
 
 final class UuidType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         Assertion::isInstanceOf($value, UuidIdentifier::class, null, $field->getName());
         if ($field->hasClassName()) {
@@ -20,10 +18,7 @@ final class UuidType extends AbstractType
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof UuidIdentifier) {
             return $value->toString();
@@ -32,10 +27,7 @@ final class UuidType extends AbstractType
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (empty($value)) {
             return null;
@@ -47,29 +39,20 @@ final class UuidType extends AbstractType
             return $value;
         }
 
-        return $className::fromString((string) $value);
+        return $className::fromString((string)$value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return UuidIdentifier::generate();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }

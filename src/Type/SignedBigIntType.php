@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,10 +10,7 @@ use Gdbots\Pbj\Field;
 
 final class SignedBigIntType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         /** @var BigInteger $value */
         Assertion::isInstanceOf($value, BigInteger::class, null, $field->getName());
@@ -28,10 +26,7 @@ final class SignedBigIntType extends AbstractType
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof BigInteger) {
             return (string)$value;
@@ -40,10 +35,7 @@ final class SignedBigIntType extends AbstractType
         return '0';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (null === $value || $value instanceof BigInteger) {
             return $value;
@@ -52,26 +44,17 @@ final class SignedBigIntType extends AbstractType
         return BigInteger::of((string)$value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return BigInteger::zero();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return true;
     }

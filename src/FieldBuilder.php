@@ -63,7 +63,7 @@ final class FieldBuilder
 
     /**
      * @param string $name
-     * @param Type $type
+     * @param Type   $type
      */
     final private function __construct($name, Type $type)
     {
@@ -73,10 +73,11 @@ final class FieldBuilder
 
     /**
      * @param string $name
-     * @param Type $type
+     * @param Type   $type
+     *
      * @return self
      */
-    public static function create($name, Type $type)
+    public static function create($name, Type $type): self
     {
         $builder = new static($name, $type);
         return $builder;
@@ -85,7 +86,7 @@ final class FieldBuilder
     /**
      * @return self
      */
-    public function required()
+    public function required(): self
     {
         $this->required = true;
         return $this;
@@ -94,7 +95,7 @@ final class FieldBuilder
     /**
      * @return self
      */
-    public function optional()
+    public function optional(): self
     {
         $this->required = false;
         return $this;
@@ -103,7 +104,7 @@ final class FieldBuilder
     /**
      * @return self
      */
-    public function asASingleValue()
+    public function asASingleValue(): self
     {
         $this->rule = FieldRule::A_SINGLE_VALUE();
         return $this;
@@ -112,7 +113,7 @@ final class FieldBuilder
     /**
      * @return self
      */
-    public function asASet()
+    public function asASet(): self
     {
         $this->rule = FieldRule::A_SET();
         return $this;
@@ -121,7 +122,7 @@ final class FieldBuilder
     /**
      * @return self
      */
-    public function asAList()
+    public function asAList(): self
     {
         $this->rule = FieldRule::A_LIST();
         return $this;
@@ -130,7 +131,7 @@ final class FieldBuilder
     /**
      * @return self
      */
-    public function asAMap()
+    public function asAMap(): self
     {
         $this->rule = FieldRule::A_MAP();
         return $this;
@@ -138,29 +139,32 @@ final class FieldBuilder
 
     /**
      * @param int $minLength
+     *
      * @return self
      */
-    public function minLength($minLength)
+    public function minLength($minLength): self
     {
-        $this->minLength = (int) $minLength;
+        $this->minLength = (int)$minLength;
         return $this;
     }
 
     /**
      * @param int $maxLength
+     *
      * @return self
      */
-    public function maxLength($maxLength)
+    public function maxLength($maxLength): self
     {
-        $this->maxLength = (int) $maxLength;
+        $this->maxLength = (int)$maxLength;
         return $this;
     }
 
     /**
      * @param string $pattern
+     *
      * @return self
      */
-    public function pattern($pattern)
+    public function pattern($pattern): self
     {
         $this->pattern = $pattern;
         return $this;
@@ -168,9 +172,10 @@ final class FieldBuilder
 
     /**
      * @param string $format
+     *
      * @return self
      */
-    public function format($format)
+    public function format($format): self
     {
         $this->format = $format;
         return $this;
@@ -178,49 +183,54 @@ final class FieldBuilder
 
     /**
      * @param int $min
+     *
      * @return self
      */
-    public function min($min)
+    public function min($min): self
     {
-        $this->min = (int) $min;
+        $this->min = (int)$min;
         return $this;
     }
 
     /**
      * @param int $max
+     *
      * @return self
      */
-    public function max($max)
+    public function max($max): self
     {
-        $this->max = (int) $max;
+        $this->max = (int)$max;
         return $this;
     }
 
     /**
      * @param int $precision
+     *
      * @return self
      */
-    public function precision($precision)
+    public function precision($precision): self
     {
-        $this->precision = (int) $precision;
+        $this->precision = (int)$precision;
         return $this;
     }
 
     /**
      * @param int $scale
+     *
      * @return self
      */
-    public function scale($scale)
+    public function scale($scale): self
     {
-        $this->scale = (int) $scale;
+        $this->scale = (int)$scale;
         return $this;
     }
 
     /**
      * @param mixed $default
+     *
      * @return self
      */
-    public function withDefault($default)
+    public function withDefault($default): self
     {
         $this->default = $default;
         return $this;
@@ -228,19 +238,21 @@ final class FieldBuilder
 
     /**
      * @param bool $useTypeDefault
+     *
      * @return self
      */
-    public function useTypeDefault($useTypeDefault)
+    public function useTypeDefault($useTypeDefault): self
     {
-        $this->useTypeDefault = (bool) $useTypeDefault;
+        $this->useTypeDefault = (bool)$useTypeDefault;
         return $this;
     }
 
     /**
      * @param string $className
+     *
      * @return self
      */
-    public function className($className)
+    public function className($className): self
     {
         $this->className = $className;
         $this->anyOfClassNames = null;
@@ -249,9 +261,10 @@ final class FieldBuilder
 
     /**
      * @param array $anyOfClassNames
+     *
      * @return self
      */
-    public function anyOfClassNames(array $anyOfClassNames)
+    public function anyOfClassNames(array $anyOfClassNames): self
     {
         $this->anyOfClassNames = $anyOfClassNames;
         $this->className = null;
@@ -260,9 +273,10 @@ final class FieldBuilder
 
     /**
      * @param \Closure $assertion
+     *
      * @return self
      */
-    public function assertion(\Closure $assertion)
+    public function assertion(\Closure $assertion): self
     {
         $this->assertion = $assertion;
         return $this;
@@ -270,18 +284,19 @@ final class FieldBuilder
 
     /**
      * @param bool $overridable
+     *
      * @return self
      */
-    public function overridable($overridable)
+    public function overridable($overridable): self
     {
-        $this->overridable = (bool) $overridable;
+        $this->overridable = (bool)$overridable;
         return $this;
     }
 
     /**
      * @return Field
      */
-    public function build()
+    public function build(): Field
     {
         if (null === $this->rule) {
             $this->rule = FieldRule::A_SINGLE_VALUE();

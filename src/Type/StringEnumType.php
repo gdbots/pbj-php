@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -10,10 +11,7 @@ use Gdbots\Pbj\Field;
 
 final class StringEnumType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         /** @var Enum $value */
         Assertion::isInstanceOf($value, Enum::class, null, $field->getName());
@@ -37,22 +35,16 @@ final class StringEnumType extends AbstractType
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof Enum) {
-            return (string) $value->getValue();
+            return (string)$value->getValue();
         }
 
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (empty($value)) {
             return null;
@@ -62,32 +54,23 @@ final class StringEnumType extends AbstractType
         $className = $field->getClassName();
 
         try {
-            return $className::create((string) $value);
-        } catch (\Exception $e) {
+            return $className::create((string)$value);
+        } catch (\Throwable $e) {
             throw new DecodeValueFailed($value, $field, $e->getMessage());
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMaxBytes()
+    public function getMaxBytes(): int
     {
         return 100;
     }

@@ -1,21 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
 final class MediumTextType extends AbstractStringType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getMaxBytes()
+    public function getMaxBytes(): int
     {
         return 16777215;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return false;
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -19,10 +20,7 @@ abstract class AbstractType implements Type
         $this->typeName = $typeName;
     }
 
-    /**
-     * @return static
-     */
-    final public static function create()
+    final public static function create(): self
     {
         static $instance;
         if (null === $instance) {
@@ -34,114 +32,72 @@ abstract class AbstractType implements Type
         return $instance;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getTypeName()
+    final public function getTypeName(): TypeName
     {
         return $this->typeName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getTypeValue()
+    final public function getTypeValue(): string
     {
         return $this->typeName->getValue();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encodesToScalar()
+    public function encodesToScalar(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isBoolean()
+    public function isBoolean(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isBinary()
+    public function isBinary(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isMessage()
+    public function isMessage(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMin()
+    public function getMin(): int
     {
         return -2147483648;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMax()
+    public function getMax(): int
     {
         return 2147483647;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMaxBytes()
+    public function getMaxBytes(): int
     {
         return 65535;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return true;
     }
