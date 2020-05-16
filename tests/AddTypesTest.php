@@ -9,6 +9,7 @@ use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
 use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Pbj\WellKnown\Microtime;
+use Gdbots\Pbj\WellKnown\NodeRef;
 use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
 use Gdbots\Pbj\WellKnown\UuidIdentifier;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
@@ -43,6 +44,7 @@ class AddTypesTest extends TestCase
             'Message'         => NestedMessage::create(),
             'MessageRef'      => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()->toString()),
             'Microtime'       => Microtime::create(),
+            'NodeRef'         => NodeRef::fromString('acme:article:123'),
             'SignedBigInt'    => [BigInteger::of('-9223372036854775808'), BigInteger::of('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],
             'SignedSmallInt'  => [-32768, 32767],
@@ -79,6 +81,7 @@ class AddTypesTest extends TestCase
             'Message'         => EmailMessage::create(), // not the correct message
             'MessageRef'      => 'not_a_message_ref',
             'Microtime'       => microtime(),
+            'NodeRef'         => 'not_a_node_ref',
             'SignedBigInt'    => [BigInteger::of('-9223372036854775809'), BigInteger::of('9223372036854775808')],
             'SignedMediumInt' => [-8388609, 8388608],
             'SignedSmallInt'  => [-32769, 32768],
@@ -269,6 +272,8 @@ class AddTypesTest extends TestCase
                 }
             }
         }
-        //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+
+        // echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+        // echo json_encode($shouldWork::schema(), JSON_PRETTY_PRINT);
     }
 }

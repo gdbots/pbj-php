@@ -17,12 +17,12 @@ final class DecimalType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
-        return (float)bcadd((float)$value, '0', $field->getScale());
+        return (float)bcadd((string)$value, '0', $field->getScale());
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
-        return (float)bcadd((float)$value, '0', $field->getScale());
+        return (float)bcadd((string)$value, '0', $field->getScale());
     }
 
     public function getDefault()
