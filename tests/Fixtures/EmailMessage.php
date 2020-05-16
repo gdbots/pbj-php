@@ -28,7 +28,7 @@ final class EmailMessage extends AbstractMessage
                     ->build(),
                 Fb::create('from_email', T\StringType::create())
                     ->required()
-                    ->format('email')
+                    ->format(Format::EMAIL())
                     ->build(),
                 Fb::create('subject', T\StringType::create())
                     ->withDefault(function (EmailMessage $message = null) {
@@ -59,8 +59,8 @@ final class EmailMessage extends AbstractMessage
                     ->format(Format::URL())
                     ->build(),
                 Fb::create('nested', T\MessageType::create())
-                    ->anyOfClassNames([
-                        NestedMessage::class
+                    ->anyOfCuries([
+                        NestedMessage::schema()->getCurie()->toString()
                     ])
                     ->build(),
                 Fb::create('enum_in_set', T\StringEnumType::create())

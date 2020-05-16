@@ -110,7 +110,7 @@ class AddTypesTest extends TestCase
                 } else {
                     $message->addToMap($k, 'test1', $v);
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $thrown = true;
             }
 

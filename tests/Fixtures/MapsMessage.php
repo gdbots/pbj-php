@@ -66,8 +66,8 @@ final class MapsMessage extends AbstractMessage
                 case 'Message':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->anyOfClassNames([
-                            NestedMessage::class,
+                        ->anyOfCuries([
+                            NestedMessage::schema()->getCurie()->toString(),
                         ])
                         ->build();
                     break;

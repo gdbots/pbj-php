@@ -211,10 +211,10 @@ class MappingFactory
     {
         /** @var Message $class */
         $class = null;
-        $anyOfClassNames = $field->getAnyOfClassNames();
+        $anyOfCuries = []; // todo: $field->getAnyOfCuries();
 
-        if (!empty($anyOfClassNames) && count($anyOfClassNames) === 1) {
-            $class = current($anyOfClassNames);
+        if (!empty($anyOfCuries) && count($anyOfCuries) === 1) {
+            $class = current($anyOfCuries);
             if (!class_exists($class)) {
                 /*
                  * gdbots/pbjc compiler generates an interface and a concrete class with

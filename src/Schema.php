@@ -255,7 +255,7 @@ final class Schema implements ToArray, \JsonSerializable
      *
      * @return bool
      */
-    public function supportsCurie($curie): bool
+    public function usesCurie($curie): bool
     {
         $curie = (string)$curie;
 

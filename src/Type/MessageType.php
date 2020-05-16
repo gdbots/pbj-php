@@ -15,14 +15,15 @@ final class MessageType extends AbstractType
         /** @var Message $value */
         Assertion::isInstanceOf($value, Message::class, null, $field->getName());
 
-        $classNames = $field->getAnyOfClassNames();
-        if (empty($classNames)) {
+        if (!$field->hasAnyOfCuries()) {
             // means it can be "any message"
             return;
         }
 
-        foreach ($classNames as $className) {
-            if ($value instanceof $className) {
+        $curies = $field->getAnyOfCuries();
+        $schema = $value::schema();
+        foreach ($curies as $curie) {
+            if ($schema->usesCurie($curie)) {
                 return;
             }
         }
@@ -30,9 +31,9 @@ final class MessageType extends AbstractType
         Assertion::true(
             false,
             sprintf(
-                'Field [%s] must be an instance of at least one of: %s.',
+                'Field [%s] must be use at least one of: %s.',
                 $field->getName(),
-                implode(',', $classNames)
+                implode(',', $curies)
             ),
             $field->getName()
         );
