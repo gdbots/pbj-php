@@ -256,7 +256,7 @@ class AddTypesTest extends TestCase
                     if (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
                         continue;
                     }
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $thrown = true;
                 }
 

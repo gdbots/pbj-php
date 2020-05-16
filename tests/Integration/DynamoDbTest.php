@@ -111,7 +111,7 @@ class DynamoDbTest extends TestCase
                 'TableName' => self::$tableName,
                 'Item'      => $item,
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->fail($e->getMessage());
             return;
         }
@@ -125,7 +125,7 @@ class DynamoDbTest extends TestCase
                 'ConsistentRead' => true,
                 'Key'            => ['id' => ['S' => $this->message->get('id')->toString()]],
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->fail($e->getMessage());
             return;
         }

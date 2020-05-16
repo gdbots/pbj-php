@@ -40,7 +40,7 @@ class MessageRefTest extends TestCase
     {
         try {
             $ref = MessageRef::fromString($string);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertTrue(true, sprintf('MessageRef correctly failed on string [%s].', $string));
             return;
         }
