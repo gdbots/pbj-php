@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj;
 
-use Gdbots\Common\Enum;
+use Gdbots\Pbj\Enum;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;

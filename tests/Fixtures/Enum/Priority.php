@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
-use Gdbots\Common\Enum;
+use Gdbots\Pbj\Enum;
 
 /**
  * @method static Priority NORMAL()
@@ -13,6 +13,6 @@ use Gdbots\Common\Enum;
 final class Priority extends Enum
 {
     const NORMAL = 1;
-    const HIGH   = 2;
-    const LOW    = 3;
+    const HIGH = 2;
+    const LOW = 3;
 }

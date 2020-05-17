@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
-use Gdbots\Common\Enum;
+use Gdbots\Pbj\Enum;
 
 /**
  * @method static Provider AOL()
@@ -12,7 +12,7 @@ use Gdbots\Common\Enum;
  */
 final class Provider extends Enum
 {
-    const AOL     = 'aol';
-    const GMAIL   = 'gmail';
+    const AOL = 'aol';
+    const GMAIL = 'gmail';
     const HOTMAIL = 'hotmail';
 }

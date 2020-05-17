@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
 use Gdbots\Pbj\Exception\FieldOverrideNotCompatible;
+use Gdbots\Pbj\Util\ClassUtil;
 
-final class Schema implements ToArray, \JsonSerializable
+final class Schema implements \JsonSerializable
 {
     const PBJ_FIELD_NAME = '_schema';
 
@@ -36,7 +35,7 @@ final class Schema implements ToArray, \JsonSerializable
     {
         $this->id = $id instanceof SchemaId ? $id : SchemaId::fromString($id);
         $this->className = $className;
-        $this->classShortName = ClassUtils::getShortName($this->className);
+        $this->classShortName = ClassUtil::getShortName($this->className);
 
         $this->addField(
             FieldBuilder::create(self::PBJ_FIELD_NAME, Type\StringType::create())

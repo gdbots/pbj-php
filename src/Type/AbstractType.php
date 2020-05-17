@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Enum\TypeName;
+use Gdbots\Pbj\Util\StringUtil;
 
 abstract class AbstractType implements Type
 {
@@ -25,7 +25,7 @@ abstract class AbstractType implements Type
         static $instance;
         if (null === $instance) {
             $a = explode('\\', static::class);
-            $typeName = StringUtils::toSlugFromCamel(str_replace('Type', '', end($a)));
+            $typeName = StringUtil::toSlugFromCamel(str_replace('Type', '', end($a)));
             $instance = new static(TypeName::create($typeName));
         }
 

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Enum\DynamicFieldKind;
 use Gdbots\Pbj\Enum\FieldRule;
@@ -39,7 +37,7 @@ use Gdbots\Pbj\Type\TextType;
  *      'text_val' => 'some text',
  *  ]
  */
-final class DynamicField implements FromArray, ToArray, \JsonSerializable
+final class DynamicField implements \JsonSerializable
 {
     /**
      * Regular expression pattern for matching a valid dynamic field name.

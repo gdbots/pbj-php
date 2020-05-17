@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\DateUtil;
 
 final class DateTimeType extends AbstractType
 {
@@ -21,7 +21,7 @@ final class DateTimeType extends AbstractType
     public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof \DateTimeInterface) {
-            return $this->convertToUtc($value)->format(DateUtils::ISO8601_ZULU);
+            return $this->convertToUtc($value)->format(DateUtil::ISO8601_ZULU);
         }
 
         return null;
@@ -37,7 +37,7 @@ final class DateTimeType extends AbstractType
             return $this->convertToUtc($value);
         }
 
-        $date = \DateTimeImmutable::createFromFormat(DateUtils::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
+        $date = \DateTimeImmutable::createFromFormat(DateUtil::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
         if ($date instanceof \DateTimeInterface) {
             return $this->convertToUtc($date);
         }
@@ -47,7 +47,7 @@ final class DateTimeType extends AbstractType
             $field,
             sprintf(
                 'Format must be [%s].  Errors: [%s]',
-                DateUtils::ISO8601_ZULU,
+                DateUtil::ISO8601_ZULU,
                 // this is mutant
                 print_r(\DateTimeImmutable::getLastErrors() ?: \DateTime::getLastErrors(), true)
             )
@@ -78,8 +78,8 @@ final class DateTimeType extends AbstractType
 
             if ($date instanceof \DateTimeImmutable) {
                 $date = \DateTime::createFromFormat(
-                    DateUtils::ISO8601_ZULU,
-                    $date->format(DateUtils::ISO8601_ZULU)
+                    DateUtil::ISO8601_ZULU,
+                    $date->format(DateUtil::ISO8601_ZULU)
                 );
             }
 

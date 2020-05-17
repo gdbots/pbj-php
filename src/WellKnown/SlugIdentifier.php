@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
+use Gdbots\Pbj\Util\SlugUtil;
 
 abstract class SlugIdentifier implements Identifier
 {
@@ -12,7 +12,7 @@ abstract class SlugIdentifier implements Identifier
 
     protected function __construct(string $slug)
     {
-        if (!SlugUtils::isValid($slug)) {
+        if (!SlugUtil::isValid($slug)) {
             throw new InvalidArgumentException(
                 sprintf('The value [%s] is not a valid slug.', $slug)
             );
@@ -23,7 +23,7 @@ abstract class SlugIdentifier implements Identifier
 
     public static function create(string $string): self
     {
-        return new static(SlugUtils::create($string));
+        return new static(SlugUtil::create($string));
     }
 
     public static function fromString(string $string): self

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Gdbots\Tests\Pbj;
 
 use Brick\Math\BigInteger;
-use Gdbots\Common\Util\StringUtils;
+use Gdbots\Pbj\Util\StringUtil;
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
 use Gdbots\Pbj\WellKnown\MessageRef;
@@ -118,10 +118,10 @@ class AddTypesTest extends TestCase
 
             if (!$thrown) {
                 if (is_array($v)) {
-                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v[0])));
-                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v[1])));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtil::varToString($v[0])));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtil::varToString($v[1])));
                 } else {
-                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v)));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtil::varToString($v)));
                 }
             }
         }
@@ -264,10 +264,10 @@ class AddTypesTest extends TestCase
 
                 if (!$thrown) {
                     if (is_array($v)) {
-                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[0])));
-                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[1])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtil::varToString($v[0])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtil::varToString($v[1])));
                     } else {
-                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v)));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtil::varToString($v)));
                     }
                 }
             }

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\LogicException;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
@@ -12,7 +10,7 @@ use Gdbots\Pbj\Serializer\PhpArraySerializer;
 use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Pbj\WellKnown\NodeRef;
 
-abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
+abstract class AbstractMessage implements Message, \JsonSerializable
 {
     private static ?PhpArraySerializer $serializer = null;
     private array $data = [];

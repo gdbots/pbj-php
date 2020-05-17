@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\NumberUtil;
 
 abstract class AbstractIntType extends AbstractType
 {
@@ -15,8 +15,8 @@ abstract class AbstractIntType extends AbstractType
         Assertion::integer($value, null, $field->getName());
         $intMin = $this->getMin();
         $intMax = $this->getMax();
-        $min = NumberUtils::bound($field->getMin(), $intMin, $intMax);
-        $max = NumberUtils::bound($field->getMax(), $intMin, $intMax);
+        $min = NumberUtil::bound($field->getMin(), $intMin, $intMax);
+        $max = NumberUtil::bound($field->getMax(), $intMin, $intMax);
         Assertion::range($value, $min, $max, null, $field->getName());
     }
 

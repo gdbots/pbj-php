@@ -17,3 +17,6 @@ __BREAKING CHANGES__
 * Change `MessageResolver::register` to simply accept map of curie to classname since mixin resolution going away means we don't need a manifest.
 * Simplifies `Schema` so the mixins are just the curies in string form, not objects.
 * Adds `Gdbots\Pbj\WellKnown\NodeRef` and `Gdbots\Pbj\Type\NodeRefType`.
+* Removes use of `gdbots/common` lib as those classes moved to `Gdbots\Pbj\Util\*Util`.
+* Removes all use of `Gdbots\Common\FromArray` and `Gdbots\Common\ToArray` interfaces as it wasn't really needed.
+* Adds `Gdbots\Pbj\Enum` which replaces `Gdbots\Common\Enum`.

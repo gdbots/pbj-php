@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\NumberUtil;
 
 abstract class AbstractBinaryType extends AbstractType
 {
@@ -31,7 +31,7 @@ abstract class AbstractBinaryType extends AbstractType
         // intentionally using strlen to get byte length, not mb_strlen
         $length = $this->encodeToBase64 ? strlen($this->encode($value, $field)) : strlen($value);
         $minLength = $field->getMinLength();
-        $maxLength = NumberUtils::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
+        $maxLength = NumberUtil::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
         $okay = $length >= $minLength && $length <= $maxLength;
 
         Assertion::true(

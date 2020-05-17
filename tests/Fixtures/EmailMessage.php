@@ -60,7 +60,7 @@ final class EmailMessage extends AbstractMessage
                     ->build(),
                 Fb::create('nested', T\MessageType::create())
                     ->anyOfCuries([
-                        NestedMessage::schema()->getCurie()->toString()
+                        NestedMessage::schema()->getCurie()->toString(),
                     ])
                     ->build(),
                 Fb::create('enum_in_set', T\StringEnumType::create())

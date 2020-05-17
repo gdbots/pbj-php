@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\Util\SlugUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
+use Gdbots\Pbj\Util\SlugUtil;
 
 abstract class DatedSlugIdentifier implements Identifier
 {
@@ -12,7 +12,7 @@ abstract class DatedSlugIdentifier implements Identifier
 
     protected function __construct(string $slug)
     {
-        if (!SlugUtils::isValid($slug, true) || !SlugUtils::containsDate($slug)) {
+        if (!SlugUtil::isValid($slug, true) || !SlugUtil::containsDate($slug)) {
             throw new InvalidArgumentException(
                 sprintf('The value [%s] is not a valid dated slug.', $slug)
             );
@@ -29,14 +29,14 @@ abstract class DatedSlugIdentifier implements Identifier
      */
     public static function create(string $string, ?\DateTimeInterface $date = null): self
     {
-        $slug = SlugUtils::create($string, true);
+        $slug = SlugUtil::create($string, true);
 
-        if (SlugUtils::containsDate($slug)) {
+        if (SlugUtil::containsDate($slug)) {
             return new static($slug);
         }
 
         $date = $date ?: new \DateTime();
-        $slug = SlugUtils::addDate($slug, $date);
+        $slug = SlugUtil::addDate($slug, $date);
         return new static($slug);
     }
 

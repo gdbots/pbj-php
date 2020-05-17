@@ -3,17 +3,15 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\Enum;
-use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Type\Type;
+use Gdbots\Pbj\Util\ArrayUtil;
+use Gdbots\Pbj\Util\NumberUtil;
 use Gdbots\Pbj\WellKnown\Identifier;
 
-final class Field implements ToArray, \JsonSerializable
+final class Field implements \JsonSerializable
 {
     /**
      * Regular expression pattern for matching a valid field name.  The pattern allows
@@ -121,10 +119,10 @@ final class Field implements ToArray, \JsonSerializable
         $maxLength = (int)$maxLength;
         if ($maxLength > 0) {
             $this->maxLength = $maxLength;
-            $this->minLength = NumberUtils::bound($minLength, 0, $this->maxLength);
+            $this->minLength = NumberUtil::bound($minLength, 0, $this->maxLength);
         } else {
             // arbitrary string minimum range
-            $this->minLength = NumberUtils::bound($minLength, 0, $this->type->getMaxBytes());
+            $this->minLength = NumberUtil::bound($minLength, 0, $this->type->getMaxBytes());
         }
 
         if (null !== $pattern) {
@@ -149,8 +147,8 @@ final class Field implements ToArray, \JsonSerializable
             }
         }
 
-        $this->precision = NumberUtils::bound($precision, 1, 65);
-        $this->scale = NumberUtils::bound($scale, 0, $this->precision);
+        $this->precision = NumberUtil::bound($precision, 1, 65);
+        $this->scale = NumberUtil::bound($scale, 0, $this->precision);
     }
 
     private function applyDefault($default = null): void
@@ -319,7 +317,7 @@ final class Field implements ToArray, \JsonSerializable
 
         if ($this->isAMap()) {
             Assertion::true(
-                ArrayUtils::isAssoc($default),
+                ArrayUtil::isAssoc($default),
                 sprintf('Field [%s] default must be an associative array.', $this->name)
             );
         }

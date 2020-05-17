@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\DateUtils;
-use Gdbots\Common\Util\HashtagUtils;
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\DateUtil;
+use Gdbots\Pbj\Util\HashtagUtil;
+use Gdbots\Pbj\Util\NumberUtil;
 
 abstract class AbstractStringType extends AbstractType
 {
@@ -20,7 +20,7 @@ abstract class AbstractStringType extends AbstractType
         // intentionally using strlen to get byte length, not mb_strlen
         $length = strlen($value);
         $minLength = $field->getMinLength();
-        $maxLength = NumberUtils::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
+        $maxLength = NumberUtil::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
         $okay = $length >= $minLength && $length <= $maxLength;
 
         Assertion::true(
@@ -49,12 +49,12 @@ abstract class AbstractStringType extends AbstractType
 
             case Format::DATE_TIME:
                 Assertion::true(
-                    DateUtils::isValidISO8601Date($value),
+                    DateUtil::isValidISO8601Date($value),
                     sprintf(
                         'Field [%s] must be a valid ISO8601 date-time.  Format must match one of [%s], [%s] or [%s].',
                         $field->getName(),
-                        DateUtils::ISO8601_ZULU,
-                        DateUtils::ISO8601,
+                        DateUtil::ISO8601_ZULU,
+                        DateUtil::ISO8601,
                         \DateTime::ISO8601
                     ),
                     $field->getName()
@@ -71,15 +71,15 @@ abstract class AbstractStringType extends AbstractType
 
             case Format::HASHTAG:
                 Assertion::true(
-                    HashtagUtils::isValid($value),
-                    sprintf('Field [%s] must be a valid hashtag.  @see HashtagUtils::isValid', $field->getName()),
+                    HashtagUtil::isValid($value),
+                    sprintf('Field [%s] must be a valid hashtag.  @see HashtagUtil::isValid', $field->getName()),
                     $field->getName()
                 );
                 break;
 
             case Format::IPV4:
                 Assertion::url(
-                    'http://' . $value,
+                    'https://' . $value,
                     sprintf(
                         'Field [%s] must be a valid [%s].',
                         $field->getName(),
@@ -91,7 +91,7 @@ abstract class AbstractStringType extends AbstractType
 
             case Format::IPV6:
                 Assertion::url(
-                    'http://[' . $value . ']',
+                    'https://[' . $value . ']',
                     sprintf(
                         'Field [%s] must be a valid [%s].',
                         $field->getName(),
@@ -111,7 +111,7 @@ abstract class AbstractStringType extends AbstractType
                  * urn:, etc.
                  */
                 if (false === strpos($value, 'http')) {
-                    $value = 'http://' . $value;
+                    $value = 'https://' . $value;
                 }
 
                 Assertion::url(

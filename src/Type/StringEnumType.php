@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Enum;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
+use Gdbots\Pbj\Enum;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 

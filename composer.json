@@ -10,7 +10,6 @@
     "ext-json": "*",
     "beberlei/assert": "^3.2",
     "brick/math": "^0.8",
-    "gdbots/common": "^1.1",
     "ramsey/uuid": "^4.0"
   },
   "require-dev": {

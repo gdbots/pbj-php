@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Exception\LogicException;
@@ -15,7 +13,7 @@ use Gdbots\Pbj\SchemaCurie;
  * together via a correlator or "links".  Format for a reference:
  * vendor:package:category:message:id#tag (tag is optional)
  */
-final class MessageRef implements FromArray, ToArray, \JsonSerializable
+final class MessageRef implements \JsonSerializable
 {
     private SchemaCurie $curie;
 

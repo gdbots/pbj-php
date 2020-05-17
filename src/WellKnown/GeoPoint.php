@@ -3,15 +3,13 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 
 /**
  * Represents a GeoJson Point value.
  * @link http://geojson.org/geojson-spec.html#point
  */
-final class GeoPoint implements FromArray, ToArray, \JsonSerializable
+final class GeoPoint implements \JsonSerializable
 {
     private float $latitude;
     private float $longitude;

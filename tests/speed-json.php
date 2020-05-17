@@ -2,7 +2,7 @@
 
 require 'speed-bootstrap.php';
 
-use \Gdbots\Pbj\Serializer\JsonSerializer;
+use Gdbots\Pbj\Serializer\JsonSerializer;
 
 $startTime = microtime(true);
 $i = 0;

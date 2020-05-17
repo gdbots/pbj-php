@@ -63,7 +63,7 @@ final class MessageResolver
      */
     public static function all(): array
     {
-        return array_values(self::$messages);
+        return self::$messages;
     }
 
     /**

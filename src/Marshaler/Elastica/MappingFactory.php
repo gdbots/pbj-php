@@ -3,12 +3,12 @@
 namespace Gdbots\Pbj\Marshaler\Elastica;
 
 use Elastica\Mapping;
-use Gdbots\Common\Util\SlugUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\Schema;
+use Gdbots\Pbj\Util\SlugUtil;
+use Gdbots\Pbj\Util\StringUtil;
 
 class MappingFactory
 {
@@ -157,10 +157,10 @@ class MappingFactory
                 continue;
             }
 
-            $method = 'map' . ucfirst(StringUtils::toCamelFromSlug($type->getTypeValue()));
+            $method = 'map' . ucfirst(StringUtil::toCamelFromSlug($type->getTypeValue()));
 
             if ($field->isAMap()) {
-                $templateName = str_replace('-', '_', SlugUtils::create($fieldPath . '-template'));
+                $templateName = str_replace('-', '_', SlugUtil::create($fieldPath . '-template'));
                 if (is_callable([$this, $method])) {
                     $rootObject->dynamic_templates[] = [
                         $templateName => [

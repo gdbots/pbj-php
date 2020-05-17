@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\StringUtil;
 
 class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
 {
@@ -17,7 +17,7 @@ class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjEx
         $this->field = $field;
         $message = sprintf(
             'Failed to encode [%s] for field [%s].  Detail: %s',
-            is_scalar($this->value) ? $this->value : StringUtils::varToString($this->value),
+            is_scalar($this->value) ? $this->value : StringUtil::varToString($this->value),
             $this->field->getName(),
             $message
         );
