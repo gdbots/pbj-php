@@ -13,19 +13,10 @@ final class MessageResolver
 
     /**
      * An array of all the available schemas keyed by a curie or curie major.
-     * The value is an int used to correlate with the other maps.
      *
-     * @var int[]
+     * @var Message[]
      */
-    private static array $curies = [];
-
-    /**
-     * An array of all the classes, the numeric key relates to the int
-     * from the curies array.
-     *
-     * @var string[]
-     */
-    private static array $classes = [];
+    private static array $messages = [];
 
     /**
      * An array of resolved lookups by qname.
@@ -37,22 +28,32 @@ final class MessageResolver
     private static array $resolvedQnames = [];
 
     /**
-     * An array with the following structure (gdbots/pbjc-php automatically creates this)
+     * An array of class names keyed by curie or curie major.
      * [
-     *     'curies' => [
-     *         'vendor:package:category:message' => 1, // int is used to connect other values
-     *     ],
-     *     'classes' => [
-     *         1 => 'Vendor\Package\Category\MessageV1', // 1 refers to the value of the curies entry
-     *     ],
-     * ]
+     *     'vendor:package:category:message' => 'Vendor\Package\Category\MessageV1'
+     * ],
      *
-     * @param array $manifest
+     * @param Message[] $messages
      */
-    public static function registerManifest(array $manifest): void
+    public static function register(array $messages): void
     {
-        self::$curies = $manifest['curies'] ?? [];
-        self::$classes = $manifest['classes'] ?? [];
+        if (empty(self::$messages)) {
+            self::$messages = $messages;
+            return;
+        }
+
+        self::$messages = array_merge(self::$messages, $messages);
+    }
+
+    /**
+     * Adds a single schema to the resolver.  This is used in tests or dynamic
+     * message schema creation (not a typical or recommended use case).
+     *
+     * @param Schema $schema
+     */
+    public static function registerSchema(Schema $schema): void
+    {
+        self::$messages[$schema->getId()->getCurieMajor()] = $schema->getClassName();
     }
 
     /**
@@ -62,7 +63,7 @@ final class MessageResolver
      */
     public static function all(): array
     {
-        return array_values(self::$classes);
+        return array_values(self::$messages);
     }
 
     /**
@@ -77,13 +78,13 @@ final class MessageResolver
     public static function resolveId(SchemaId $id): string
     {
         $curieMajor = $id->getCurieMajor();
-        if (isset(self::$curies[$curieMajor])) {
-            return self::$classes[self::$curies[$curieMajor]];
+        if (isset(self::$messages[$curieMajor])) {
+            return self::$messages[$curieMajor];
         }
 
         $curie = $id->getCurie()->toString();
-        if (isset(self::$curies[$curie])) {
-            return self::$classes[self::$curies[$curie]];
+        if (isset(self::$messages[$curie])) {
+            return self::$messages[$curie];
         }
 
         throw new NoMessageForSchemaId($id);
@@ -108,6 +109,31 @@ final class MessageResolver
     }
 
     /**
+     * Returns the fully qualified php class name to be used for the provided curie.
+     *
+     * @param SchemaCurie|string $curie
+     *
+     * @return Message
+     *
+     * @throws NoMessageForCurie
+     */
+    public static function resolveCurie($curie): string
+    {
+        $key = (string)$curie;
+        $key = str_replace('*', self::$defaultVendor, $key);
+        if (isset(self::$messages[$key])) {
+            return self::$messages[$key];
+        }
+
+        $v1key = "{$key}:v1";
+        if (isset(self::$messages[$v1key])) {
+            return self::$messages[$v1key];
+        }
+
+        throw new NoMessageForCurie(SchemaCurie::fromString($key));
+    }
+
+    /**
      * Returns true if the provided qname exists.
      *
      * @param SchemaQName|string $qname
@@ -125,26 +151,6 @@ final class MessageResolver
         }
 
         return true;
-    }
-
-    /**
-     * Returns the fully qualified php class name to be used for the provided curie.
-     *
-     * @param SchemaCurie|string $curie
-     *
-     * @return Message
-     *
-     * @throws NoMessageForCurie
-     */
-    public static function resolveCurie($curie): string
-    {
-        $key = (string)$curie;
-        $key = str_replace('*', self::$defaultVendor, $key);
-        if (isset(self::$curies[$key])) {
-            return self::$classes[self::$curies[$key]];
-        }
-
-        throw new NoMessageForCurie(SchemaCurie::fromString($key));
     }
 
     /**
@@ -170,7 +176,7 @@ final class MessageResolver
         $qvendor = $qname->getVendor();
         $qmessage = $qname->getMessage();
 
-        foreach (self::$curies as $curie => $id) {
+        foreach (self::$messages as $curie => $class) {
             [$vendor, $package, $category, $message] = explode(':', $curie);
             if ($qvendor === $vendor && $qmessage === $message) {
                 self::$resolvedQnames[$key] = SchemaCurie::fromString("{$vendor}:{$package}:{$category}:{$message}");
@@ -179,29 +185,6 @@ final class MessageResolver
         }
 
         throw new NoMessageForQName($qname);
-    }
-
-    /**
-     * Adds a single schema to the resolver.  This is used in tests or dynamic
-     * message schema creation (not a typical or recommended use case).
-     *
-     * @param Schema $schema
-     */
-    public static function registerSchema(Schema $schema): void
-    {
-        $id = $schema->getId();
-        $nextId = count(self::$curies) + 10000;
-        self::$curies[$id->getCurieMajor()] = $nextId;
-        self::$classes[$nextId] = $schema->getClassName();
-
-        $curie = $id->getCurie()->toString();
-        if (isset(self::$curies[$curie])) {
-            return;
-        }
-
-        ++$nextId;
-        self::$curies[$curie] = $nextId;
-        self::$classes[$nextId] = $schema->getClassName();
     }
 
     /**

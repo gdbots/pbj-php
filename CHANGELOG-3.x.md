@@ -14,5 +14,6 @@ __BREAKING CHANGES__
 * Removes `Mixin` and `AbstractMixin` since the `gdbots/pbjc` no longer uses them.
 * Removes `MessageResolver::findOneUsingMixin` and `MessageResolver::findAllUsingMixin`.  Mixin lookup resolution no longer used and the mixin mostly disappears once schema is compiled.
 * Removes `Gdbots\Pbj\Exception\HasEndUserMessage`.
+* Change `MessageResolver::register` to simply accept map of curie to classname since mixin resolution going away means we don't need a manifest.
 * Simplifies `Schema` so the mixins are just the curies in string form, not objects.
 * Adds `Gdbots\Pbj\WellKnown\NodeRef` and `Gdbots\Pbj\Type\NodeRefType`.
