@@ -6,14 +6,12 @@ namespace Gdbots\Pbj\Marshaler\DynamoDb;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\FieldRule;
-use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Exception\EncodeValueFailed;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
-use Gdbots\Pbj\SchemaCurie;
 use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
@@ -66,7 +64,7 @@ final class ItemMarshaler implements Codec
                 continue;
             }
 
-            $value = $message->get($fieldName);
+            $value = $this->skipValidation() ? $message->fget($fieldName) : $message->get($fieldName);
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
@@ -106,36 +104,68 @@ final class ItemMarshaler implements Codec
         return $this->doUnmarshal(['M' => $data]);
     }
 
-    public function encodeDynamicField(DynamicField $dynamicField, Field $field)
+    public function encodeDynamicField($dynamicField, Field $field)
     {
+        if ($dynamicField instanceof DynamicField) {
+            return [
+                'M' => [
+                    'name'                   => [self::TYPE_STRING => $dynamicField->getName()],
+                    $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
+                ],
+            ];
+        }
+
+        $name = $dynamicField['name'];
+        unset($dynamicField['name']);
+        $kind = key($dynamicField);
+        $dfField = DynamicField::createField($kind);
+
         return [
             'M' => [
-                'name'                   => [self::TYPE_STRING => $dynamicField->getName()],
-                $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
+                'name' => [self::TYPE_STRING => $name],
+                $kind  => $this->encodeValue($dynamicField[$kind], $dfField),
             ],
         ];
     }
 
     public function decodeDynamicField($value, Field $field)
     {
+        if ($value instanceof DynamicField) {
+            return $value;
+        }
+
         $data = ['name' => $value['name']['S']];
         unset($value['name']);
 
         $kind = key($value);
         $data[$kind] = current($value[$kind]);
 
+        if ($this->skipValidation()) {
+            $dfField = DynamicField::createField($kind);
+            $data[$kind] = $dfField->getType()->decode($data[$kind], $dfField, $this);
+            return $data;
+        }
+
         return DynamicField::fromArray($data);
     }
 
     public function encodeGeoPoint($geoPoint, Field $field)
     {
+        if ($geoPoint instanceof GeoPoint) {
+            $long = (string)$geoPoint->getLongitude();
+            $lat = (string)$geoPoint->getLatitude();
+        } else {
+            $long = (string)$geoPoint['coordinates'][0];
+            $lat = (string)$geoPoint['coordinates'][1];
+        }
+
         return [
             'M' => [
                 'type'        => [self::TYPE_STRING => 'Point'],
                 'coordinates' => [
                     'L' => [
-                        [self::TYPE_NUMBER => (string)$geoPoint->getLongitude()],
-                        [self::TYPE_NUMBER => (string)$geoPoint->getLatitude()],
+                        [self::TYPE_NUMBER => $long],
+                        [self::TYPE_NUMBER => $lat],
                     ],
                 ],
             ],
@@ -144,7 +174,18 @@ final class ItemMarshaler implements Codec
 
     public function decodeGeoPoint($value, Field $field)
     {
-        return new GeoPoint((float)$value['coordinates']['L'][1]['N'], (float)$value['coordinates']['L'][0]['N']);
+        if ($value instanceof GeoPoint) {
+            return $value;
+        }
+
+        $long = (float)$value['coordinates']['L'][0]['N'];
+        $lat = (float)$value['coordinates']['L'][1]['N'];
+
+        if ($this->skipValidation()) {
+            return ['type' => 'Point', 'coordinates' => [$long, $lat]];
+        }
+
+        return new GeoPoint($lat, $long);
     }
 
     public function encodeMessage(Message $message, Field $field)
@@ -159,22 +200,45 @@ final class ItemMarshaler implements Codec
 
     public function encodeMessageRef($messageRef, Field $field)
     {
+        if ($messageRef instanceof MessageRef) {
+            $curie = $messageRef->getCurie()->toString();
+            $id = $messageRef->getId();
+            $tag = $messageRef->getTag();
+        } else {
+            $curie = $messageRef['curie'];
+            $id = $messageRef['id'];
+            $tag = $messageRef['tag'] ?? null;
+        }
+
         return [
             'M' => [
-                'curie' => [self::TYPE_STRING => $messageRef->getCurie()->toString()],
-                'id'    => [self::TYPE_STRING => $messageRef->getId()],
-                'tag'   => $messageRef->hasTag() ? [self::TYPE_STRING => $messageRef->getTag()] : ['NULL' => true],
+                'curie' => [self::TYPE_STRING => $curie],
+                'id'    => [self::TYPE_STRING => $id],
+                'tag'   => $tag ? [self::TYPE_STRING => $tag] : ['NULL' => true],
             ],
         ];
     }
 
     public function decodeMessageRef($value, Field $field)
     {
-        return new MessageRef(
-            SchemaCurie::fromString($value['curie']['S']),
-            $value['id']['S'],
-            isset($value['tag']['NULL']) ? null : $value['tag']['S']
-        );
+        if ($value instanceof MessageRef) {
+            return $value;
+        }
+
+        $array = [
+            'curie' => $value['curie']['S'],
+            'id'    => $value['id']['S'],
+        ];
+
+        if (isset($value['tag']['S'])) {
+            $array['tag'] = $value['tag']['S'];
+        }
+
+        if ($this->skipValidation()) {
+            return $array;
+        }
+
+        return MessageRef::fromArray($array);
     }
 
     private function doUnmarshal(array $data): Message
@@ -213,7 +277,12 @@ final class ItemMarshaler implements Codec
 
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
-                    $message->set($fieldName, $type->decode($value, $field, $this));
+                    $value = $type->decode($value, $field, $this);
+                    if ($this->skipValidation()) {
+                        $message->setWithoutValidation($fieldName, $value);
+                    } else {
+                        $message->set($fieldName, $value);
+                    }
                     break;
 
                 case FieldRule::A_SET:
@@ -229,16 +298,28 @@ final class ItemMarshaler implements Codec
                         }
                     }
 
-                    if ($field->isASet()) {
-                        $message->addToSet($fieldName, $values);
+                    if ($this->skipValidation()) {
+                        $message->setWithoutValidation($fieldName, $values);
                     } else {
-                        $message->addToList($fieldName, $values);
+                        if ($field->isASet()) {
+                            $message->addToSet($fieldName, $values);
+                        } else {
+                            $message->addToList($fieldName, $values);
+                        }
                     }
                     break;
 
                 case FieldRule::A_MAP:
-                    foreach ($value as $k => $v) {
-                        $message->addToMap($fieldName, $k, $type->decode(current($v), $field, $this));
+                    if ($this->skipValidation()) {
+                        $values = [];
+                        foreach ($value as $k => $v) {
+                            $values[$k] = $type->decode(current($v), $field, $this);
+                        }
+                        $message->setWithoutValidation($fieldName, $values);
+                    } else {
+                        foreach ($value as $k => $v) {
+                            $message->addToMap($fieldName, $k, $type->decode(current($v), $field, $this));
+                        }
                     }
                     break;
 
@@ -284,19 +365,6 @@ final class ItemMarshaler implements Codec
     private function encodeASetValue(array $value, Field $field): array
     {
         $type = $field->getType();
-
-        /*
-         * A MessageRefType is the only object/map value that can be
-         * used in a set.  In this case of DynamoDb, we can store it as
-         * a list of maps.
-         */
-        if ($type->getTypeName() === TypeName::MESSAGE_REF()) {
-            $list = [];
-            foreach ($value as $v) {
-                $list[] = $type->encode($v, $field, $this);
-            }
-            return ['L' => $list];
-        }
 
         if ($type->isString()) {
             $dynamoType = self::TYPE_STRING_SET;

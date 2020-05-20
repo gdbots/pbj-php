@@ -70,7 +70,7 @@ final class DynamicField implements \JsonSerializable
         $field->guardValue($this->value);
     }
 
-    private static function createField(string $kind): Field
+    public static function createField(string $kind): Field
     {
         if (!isset(self::$fields[$kind])) {
             switch ($kind) {
