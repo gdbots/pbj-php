@@ -93,10 +93,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     final public function generateEtag(array $ignoredFields = []): string
     {
-        $serializer = self::getSerializer();
-        $serializer->skipValidation(true);
-        $array = $serializer->serialize($this);
-        $serializer->skipValidation(false);
+        $array = $this->toArray();
 
         if (empty($ignoredFields)) {
             return md5(json_encode($array));
