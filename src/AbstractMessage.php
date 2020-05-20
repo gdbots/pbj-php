@@ -339,7 +339,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
             }, $this->data[$fieldName]);
         }
 
-        return $this->decoded[$fieldName] = $decoded;
+        $this->decoded[$fieldName] = $decoded;
+        return $field->isASet() ? array_values($this->decoded[$fieldName]) : $this->decoded[$fieldName];
     }
 
     final public function fget(string $fieldName, $default = null)
