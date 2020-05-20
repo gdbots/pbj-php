@@ -8,7 +8,7 @@ $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
 $marshaler = new DocumentMarshaler();
-//$marshaler->skipValidation(true);
+$marshaler->skipValidation(true);
 
 do {
     $i++;

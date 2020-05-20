@@ -8,7 +8,7 @@ $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
 $serializer = new JsonSerializer();
-//$serializer->skipValidation(true);
+$serializer->skipValidation(true);
 
 do {
     $i++;
