@@ -78,6 +78,8 @@ final class EmailMessage extends AbstractMessage
                 Fb::create('dynamic_fields', T\DynamicFieldType::create())
                     ->asAList()
                     ->build(),
+                Fb::create('node_ref', T\NodeRefType::create())
+                    ->build(),
             ],
             [
                 'gdbots:tests.pbj:mixin:fake-mixin:v1',

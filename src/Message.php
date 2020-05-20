@@ -80,26 +80,32 @@ interface Message
     public function getUriTemplateVars(): array;
 
     /**
-     * Verifies all required fields have been populated.
+     * Verifies all required fields have been populated and when
+     * using strict mode will run the guard check on all fields.
+     *
+     * @param bool $strict
+     * @param bool $recursive
      *
      * @return static
      *
      * @throws GdbotsPbjException
      * @throws RequiredFieldNotSet
      */
-    public function validate(): self;
+    public function validate(bool $strict = false, bool $recursive = false): self;
 
     /**
-     * Freezes the message, making it immutable.  The message must be valid
+     * Freezes the message, making it immutable.  The message must be validated
      * before it can be frozen so this may throw an exception if some required
-     * fields have not been populated.
+     * fields have not been populated. Using strict
+     *
+     * @param bool $withStrictValidation
      *
      * @return static
      *
      * @throws GdbotsPbjException
      * @throws RequiredFieldNotSet
      */
-    public function freeze(): self;
+    public function freeze(bool $withStrictValidation = true): self;
 
     /**
      * Returns true if the message has been frozen.  A frozen message is
@@ -130,6 +136,24 @@ interface Message
      * @throws LogicException
      */
     public function isReplay(?bool $replay = null): bool;
+
+    /**
+     * Sets the value for a given field without doing any
+     * encoding or validation (type guard). This should
+     * only be used by serializers and codecs/marshalers.
+     *
+     * The internal value is optimized for php.
+     *
+     * @param string $fieldName
+     * @param mixed  $value
+     *
+     * @return static
+     *
+     * @throws GdbotsPbjException
+     *
+     * @internal
+     */
+    public function setWithoutValidation(string $fieldName, $value): self;
 
     /**
      * Populates the defaults on all fields or just the fieldName provided.
@@ -172,6 +196,20 @@ interface Message
      * @return mixed
      */
     public function get(string $fieldName, $default = null);
+
+    /**
+     * A fast get method that returns the raw value instead of an
+     * object when possible. E.g. a UuidType would normally return
+     * a UuidIdentifier instance but fget just returns the string.
+     *
+     * Note: MessageType fields always return a Message instance.
+     *
+     * @param string $fieldName
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    public function fget(string $fieldName, $default = null);
 
     /**
      * Clears the value of a field.

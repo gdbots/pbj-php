@@ -21,6 +21,17 @@ class PhpArraySerializer implements Serializer, Codec
     /** Options for the serializer to use, e.g. json encoding options */
     protected array $options;
 
+    private bool $skipValidation = false;
+
+    public function skipValidation(?bool $skipValidation = null): bool
+    {
+        if (null !== $skipValidation) {
+            $this->skipValidation = $skipValidation;
+        }
+
+        return $this->skipValidation;
+    }
+
     public function serialize(Message $message, array $options = [])
     {
         $this->options = $options;
@@ -34,34 +45,53 @@ class PhpArraySerializer implements Serializer, Codec
         Assertion::keyIsset(
             $data,
             Schema::PBJ_FIELD_NAME,
-            sprintf(
-                '[%s::%s] Array provided must contain the [%s] key.',
-                static::class,
-                __FUNCTION__,
-                Schema::PBJ_FIELD_NAME
-            )
+            'Array provided must contain the [_schema] key.',
         );
 
         return $this->doDeserialize($data);
     }
 
-    public function encodeDynamicField(DynamicField $dynamicField, Field $field)
+    public function encodeDynamicField($dynamicField, Field $field)
     {
-        return $dynamicField->toArray();
+        if ($dynamicField instanceof DynamicField) {
+            return $dynamicField->toArray();
+        }
+
+        return $dynamicField;
     }
 
-    public function decodeDynamicField($value, Field $field): DynamicField
+    public function decodeDynamicField($value, Field $field)
     {
+        if ($value instanceof DynamicField) {
+            return $value;
+        }
+
+        if ($this->skipValidation()) {
+            return $value;
+        }
+
         return DynamicField::fromArray($value);
     }
 
-    public function encodeGeoPoint(GeoPoint $geoPoint, Field $field)
+    public function encodeGeoPoint($geoPoint, Field $field)
     {
-        return $geoPoint->toArray();
+        if ($geoPoint instanceof GeoPoint) {
+            return $geoPoint->toArray();
+        }
+
+        return $geoPoint;
     }
 
-    public function decodeGeoPoint($value, Field $field): GeoPoint
+    public function decodeGeoPoint($value, Field $field)
     {
+        if ($value instanceof GeoPoint) {
+            return $value;
+        }
+
+        if ($this->skipValidation()) {
+            return $value;
+        }
+
         return GeoPoint::fromArray($value);
     }
 
@@ -72,16 +102,32 @@ class PhpArraySerializer implements Serializer, Codec
 
     public function decodeMessage($value, Field $field): Message
     {
+        if ($value instanceof Message) {
+            return $value;
+        }
+
         return $this->doDeserialize($value);
     }
 
-    public function encodeMessageRef(MessageRef $messageRef, Field $field)
+    public function encodeMessageRef($messageRef, Field $field)
     {
-        return $messageRef->toArray();
+        if ($messageRef instanceof MessageRef) {
+            return $messageRef->toArray();
+        }
+
+        return $messageRef;
     }
 
-    public function decodeMessageRef($value, Field $field): MessageRef
+    public function decodeMessageRef($value, Field $field)
     {
+        if ($value instanceof MessageRef) {
+            return $value;
+        }
+
+        if ($this->skipValidation()) {
+            return $value;
+        }
+
         return MessageRef::fromArray($value);
     }
 
@@ -93,36 +139,19 @@ class PhpArraySerializer implements Serializer, Codec
 
         foreach ($schema->getFields() as $field) {
             $fieldName = $field->getName();
-
             if (!$message->has($fieldName)) {
                 continue;
             }
 
-            $value = $message->get($fieldName);
+            $value = $message->fget($fieldName);
             $type = $field->getType();
 
-            switch ($field->getRule()->getValue()) {
-                case FieldRule::A_SINGLE_VALUE:
-                    $payload[$fieldName] = $type->encode($value, $field, $this);
-                    break;
-
-                case FieldRule::A_SET:
-                case FieldRule::A_LIST:
-                    $payload[$fieldName] = [];
-                    foreach ($value as $v) {
-                        $payload[$fieldName][] = $type->encode($v, $field, $this);
-                    }
-                    break;
-
-                case FieldRule::A_MAP:
-                    $payload[$fieldName] = [];
-                    foreach ($value as $k => $v) {
-                        $payload[$fieldName][$k] = $type->encode($v, $field, $this);
-                    }
-                    break;
-
-                default:
-                    break;
+            if ($field->isASingleValue()) {
+                $payload[$fieldName] = $type->encode($value, $field, $this);
+            } else {
+                $payload[$fieldName] = array_map(function ($v) use ($type, $field) {
+                    return $type->encode($v, $field, $this);
+                }, $value);
             }
         }
 
@@ -154,6 +183,17 @@ class PhpArraySerializer implements Serializer, Codec
             $field = $schema->getField($fieldName);
             $type = $field->getType();
 
+            if ($this->skipValidation()) {
+                if ($field->isASingleValue()) {
+                    $message->setWithoutValidation($fieldName, $type->decode($value, $field, $this));
+                } else {
+                    $message->setWithoutValidation($fieldName, array_map(function ($v) use ($type, $field) {
+                        return $type->decode($v, $field, $this);
+                    }, $value));
+                }
+                continue;
+            }
+
             switch ($field->getRule()->getValue()) {
                 case FieldRule::A_SINGLE_VALUE:
                     $message->set($fieldName, $type->decode($value, $field, $this));
@@ -175,7 +215,7 @@ class PhpArraySerializer implements Serializer, Codec
                     break;
 
                 case FieldRule::A_MAP:
-                    Assertion::isArray($value, sprintf('Field [%s] must be an associative array.', $fieldName), $fieldName);
+                    Assertion::isArray($value, 'Field must be an associative array.', $fieldName);
                     foreach ($value as $k => $v) {
                         $message->addToMap($fieldName, $k, $type->decode($v, $field, $this));
                     }
@@ -186,6 +226,6 @@ class PhpArraySerializer implements Serializer, Codec
             }
         }
 
-        return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
+        return $message->setWithoutValidation(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 }

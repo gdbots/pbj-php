@@ -22,13 +22,17 @@ final class NodeRefType extends AbstractType
             return $value->toString();
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (null === $value || $value instanceof NodeRef) {
             return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && !empty($value)) {
+            return (string)$value;
         }
 
         try {

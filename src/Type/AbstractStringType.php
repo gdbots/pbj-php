@@ -15,7 +15,8 @@ abstract class AbstractStringType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
-        Assertion::string($value, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::string($value, null, $fieldName);
 
         // intentionally using strlen to get byte length, not mb_strlen
         $length = strlen($value);
@@ -23,81 +24,66 @@ abstract class AbstractStringType extends AbstractType
         $maxLength = NumberUtil::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
         $okay = $length >= $minLength && $length <= $maxLength;
 
-        Assertion::true(
-            $okay,
-            sprintf(
-                'Field [%s] must be between [%d] and [%d] bytes, [%d] bytes given.',
-                $field->getName(),
-                $minLength,
-                $maxLength,
-                $length
-            ),
-            $field->getName()
-        );
+        if (!$okay) {
+            Assertion::true(
+                $okay,
+                sprintf(
+                    'Field [%s] must be between [%d] and [%d] bytes, [%d] bytes given.',
+                    $fieldName,
+                    $minLength,
+                    $maxLength,
+                    $length
+                ),
+                $fieldName
+            );
+        }
 
         if ($pattern = $field->getPattern()) {
-            Assertion::regex($value, $pattern, null, $field->getName());
+            Assertion::regex($value, $pattern, null, $fieldName);
+        }
+
+        if (!$field->hasFormat()) {
+            return;
         }
 
         switch ($field->getFormat()->getValue()) {
-            case Format::UNKNOWN:
-                break;
-
             case Format::DATE:
-                Assertion::regex($value, '/^\d{4}-\d{2}-\d{2}$/', null, $field->getName());
+                Assertion::regex($value, '/^\d{4}-\d{2}-\d{2}$/', null, $fieldName);
                 break;
 
             case Format::DATE_TIME:
                 Assertion::true(
                     DateUtil::isValidISO8601Date($value),
-                    sprintf(
-                        'Field [%s] must be a valid ISO8601 date-time.  Format must match one of [%s], [%s] or [%s].',
-                        $field->getName(),
-                        DateUtil::ISO8601_ZULU,
-                        DateUtil::ISO8601,
-                        \DateTime::ISO8601
-                    ),
-                    $field->getName()
+                    'Field must be a valid ISO8601 date-time.',
+                    $fieldName
                 );
                 break;
 
             case Format::SLUG:
-                Assertion::regex($value, '/^([\w\/-]|[\w-][\w\/-]*[\w-])$/', null, $field->getName());
+                Assertion::regex($value, '/^([\w\/-]|[\w-][\w\/-]*[\w-])$/', null, $fieldName);
                 break;
 
             case Format::EMAIL:
-                Assertion::email($value, null, $field->getName());
+                Assertion::email($value, null, $fieldName);
                 break;
 
             case Format::HASHTAG:
                 Assertion::true(
                     HashtagUtil::isValid($value),
-                    sprintf('Field [%s] must be a valid hashtag.  @see HashtagUtil::isValid', $field->getName()),
-                    $field->getName()
+                    'Field must be a valid hashtag.',
+                    $fieldName
                 );
                 break;
 
             case Format::IPV4:
-                Assertion::url(
-                    'https://' . $value,
-                    sprintf(
-                        'Field [%s] must be a valid [%s].',
-                        $field->getName(),
-                        $field->getFormat()->getValue()
-                    ),
-                    $field->getName()
-                );
+                Assertion::url('https://' . $value, 'Field must be a valid IPV4.', $fieldName);
                 break;
 
             case Format::IPV6:
                 Assertion::url(
                     'https://[' . $value . ']',
-                    sprintf(
-                        'Field [%s] must be a valid [%s].',
-                        $field->getName(),
-                        $field->getFormat()->getValue()
-                    ),
-                    $field->getName()
+                    'Field must be a valid IPV6.',
+                    $fieldName
                 );
                 break;
 
@@ -114,19 +100,11 @@ abstract class AbstractStringType extends AbstractType
                     $value = 'https://' . $value;
                 }
 
-                Assertion::url(
-                    $value,
-                    sprintf(
-                        'Field [%s] must be a valid [%s].',
-                        $field->getName(),
-                        $field->getFormat()->getValue()
-                    ),
-                    $field->getName()
-                );
+                Assertion::url($value, 'Field must be a valid URL.', $fieldName);
                 break;
 
             case Format::UUID:
-                Assertion::uuid($value, null, $field->getName());
+                Assertion::uuid($value, null, $fieldName);
                 break;
 
             default:
@@ -136,7 +114,7 @@ abstract class AbstractStringType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
-        $value = trim($value);
+        $value = trim((string)$value);
         if ($value === '') {
             return null;
         }

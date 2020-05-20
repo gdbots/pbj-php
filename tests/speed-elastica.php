@@ -2,21 +2,21 @@
 
 require 'speed-bootstrap.php';
 
-use Gdbots\Pbj\Serializer\JsonSerializer;
+use \Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
 
 $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
-$serializer = new JsonSerializer();
-//$serializer->skipValidation(true);
+$marshaler = new DocumentMarshaler();
+//$marshaler->skipValidation(true);
 
 do {
     $i++;
-    $json = $serializer->serialize($message);
-    $message = $serializer->deserialize($json);
+    $document = $marshaler->marshal($message);
+    $message = $marshaler->unmarshal($document);
 } while ($i < numTimes());
 
-echo $serializer->serialize($message, ['json_encode_options' => JSON_PRETTY_PRINT]) . PHP_EOL;
+echo json_encode($marshaler->marshal($message)->toArray(), JSON_PRETTY_PRINT) . PHP_EOL;
 
 // speed report
 $benchmark = microtime(true) - $startTime;

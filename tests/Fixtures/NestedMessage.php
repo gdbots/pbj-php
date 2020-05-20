@@ -17,7 +17,7 @@ final class NestedMessage extends AbstractMessage
             Fb::create('test1', T\StringType::create())->build(),
             Fb::create('test2', T\IntType::create())->asASet()->build(),
             Fb::create('location', T\GeoPointType::create())->build(),
-            Fb::create('refs', T\MessageRefType::create())->asASet()->build(),
+            Fb::create('refs', T\MessageRefType::create())->asAList()->build(),
         ]);
 
         MessageResolver::registerSchema($schema);

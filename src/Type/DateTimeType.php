@@ -24,7 +24,7 @@ final class DateTimeType extends AbstractType
             return $this->convertToUtc($value)->format(DateUtil::ISO8601_ZULU);
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
@@ -35,6 +35,10 @@ final class DateTimeType extends AbstractType
 
         if ($value instanceof \DateTimeInterface) {
             return $this->convertToUtc($value);
+        }
+
+        if ($codec && $codec->skipValidation()) {
+            return str_replace('+00:00', 'Z', (string)$value);
         }
 
         $date = \DateTimeImmutable::createFromFormat(DateUtil::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));

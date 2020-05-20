@@ -12,12 +12,13 @@ abstract class AbstractIntType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
-        Assertion::integer($value, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::integer($value, null, $fieldName);
         $intMin = $this->getMin();
         $intMax = $this->getMax();
         $min = NumberUtil::bound($field->getMin(), $intMin, $intMax);
         $max = NumberUtil::bound($field->getMax(), $intMin, $intMax);
-        Assertion::range($value, $min, $max, null, $field->getName());
+        Assertion::range($value, $min, $max, null, $fieldName);
     }
 
     public function encode($value, Field $field, ?Codec $codec = null)

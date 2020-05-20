@@ -39,6 +39,7 @@ class EnumTest extends TestCase
             TestEnum::create('notvalid');
             $this->fail('Enum allowed creation with invalid constant.');
         } catch (\Throwable $e) {
+            $this->assertTrue(true);
         }
     }
 

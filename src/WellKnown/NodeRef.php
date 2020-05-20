@@ -62,7 +62,7 @@ final class NodeRef implements Identifier
     public static function fromNode(Message $node): self
     {
         if ($node->has('_id')) {
-            return new self($node::schema()->getQName(), (string)$node->get('_id'));
+            return new self($node::schema()->getQName(), (string)$node->fget('_id'));
         }
 
         return self::fromMessageRef($node->generateMessageRef());

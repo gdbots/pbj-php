@@ -12,17 +12,18 @@ final class BigIntType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
+        $fieldName = $field->getName();
         /** @var BigInteger $value */
-        Assertion::isInstanceOf($value, BigInteger::class, null, $field->getName());
+        Assertion::isInstanceOf($value, BigInteger::class, null, $fieldName);
         Assertion::true(
             !$value->isNegative(),
-            sprintf('Field [%s] cannot be negative.', $field->getName()),
-            $field->getName()
+            'Field cannot be negative.',
+            $fieldName
         );
         Assertion::true(
             $value->isLessThanOrEqualTo('18446744073709551615'),
-            sprintf('Field [%s] cannot be greater than [18446744073709551615].', $field->getName()),
-            $field->getName()
+            'Field cannot be greater than [18446744073709551615].',
+            $fieldName
         );
     }
 
@@ -32,13 +33,18 @@ final class BigIntType extends AbstractType
             return (string)$value;
         }
 
-        return '0';
+        $str = (string)$value;
+        return strlen($str) ? $str : '0';
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (null === $value || $value instanceof BigInteger) {
             return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && strlen((string)$value)) {
+            return (string)$value;
         }
 
         return BigInteger::of((string)$value);

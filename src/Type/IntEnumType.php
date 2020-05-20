@@ -13,11 +13,13 @@ final class IntEnumType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
+        $fieldName = $field->getName();
+
         /** @var Enum $value */
-        Assertion::isInstanceOf($value, Enum::class, null, $field->getName());
-        Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+        // Assertion::isInstanceOf($value, Enum::class, null, $fieldName);
+        Assertion::isInstanceOf($value, $field->getClassName(), null, $fieldName);
         Assertion::integer($value->getValue(), null, $field->getName());
-        Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $field->getName());
+        Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $fieldName);
     }
 
     public function encode($value, Field $field, ?Codec $codec = null)
@@ -26,13 +28,17 @@ final class IntEnumType extends AbstractType
             return (int)$value->getValue();
         }
 
-        return 0;
+        return strlen((string)$value) ? (int)$value : 0;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (null === $value) {
-            return null;
+        if (null === $value || $value instanceof Enum) {
+            return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && strlen((string)$value)) {
+            return (int)$value;
         }
 
         /** @var Enum $className */

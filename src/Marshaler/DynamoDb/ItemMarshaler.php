@@ -42,6 +42,17 @@ final class ItemMarshaler implements Codec
     const TYPE_NUMBER_SET = 'NS';
     const TYPE_BINARY_SET = 'BS';
 
+    private bool $skipValidation = false;
+
+    public function skipValidation(?bool $skipValidation = null): bool
+    {
+        if (null !== $skipValidation) {
+            $this->skipValidation = $skipValidation;
+        }
+
+        return $this->skipValidation;
+    }
+
     public function marshal(Message $message): array
     {
         $schema = $message::schema();
@@ -105,7 +116,7 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    public function decodeDynamicField($value, Field $field): DynamicField
+    public function decodeDynamicField($value, Field $field)
     {
         $data = ['name' => $value['name']['S']];
         unset($value['name']);
@@ -116,7 +127,7 @@ final class ItemMarshaler implements Codec
         return DynamicField::fromArray($data);
     }
 
-    public function encodeGeoPoint(GeoPoint $geoPoint, Field $field)
+    public function encodeGeoPoint($geoPoint, Field $field)
     {
         return [
             'M' => [
@@ -131,7 +142,7 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    public function decodeGeoPoint($value, Field $field): GeoPoint
+    public function decodeGeoPoint($value, Field $field)
     {
         return new GeoPoint((float)$value['coordinates']['L'][1]['N'], (float)$value['coordinates']['L'][0]['N']);
     }
@@ -146,7 +157,7 @@ final class ItemMarshaler implements Codec
         return $this->unmarshal($value);
     }
 
-    public function encodeMessageRef(MessageRef $messageRef, Field $field)
+    public function encodeMessageRef($messageRef, Field $field)
     {
         return [
             'M' => [
@@ -157,7 +168,7 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    public function decodeMessageRef($value, Field $field): MessageRef
+    public function decodeMessageRef($value, Field $field)
     {
         return new MessageRef(
             SchemaCurie::fromString($value['curie']['S']),
@@ -171,12 +182,7 @@ final class ItemMarshaler implements Codec
         Assertion::keyIsset(
             $data['M'],
             Schema::PBJ_FIELD_NAME,
-            sprintf(
-                '[%s::%s] Array provided must contain the [%s] key.',
-                static::class,
-                __FUNCTION__,
-                Schema::PBJ_FIELD_NAME
-            )
+            'Array provided must contain the [_schema] key.'
         );
 
         $schemaId = SchemaId::fromString((string)$data['M'][Schema::PBJ_FIELD_NAME]['S']);
@@ -241,7 +247,7 @@ final class ItemMarshaler implements Codec
             }
         }
 
-        return $message->set(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
+        return $message->setWithoutValidation(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
     private function encodeValue($value, Field $field): array

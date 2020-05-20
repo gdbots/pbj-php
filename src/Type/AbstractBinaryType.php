@@ -34,17 +34,19 @@ abstract class AbstractBinaryType extends AbstractType
         $maxLength = NumberUtil::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
         $okay = $length >= $minLength && $length <= $maxLength;
 
-        Assertion::true(
-            $okay,
-            sprintf(
-                'Field [%s] must be between [%d] and [%d] bytes, [%d] bytes given.',
-                $field->getName(),
-                $minLength,
-                $maxLength,
-                $length
-            ),
-            $field->getName()
-        );
+        if (!$okay) {
+            Assertion::true(
+                $okay,
+                sprintf(
+                    'Field [%s] must be between [%d] and [%d] bytes, [%d] bytes given.',
+                    $field->getName(),
+                    $minLength,
+                    $maxLength,
+                    $length
+                ),
+                $field->getName()
+            );
+        }
     }
 
     public function encode($value, Field $field, ?Codec $codec = null)

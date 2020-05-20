@@ -6,12 +6,14 @@ namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 use Gdbots\Pbj\Enum;
 
 /**
+ * @method static Priority UNKNOWN()
  * @method static Priority NORMAL()
  * @method static Priority HIGH()
  * @method static Priority LOW()
  */
 final class Priority extends Enum
 {
+    const UNKNOWN = 0;
     const NORMAL = 1;
     const HIGH = 2;
     const LOW = 3;

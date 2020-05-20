@@ -12,9 +12,10 @@ final class UuidType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
-        Assertion::isInstanceOf($value, UuidIdentifier::class, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::isInstanceOf($value, UuidIdentifier::class, null, $fieldName);
         if ($field->hasClassName()) {
-            Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+            Assertion::isInstanceOf($value, $field->getClassName(), null, $fieldName);
         }
     }
 
@@ -24,13 +25,17 @@ final class UuidType extends AbstractType
             return $value->toString();
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (empty($value)) {
-            return null;
+        if (null === $value || $value instanceof UuidIdentifier) {
+            return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && !empty($value)) {
+            return (string)$value;
         }
 
         /** @var UuidIdentifier $className */

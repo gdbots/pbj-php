@@ -17,11 +17,19 @@ final class DynamicFieldType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value) {
+            return null;
+        }
+
         return $codec->encodeDynamicField($value, $field);
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value || $value instanceof DynamicField) {
+            return $value;
+        }
+
         return $codec->decodeDynamicField($value, $field);
     }
 

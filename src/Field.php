@@ -48,6 +48,11 @@ final class Field implements \JsonSerializable
     private ?\Closure $assertion;
     private bool $overridable;
 
+    private static ?FieldRule $aSingleValue = null;
+    private static ?FieldRule $aSet = null;
+    private static ?FieldRule $aList = null;
+    private static ?FieldRule $aMap = null;
+
     public function __construct(
         string $name,
         Type $type,
@@ -68,10 +73,15 @@ final class Field implements \JsonSerializable
         ?\Closure $assertion = null,
         bool $overridable = false
     ) {
+        if (null === self::$aSingleValue) {
+            self::$aSingleValue = FieldRule::A_SINGLE_VALUE();
+            self::$aSet = FieldRule::A_SET();
+            self::$aList = FieldRule::A_LIST();
+            self::$aMap = FieldRule::A_MAP();
+        }
+
         Assertion::betweenLength($name, 1, 127);
-        Assertion::regex($name, self::VALID_NAME_PATTERN,
-            sprintf('Field [%s] must match pattern [%s].', $name, self::VALID_NAME_PATTERN)
-        );
+        Assertion::regex($name, self::VALID_NAME_PATTERN, 'Field name must match pattern.', $name);
 
         if (!$type->isMessage()) {
             // anyOf is only supported on nested messages
@@ -100,11 +110,8 @@ final class Field implements \JsonSerializable
         if ($this->isASet()) {
             Assertion::true(
                 $this->type->allowedInSet(),
-                sprintf(
-                    'Field [%s] with type [%s] cannot be used in a set.',
-                    $this->name,
-                    $this->type->getTypeValue()
-                )
+                'Field cannot be used in a set.',
+                $this->name
             );
         }
     }
@@ -129,7 +136,7 @@ final class Field implements \JsonSerializable
             $this->pattern = '/' . trim($pattern, '/') . '/';
         }
 
-        $this->format = $format ?: Format::UNKNOWN();
+        $this->format = $format;
     }
 
     private function applyNumericOptions(?int $min = null, ?int $max = null, int $precision = 10, int $scale = 2): void
@@ -163,7 +170,7 @@ final class Field implements \JsonSerializable
             $decodeDefault = null !== $this->default && !$this->default instanceof \Closure;
             switch ($this->type->getTypeValue()) {
                 case TypeName::IDENTIFIER:
-                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    Assertion::notNull($this->className, 'Field requires a className.', $this->name);
                     if ($decodeDefault && !$this->default instanceof Identifier) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
@@ -171,7 +178,7 @@ final class Field implements \JsonSerializable
 
                 case TypeName::INT_ENUM:
                 case TypeName::STRING_ENUM:
-                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    Assertion::notNull($this->className, 'Field requires a className.', $this->name);
                     if ($decodeDefault && !$this->default instanceof Enum) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
@@ -204,22 +211,22 @@ final class Field implements \JsonSerializable
 
     public function isASingleValue(): bool
     {
-        return FieldRule::A_SINGLE_VALUE === $this->rule->getValue();
+        return self::$aSingleValue === $this->rule;
     }
 
     public function isASet(): bool
     {
-        return FieldRule::A_SET === $this->rule->getValue();
+        return self::$aSet === $this->rule;
     }
 
     public function isAList(): bool
     {
-        return FieldRule::A_LIST === $this->rule->getValue();
+        return self::$aList === $this->rule;
     }
 
     public function isAMap(): bool
     {
-        return FieldRule::A_MAP === $this->rule->getValue();
+        return self::$aMap === $this->rule;
     }
 
     public function isRequired(): bool
@@ -246,7 +253,12 @@ final class Field implements \JsonSerializable
         return $this->pattern;
     }
 
-    public function getFormat(): Format
+    public function hasFormat(): bool
+    {
+        return null !== $this->format;
+    }
+
+    public function getFormat(): ?Format
     {
         return $this->format;
     }
@@ -310,7 +322,7 @@ final class Field implements \JsonSerializable
             return;
         }
 
-        Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name));
+        Assertion::nullOrIsArray($default, 'Field default must be an array.', $this->name);
         if (null === $default) {
             return;
         }
@@ -318,12 +330,13 @@ final class Field implements \JsonSerializable
         if ($this->isAMap()) {
             Assertion::true(
                 ArrayUtil::isAssoc($default),
-                sprintf('Field [%s] default must be an associative array.', $this->name)
+                'Field default must be an associative array.',
+                $this->name
             );
         }
 
         foreach ($default as $k => $v) {
-            Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k));
+            Assertion::notNull($v, 'Field default for key cannot be null.', $this->name);
             $this->guardValue($v);
         }
     }
@@ -356,7 +369,7 @@ final class Field implements \JsonSerializable
     public function guardValue($value): void
     {
         if ($this->required) {
-            Assertion::notNull($value, sprintf('Field [%s] is required and cannot be null.', $this->name));
+            Assertion::notNull($value, 'Field is required and cannot be null.');
         }
 
         if (null !== $value) {
@@ -378,7 +391,7 @@ final class Field implements \JsonSerializable
             'min_length'       => $this->minLength,
             'max_length'       => $this->maxLength,
             'pattern'          => $this->pattern,
-            'format'           => $this->format->getValue(),
+            'format'           => $this->format ? $this->format->getValue() : Format::UNKNOWN,
             'min'              => $this->min,
             'max'              => $this->max,
             'precision'        => $this->precision,

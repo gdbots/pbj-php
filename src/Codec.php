@@ -9,19 +9,68 @@ use Gdbots\Pbj\WellKnown\MessageRef;
 
 interface Codec
 {
-    public function encodeDynamicField(DynamicField $dynamicField, Field $field);
+    /**
+     * If validation is not enabled Codecs and Types can use
+     * faster methods for encoding/decoding. This should only
+     * be used with very trusted input.
+     *
+     * Provide a boolean to change the value.
+     *
+     * @param bool $skipValidation
+     *
+     * @return bool
+     */
+    public function skipValidation(?bool $skipValidation = null): bool;
 
-    public function decodeDynamicField($value, Field $field): DynamicField;
+    /**
+     * @param DynamicField|array $dynamicField
+     * @param Field              $field
+     *
+     * @return mixed
+     */
+    public function encodeDynamicField($dynamicField, Field $field);
 
-    public function encodeGeoPoint(GeoPoint $geoPoint, Field $field);
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return DynamicField|array
+     */
+    public function decodeDynamicField($value, Field $field);
 
-    public function decodeGeoPoint($value, Field $field): GeoPoint;
+    /**
+     * @param GeoPoint|array $geoPoint
+     * @param Field          $field
+     *
+     * @return mixed
+     */
+    public function encodeGeoPoint($geoPoint, Field $field);
+
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return GeoPoint|array
+     */
+    public function decodeGeoPoint($value, Field $field);
 
     public function encodeMessage(Message $message, Field $field);
 
     public function decodeMessage($value, Field $field): Message;
 
-    public function encodeMessageRef(MessageRef $messageRef, Field $field);
+    /**
+     * @param MessageRef|array $messageRef
+     * @param Field            $field
+     *
+     * @return mixed
+     */
+    public function encodeMessageRef($messageRef, Field $field);
 
-    public function decodeMessageRef($value, Field $field): MessageRef;
+    /**
+     * @param mixed $value
+     * @param Field $field
+     *
+     * @return MessageRef|array
+     */
+    public function decodeMessageRef($value, Field $field);
 }

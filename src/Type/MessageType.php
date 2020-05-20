@@ -41,11 +41,19 @@ final class MessageType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value) {
+            return null;
+        }
+
         return $codec->encodeMessage($value, $field);
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value || $value instanceof Message) {
+            return $value;
+        }
+
         return $codec->decodeMessage($value, $field);
     }
 

@@ -21,17 +21,17 @@ final class MicrotimeType extends AbstractType
             return $value->toString();
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (empty($value)) {
-            return null;
+        if (null === $value || $value instanceof Microtime) {
+            return $value;
         }
 
-        if ($value instanceof Microtime) {
-            return $value;
+        if ($codec && $codec->skipValidation() && !empty($value)) {
+            return (string)$value;
         }
 
         return Microtime::fromString((string)$value);

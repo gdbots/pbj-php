@@ -13,9 +13,10 @@ final class IdentifierType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
+        $fieldName = $field->getName();
         /** @var Identifier $value */
-        Assertion::isInstanceOf($value, Identifier::class, null, $field->getName());
-        Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+        // Assertion::isInstanceOf($value, Identifier::class, null, $fieldName);
+        Assertion::isInstanceOf($value, $field->getClassName(), null, $fieldName);
         $v = $value->toString();
         //Assertion::string($v, null, $field->getName());
 
@@ -23,16 +24,19 @@ final class IdentifierType extends AbstractType
         $length = strlen($v);
         $maxBytes = $this->getMaxBytes();
         $okay = $length > 0 && $length <= $maxBytes;
-        Assertion::true(
-            $okay,
-            sprintf(
-                'Field [%s] must be between [1] and [%d] bytes, [%d] bytes given.',
-                $field->getName(),
-                $maxBytes,
-                $length
-            ),
-            $field->getName()
-        );
+
+        if (!$okay) {
+            Assertion::true(
+                $okay,
+                sprintf(
+                    'Field [%s] must be between [1] and [%d] bytes, [%d] bytes given.',
+                    $fieldName,
+                    $maxBytes,
+                    $length
+                ),
+                $fieldName
+            );
+        }
     }
 
     public function encode($value, Field $field, ?Codec $codec = null)
@@ -41,13 +45,17 @@ final class IdentifierType extends AbstractType
             return (string)$value->toString();
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (empty($value)) {
-            return null;
+        if (null === $value || $value instanceof Identifier) {
+            return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && !empty($value)) {
+            return (string)$value;
         }
 
         /** @var Identifier $className */

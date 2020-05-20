@@ -17,11 +17,19 @@ final class GeoPointType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value) {
+            return null;
+        }
+
         return $codec->encodeGeoPoint($value, $field);
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value || $value instanceof GeoPoint) {
+            return $value;
+        }
+
         return $codec->decodeGeoPoint($value, $field);
     }
 

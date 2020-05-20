@@ -13,7 +13,8 @@ use Gdbots\Pbj\WellKnown\NodeRef;
 abstract class AbstractMessage implements Message, \JsonSerializable
 {
     private static ?PhpArraySerializer $serializer = null;
-    private array $data = [];
+    protected array $data = [];
+    protected array $decoded = [];
 
     /** @see Message::freeze */
     private bool $isFrozen = false;
@@ -48,24 +49,20 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     final public static function fromArray(array $data = []): self
     {
-        if (null === self::$serializer) {
-            self::$serializer = new PhpArraySerializer();
-        }
-
         if (!isset($data[Schema::PBJ_FIELD_NAME])) {
             $data[Schema::PBJ_FIELD_NAME] = static::schema()->getId()->toString();
         }
 
-        return self::$serializer->deserialize($data);
+        return self::getSerializer()->deserialize($data);
     }
 
     final public function toArray(): array
     {
-        if (null === self::$serializer) {
-            self::$serializer = new PhpArraySerializer();
-        }
-
-        return self::$serializer->serialize($this);
+        $serializer = self::getSerializer();
+        $serializer->skipValidation(true);
+        $array = $serializer->serialize($this);
+        $serializer->skipValidation(false);
+        return $array;
     }
 
     final public function __toString()
@@ -78,23 +75,32 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this->toArray();
     }
 
+    final public function __sleep()
+    {
+        return ['data'];
+    }
+
+    final public function __wakeup()
+    {
+        $this->decoded = [];
+        $this->isFrozen = false;
+        $this->isReplay = null;
+    }
+
     final public function __clone()
     {
         $this->data = unserialize(serialize($this->data));
-        $this->unFreeze();
+        $this->decoded = [];
+        $this->isFrozen = false;
+        $this->isReplay = null;
     }
 
-    /**
-     * {@inheritdoc}
-     * todo: review performance
-     */
     final public function generateEtag(array $ignoredFields = []): string
     {
-        if (null === self::$serializer) {
-            self::$serializer = new PhpArraySerializer();
-        }
-
-        $array = self::$serializer->serialize($this);
+        $serializer = self::getSerializer();
+        $serializer->skipValidation(true);
+        $array = $serializer->serialize($this);
+        $serializer->skipValidation(false);
 
         if (empty($ignoredFields)) {
             return md5(json_encode($array));
@@ -122,80 +128,54 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return [];
     }
 
-    /**
-     * todo: recursively validate nested messages?
-     */
-    final public function validate(): self
+    final public function validate(bool $strict = false, bool $recursive = false): self
     {
-        foreach (static::schema()->getRequiredFields() as $field) {
-            if (!$this->has($field->getName())) {
-                throw new RequiredFieldNotSet($this, $field);
+        if (!$strict && $this->isFrozen()) {
+            return $this;
+        }
+
+        if (!$strict) {
+            foreach (static::schema()->getRequiredFields() as $field) {
+                if (!$this->has($field->getName())) {
+                    throw new RequiredFieldNotSet($this, $field);
+                }
             }
+        } else {
+            foreach (static::schema()->getFields() as $field) {
+                if ($field->isRequired() && !$this->has($field->getName())) {
+                    throw new RequiredFieldNotSet($this, $field);
+                }
+
+                // just getting the field will decode/guard the values
+                $this->get($field->getName());
+            }
+        }
+
+        if (!$recursive) {
+            return $this;
+        }
+
+        foreach ($this->getNestedMessages() as $message) {
+            $message->validate($strict, $recursive);
         }
 
         return $this;
     }
 
-    final public function freeze(): self
+    final public function freeze(bool $withStrictValidation = true): self
     {
         if ($this->isFrozen()) {
             return $this;
         }
 
-        $this->validate();
+        $this->validate($withStrictValidation);
         $this->isFrozen = true;
 
-        foreach (static::schema()->getFields() as $field) {
-            if ($field->getType()->isMessage()) {
-                /** @var self $value */
-                $value = $this->get($field->getName());
-                if (empty($value)) {
-                    continue;
-                }
-
-                if ($value instanceof Message) {
-                    $value->freeze();
-                    continue;
-                }
-
-                /** @var self $v */
-                foreach ($value as $v) {
-                    $v->freeze();
-                }
-            }
+        foreach ($this->getNestedMessages() as $message) {
+            $message->freeze($withStrictValidation);
         }
 
         return $this;
-    }
-
-    /**
-     * Recursively unfreezes this object and any of its children.
-     * Used internally during the clone process.
-     */
-    private function unFreeze(): void
-    {
-        $this->isFrozen = false;
-        $this->isReplay = null;
-
-        foreach (static::schema()->getFields() as $field) {
-            if ($field->getType()->isMessage()) {
-                /** @var self $value */
-                $value = $this->get($field->getName());
-                if (empty($value)) {
-                    continue;
-                }
-
-                if ($value instanceof Message) {
-                    $value->unFreeze();
-                    continue;
-                }
-
-                /** @var self $v */
-                foreach ($value as $v) {
-                    $v->unFreeze();
-                }
-            }
-        }
     }
 
     final public function isFrozen(): bool
@@ -248,7 +228,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
     {
         $this->guardFrozenMessage();
 
-        if (!empty($fieldName)) {
+        if ($fieldName) {
             $this->populateDefault(static::schema()->getField($fieldName));
             return $this;
         }
@@ -270,7 +250,9 @@ abstract class AbstractMessage implements Message, \JsonSerializable
      */
     private function populateDefault(Field $field): bool
     {
-        if ($this->has($field->getName())) {
+        $fieldName = $field->getName();
+
+        if ($this->has($fieldName)) {
             return true;
         }
 
@@ -280,7 +262,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         }
 
         if ($field->isASingleValue()) {
-            $this->data[$field->getName()] = $default;
+            $this->decoded[$fieldName] = $default;
+            $this->data[$fieldName] = $this->encodeValue($default, $field);
             return true;
         }
 
@@ -292,12 +275,36 @@ abstract class AbstractMessage implements Message, \JsonSerializable
          * sets have a special handling to deal with unique values
          */
         if ($field->isASet()) {
-            $this->addToSet($field->getName(), $default);
+            $this->addToSet($fieldName, $default);
             return true;
         }
 
-        $this->data[$field->getName()] = $default;
+        $this->decoded[$fieldName] = $default;
+        $this->data[$fieldName] = $this->encodeValue($default, $field);
         return true;
+    }
+
+    final public function setWithoutValidation(string $fieldName, $value): self
+    {
+        $this->guardFrozenMessage();
+        $field = static::schema()->getField($fieldName);
+
+        if (null === $value) {
+            return $this->clear($fieldName);
+        }
+
+        unset($this->decoded[$fieldName]);
+
+        if ($field->isASet()) {
+            $this->data[$fieldName] = [];
+            foreach ($value as $v) {
+                $this->data[$fieldName][strtolower(trim((string)$v))] = $v;
+            }
+            return $this;
+        }
+
+        $this->data[$fieldName] = $value;
+        return $this;
     }
 
     final public function has(string $fieldName): bool
@@ -320,6 +327,28 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         }
 
         $field = static::schema()->getField($fieldName);
+        if ($this->hasDecoded($fieldName)) {
+            return $field->isASet() ? array_values($this->decoded[$fieldName]) : $this->decoded[$fieldName];
+        }
+
+        if ($field->isASingleValue()) {
+            $decoded = $this->decodeValue($this->data[$fieldName], $field);
+        } else {
+            $decoded = array_map(function ($value) use ($fieldName, $field) {
+                return $this->decodeValue($value, $field);
+            }, $this->data[$fieldName]);
+        }
+
+        return $this->decoded[$fieldName] = $decoded;
+    }
+
+    final public function fget(string $fieldName, $default = null)
+    {
+        if (!$this->has($fieldName)) {
+            return $default;
+        }
+
+        $field = static::schema()->getField($fieldName);
         if ($field->isASet()) {
             return array_values($this->data[$fieldName]);
         }
@@ -331,6 +360,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
+        unset($this->decoded[$fieldName]);
         unset($this->data[$fieldName]);
         $this->populateDefault($field);
         return $this;
@@ -340,41 +370,32 @@ abstract class AbstractMessage implements Message, \JsonSerializable
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isASingleValue(), sprintf('Field [%s] must be a single value.', $fieldName), $fieldName);
+        Assertion::true($field->isASingleValue(), 'Field must be a single value.', $fieldName);
 
         if (null === $value) {
             return $this->clear($fieldName);
         }
 
         $field->guardValue($value);
-        $this->data[$fieldName] = $value;
+        $this->decoded[$fieldName] = $value;
+        $this->data[$fieldName] = $this->encodeValue($value, $field);
         return $this;
     }
 
     final public function isInSet(string $fieldName, $value): bool
     {
-        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
+        if (!$this->has($fieldName)) {
             return false;
         }
 
-        if (is_scalar($value) || (is_object($value) && method_exists($value, '__toString'))) {
-            $key = trim((string)$value);
-        } else {
-            return false;
-        }
-
-        if (0 === strlen($key)) {
-            return false;
-        }
-
-        return isset($this->data[$fieldName][strtolower($key)]);
+        return isset($this->data[$fieldName][strtolower(trim((string)$value))]);
     }
 
     final public function addToSet(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
+        Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
         foreach ($values as $value) {
             if (0 === strlen((string)$value)) {
@@ -383,7 +404,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
             $field->guardValue($value);
             $key = strtolower(trim((string)$value));
-            $this->data[$fieldName][$key] = $value;
+            $this->decoded[$fieldName][$key] = $value;
+            $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
         }
 
         return $this;
@@ -393,7 +415,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
+        Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
         foreach ($values as $value) {
             if (0 === strlen($value)) {
@@ -401,6 +423,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
             }
 
             $key = strtolower(trim((string)$value));
+            unset($this->decoded[$fieldName][$key]);
             unset($this->data[$fieldName][$key]);
         }
 
@@ -409,34 +432,33 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     final public function isInList(string $fieldName, $value): bool
     {
-        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
+        if (!$this->has($fieldName)) {
             return false;
         }
 
-        return in_array($value, $this->data[$fieldName]);
+        return in_array($value, $this->get($fieldName));
     }
 
     final public function getFromListAt(string $fieldName, int $index, $default = null)
     {
-        if (empty($this->data[$fieldName])
-            || !is_array($this->data[$fieldName])
-            || !isset($this->data[$fieldName][$index])
-        ) {
+        if (!$this->has($fieldName)) {
             return $default;
         }
 
-        return $this->data[$fieldName][$index];
+        $values = $this->get($fieldName);
+        return $values[$index] ?? $default;
     }
 
     final public function addToList(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
+        Assertion::true($field->isAList(), 'Field must be a list.', $fieldName);
 
         foreach ($values as $value) {
             $field->guardValue($value);
-            $this->data[$fieldName][] = $value;
+            $this->decoded[$fieldName][] = $value;
+            $this->data[$fieldName][] = $this->encodeValue($value, $field);
         }
 
         return $this;
@@ -446,12 +468,13 @@ abstract class AbstractMessage implements Message, \JsonSerializable
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
+        Assertion::true($field->isAList(), 'Field must be a list.', $fieldName);
 
         if (empty($this->data[$fieldName])) {
             return $this;
         }
 
+        unset($this->decoded[$fieldName]);
         array_splice($this->data[$fieldName], $index, 1);
         if (empty($this->data[$fieldName])) {
             return $this;
@@ -464,7 +487,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     final public function isInMap(string $fieldName, string $key): bool
     {
-        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName]) || !is_string($key)) {
+        if (!$this->has($fieldName)) {
             return false;
         }
 
@@ -477,21 +500,23 @@ abstract class AbstractMessage implements Message, \JsonSerializable
             return $default;
         }
 
-        return $this->data[$fieldName][$key];
+        $values = $this->get($fieldName);
+        return $values[$key] ?? $default;
     }
 
     final public function addToMap(string $fieldName, string $key, $value): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
+        Assertion::true($field->isAMap(), 'Field must be a map.', $fieldName);
 
         if (null === $value) {
             return $this->removeFromMap($fieldName, $key);
         }
 
         $field->guardValue($value);
-        $this->data[$fieldName][$key] = $value;
+        $this->decoded[$fieldName][$key] = $value;
+        $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
 
         return $this;
     }
@@ -500,15 +525,70 @@ abstract class AbstractMessage implements Message, \JsonSerializable
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
+        Assertion::true($field->isAMap(), 'Field must be a map.', $fieldName);
 
+        unset($this->decoded[$fieldName][$key]);
         unset($this->data[$fieldName][$key]);
         return $this;
     }
 
-    public function __wakeup()
+    private static function getSerializer(): PhpArraySerializer
     {
-        $this->isFrozen = false;
-        $this->isReplay = null;
+        if (null === self::$serializer) {
+            self::$serializer = new PhpArraySerializer();
+        }
+
+        return self::$serializer;
+    }
+
+    private function hasDecoded(string $fieldName): bool
+    {
+        return isset($this->decoded[$fieldName]);
+    }
+
+    private function encodeValue($value, Field $field)
+    {
+        $type = $field->getType();
+        if ($type->isMessage()) {
+            return $value;
+        }
+
+        return $type->encode($value, $field, self::getSerializer());
+    }
+
+    private function decodeValue($value, Field $field)
+    {
+        $decoded = $field->getType()->decode($value, $field, self::getSerializer());
+        $field->guardValue($decoded);
+        return $decoded;
+    }
+
+    /**
+     * @return self[]
+     */
+    private function getNestedMessages(): array
+    {
+        $messages = [];
+        foreach (static::schema()->getFields() as $field) {
+            if ($field->getType()->isMessage()) {
+                /** @var self $value */
+                $value = $this->get($field->getName());
+                if (empty($value)) {
+                    continue;
+                }
+
+                if ($value instanceof self) {
+                    $messages[] = $value;
+                    continue;
+                }
+
+                /** @var self $v */
+                foreach ($value as $v) {
+                    $messages[] = $v;
+                }
+            }
+        }
+
+        return $messages;
     }
 }

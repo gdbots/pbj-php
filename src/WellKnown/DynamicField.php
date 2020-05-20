@@ -60,9 +60,7 @@ final class DynamicField implements \JsonSerializable
     private function __construct(string $name, DynamicFieldKind $kind, $value)
     {
         Assertion::betweenLength($name, 1, 127);
-        Assertion::regex($name, self::VALID_NAME_PATTERN,
-            sprintf('DynamicField name [%s] must match pattern [%s].', $name, self::VALID_NAME_PATTERN)
-        );
+        Assertion::regex($name, self::VALID_NAME_PATTERN, 'DynamicField name must match pattern.');
 
         $this->name = $name;
         $this->kind = $kind->getValue();

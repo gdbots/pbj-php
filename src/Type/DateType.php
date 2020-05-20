@@ -23,7 +23,7 @@ final class DateType extends AbstractType
             return $value->format('Y-m-d');
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
@@ -35,6 +35,10 @@ final class DateType extends AbstractType
         if ($value instanceof \DateTimeInterface) {
             // ensures we're always in UTC and have no time parts.
             $value = $value->format('Y-m-d');
+        }
+
+        if ($codec && $codec->skipValidation()) {
+            return (string)$value;
         }
 
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, $this->getUtcTimeZone());

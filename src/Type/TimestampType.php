@@ -12,11 +12,12 @@ final class TimestampType extends AbstractType
 {
     public function guard($value, Field $field): void
     {
-        Assertion::integer($value, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::integer($value, null, $fieldName);
         Assertion::true(
             DateUtil::isValidTimestamp($value),
-            sprintf('Field [%s] value [%d] is not a valid unix timestamp.', $field->getName(), $value),
-            $field->getName()
+            'Field must be a valid unix timestamp.',
+            $fieldName
         );
     }
 

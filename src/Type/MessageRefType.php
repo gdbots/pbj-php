@@ -17,11 +17,19 @@ final class MessageRefType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value) {
+            return null;
+        }
+
         return $codec->encodeMessageRef($value, $field);
     }
 
     public function decode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value || $value instanceof MessageRef) {
+            return $value;
+        }
+
         return $codec->decodeMessageRef($value, $field);
     }
 
@@ -31,6 +39,11 @@ final class MessageRefType extends AbstractType
     }
 
     public function encodesToScalar(): bool
+    {
+        return false;
+    }
+
+    public function allowedInSet(): bool
     {
         return false;
     }
