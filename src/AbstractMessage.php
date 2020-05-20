@@ -58,11 +58,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     final public function toArray(): array
     {
-        $serializer = self::getSerializer();
-        $serializer->skipValidation(true);
-        $array = $serializer->serialize($this);
-        $serializer->skipValidation(false);
-        return $array;
+        return self::getSerializer()->serialize($this);
     }
 
     final public function __toString()
