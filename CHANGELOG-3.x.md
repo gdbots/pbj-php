@@ -20,3 +20,4 @@ __BREAKING CHANGES__
 * Removes use of `gdbots/common` lib as those classes moved to `Gdbots\Pbj\Util\*Util`.
 * Removes all use of `Gdbots\Common\FromArray` and `Gdbots\Common\ToArray` interfaces as it wasn't really needed.
 * Adds `Gdbots\Pbj\Enum` which replaces `Gdbots\Common\Enum`.
+* Adds `Codec::skipValidation` which allows an optimized process for encoding/decoding that uses native php scalars/arrays where possible instead of objects. This should only be used when data is very trusted and highest performance possible is required.

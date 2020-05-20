@@ -107,23 +107,22 @@ final class ItemMarshaler implements Codec
     public function encodeDynamicField($dynamicField, Field $field)
     {
         if ($dynamicField instanceof DynamicField) {
-            return [
-                'M' => [
-                    'name'                   => [self::TYPE_STRING => $dynamicField->getName()],
-                    $dynamicField->getKind() => $this->encodeValue($dynamicField->getValue(), $dynamicField->getField()),
-                ],
-            ];
+            $name = $dynamicField->getName();
+            $kind = $dynamicField->getKind();
+            $value = $dynamicField->getValue();
+            $dfField = $dynamicField->getField();
+        } else {
+            $name = $dynamicField['name'];
+            unset($dynamicField['name']);
+            $kind = key($dynamicField);
+            $value = $dynamicField[$kind];
+            $dfField = DynamicField::createField($kind);
         }
-
-        $name = $dynamicField['name'];
-        unset($dynamicField['name']);
-        $kind = key($dynamicField);
-        $dfField = DynamicField::createField($kind);
 
         return [
             'M' => [
                 'name' => [self::TYPE_STRING => $name],
-                $kind  => $this->encodeValue($dynamicField[$kind], $dfField),
+                $kind  => $this->encodeValue($value, $dfField),
             ],
         ];
     }
