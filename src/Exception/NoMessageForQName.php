@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\SchemaQName;
 
-class NoMessageForQName extends \LogicException implements GdbotsPbjException
+final class NoMessageForQName extends \LogicException implements GdbotsPbjException
 {
     private SchemaQName $qname;
 

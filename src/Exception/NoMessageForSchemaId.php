@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\SchemaId;
 
-class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
+final class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
 {
     private SchemaId $schemaId;
 

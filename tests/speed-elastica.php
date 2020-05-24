@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 require 'speed-bootstrap.php';
 
-use \Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
+use Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
 
 $startTime = microtime(true);
 $i = 0;

@@ -13,12 +13,18 @@ final class NestedMessage extends AbstractMessage
 {
     protected static function defineSchema(): Schema
     {
-        $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0', __CLASS__, [
-            Fb::create('test1', T\StringType::create())->build(),
-            Fb::create('test2', T\IntType::create())->asASet()->build(),
-            Fb::create('location', T\GeoPointType::create())->build(),
-            Fb::create('refs', T\MessageRefType::create())->asAList()->build(),
-        ]);
+        $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:nested-message:1-0-0', __CLASS__,
+            [
+                Fb::create('test1', T\StringType::create())->build(),
+                Fb::create('test2', T\IntType::create())->asASet()->build(),
+                Fb::create('location', T\GeoPointType::create())->build(),
+                Fb::create('refs', T\MessageRefType::create())->asAList()->build(),
+            ],
+            [
+                'gdbots:tests.pbj:mixin:many:v1',
+                'gdbots:tests.pbj:mixin:many',
+            ]
+        );
 
         MessageResolver::registerSchema($schema);
         return $schema;

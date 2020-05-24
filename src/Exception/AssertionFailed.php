@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Assert\InvalidArgumentException;
 
-class AssertionFailed extends InvalidArgumentException implements GdbotsPbjException
+final class AssertionFailed extends InvalidArgumentException implements GdbotsPbjException
 {
     public function __construct($message, $code, string $propertyPath = null, $value = null, array $constraints = [])
     {

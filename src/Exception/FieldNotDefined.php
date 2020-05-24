@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\Schema;
 
-class FieldNotDefined extends SchemaException
+final class FieldNotDefined extends SchemaException
 {
     private string $fieldName;
 

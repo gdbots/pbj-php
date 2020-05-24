@@ -6,7 +6,7 @@ namespace Gdbots\Pbj\Exception;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
 
-class RequiredFieldNotSet extends SchemaException
+final class RequiredFieldNotSet extends SchemaException
 {
     private Message $type;
     private Field $field;

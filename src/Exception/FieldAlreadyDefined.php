@@ -6,7 +6,7 @@ namespace Gdbots\Pbj\Exception;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Schema;
 
-class FieldAlreadyDefined extends SchemaException
+final class FieldAlreadyDefined extends SchemaException
 {
     private Field $field;
 

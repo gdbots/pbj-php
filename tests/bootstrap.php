@@ -15,6 +15,7 @@ $loader = require dirname(__DIR__) . '/vendor/autoload.php';
 // auto registers the schema with the MessageResolver
 // only done for tests or dynamic messages.
 \Gdbots\Pbj\MessageResolver::setDefaultVendor('gdbots');
+\Gdbots\Pbj\MessageResolver::setManifestDir(__DIR__ . '/Fixtures/manifests/');
 \Gdbots\Tests\Pbj\Fixtures\EmailMessage::schema();
 \Gdbots\Tests\Pbj\Fixtures\NestedMessage::schema();
 \Gdbots\Tests\Pbj\Fixtures\MapsMessage::schema();

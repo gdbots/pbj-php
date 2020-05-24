@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\Message;
 
-class FrozenMessageIsImmutable extends \LogicException implements GdbotsPbjException
+final class FrozenMessageIsImmutable extends \LogicException implements GdbotsPbjException
 {
     private Message $type;
 

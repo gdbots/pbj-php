@@ -6,7 +6,7 @@ namespace Gdbots\Pbj\Exception;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
 
-class InvalidResolvedSchema extends SchemaException
+final class InvalidResolvedSchema extends SchemaException
 {
     private SchemaId $resolvedSchemaId;
     private string $resolvedClassName;

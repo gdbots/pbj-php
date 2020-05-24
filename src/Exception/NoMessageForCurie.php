@@ -5,7 +5,7 @@ namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\SchemaCurie;
 
-class NoMessageForCurie extends \LogicException implements GdbotsPbjException
+final class NoMessageForCurie extends \LogicException implements GdbotsPbjException
 {
     private SchemaCurie $curie;
 

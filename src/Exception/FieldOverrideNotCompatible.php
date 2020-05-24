@@ -6,7 +6,7 @@ namespace Gdbots\Pbj\Exception;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Schema;
 
-class FieldOverrideNotCompatible extends SchemaException
+final class FieldOverrideNotCompatible extends SchemaException
 {
     private Field $existingField;
     private Field $overrideField;

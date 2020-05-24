@@ -82,8 +82,10 @@ final class EmailMessage extends AbstractMessage
                     ->build(),
             ],
             [
-                'gdbots:tests.pbj:mixin:fake-mixin:v1',
-                'gdbots:tests.pbj:mixin:fake-mixin',
+                'gdbots:tests.pbj:mixin:many:v1',
+                'gdbots:tests.pbj:mixin:many',
+                'gdbots:tests.pbj:mixin:one:v1',
+                'gdbots:tests.pbj:mixin:one',
             ]
         );
 

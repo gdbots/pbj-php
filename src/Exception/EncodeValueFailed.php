@@ -6,7 +6,7 @@ namespace Gdbots\Pbj\Exception;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Util\StringUtil;
 
-class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
+final class EncodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
 {
     private $value;
     private Field $field;

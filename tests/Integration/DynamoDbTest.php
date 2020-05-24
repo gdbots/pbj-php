@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Integration;
 
@@ -14,17 +15,10 @@ class DynamoDbTest extends TestCase
 {
     use FixtureLoader;
 
-    /** @var DynamoDbClient */
-    protected static $client;
-
-    /** @var string */
-    protected static $tableName;
-
-    /** @var ItemMarshaler */
-    protected $marshaler;
-
-    /** @var EmailMessage */
-    protected $message;
+    protected static ?DynamoDbClient $client = null;
+    protected static ?string $tableName = null;
+    protected ?ItemMarshaler $marshaler = null;
+    protected ?EmailMessage $message = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -57,7 +51,7 @@ class DynamoDbTest extends TestCase
     /**
      * Create the dynamodb table before tests run.
      */
-    protected static function createTable()
+    protected static function createTable(): void
     {
         try {
             self::$client->describeTable(['TableName' => self::$tableName]);
@@ -86,13 +80,13 @@ class DynamoDbTest extends TestCase
     /**
      * Delete the test table after tests complete.
      */
-    protected static function deleteTable()
+    protected static function deleteTable(): void
     {
         self::$client->deleteTable(['TableName' => self::$tableName]);
         self::$client->waitUntil('TableNotExists', ['TableName' => self::$tableName]);
     }
 
-    public function setup(): void
+    public function setUp(): void
     {
         if (null === self::$client) {
             $this->markTestSkipped('AWS_KEY or AWS_SECRET was not supplied, skipping integration test.');
@@ -103,7 +97,7 @@ class DynamoDbTest extends TestCase
         $this->message = $this->createEmailMessage();
     }
 
-    public function testPutItem()
+    public function testPutItem(): void
     {
         try {
             $item = $this->marshaler->marshal($this->message);
@@ -117,7 +111,7 @@ class DynamoDbTest extends TestCase
         }
     }
 
-    public function testGetItem()
+    public function testGetItem(): void
     {
         try {
             $result = self::$client->getItem([
