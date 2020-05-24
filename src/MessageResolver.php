@@ -274,4 +274,9 @@ final class MessageResolver
     {
         self::$manifestDir = rtrim($dir, '/') . '/';
     }
+
+    public static function getManifestDir(): string
+    {
+        return self::$manifestDir;
+    }
 }
