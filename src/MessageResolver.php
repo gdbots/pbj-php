@@ -198,18 +198,19 @@ final class MessageResolver
     }
 
     /**
-     * Return the one curie (major) expected to be using the provided mixin.
+     * Return the one curie expected to be using the provided mixin (a curie major).
      *
      * @param string $mixin
+     * @param bool   $returnWithMajor
      *
      * @return string
      *
      * @throws MoreThanOneMessageForMixin
      * @throws NoMessageForMixin
      */
-    public static function findOneUsingMixin($mixin): string
+    public static function findOneUsingMixin($mixin, bool $returnWithMajor = true): string
     {
-        $curies = self::findAllUsingMixin($mixin);
+        $curies = self::findAllUsingMixin($mixin, $returnWithMajor);
         if (1 !== count($curies)) {
             throw new MoreThanOneMessageForMixin($mixin, $curies);
         }
@@ -218,15 +219,16 @@ final class MessageResolver
     }
 
     /**
-     * Returns an array of curies (major) of messages using the provided mixin.
+     * Returns an array of curies of messages using the provided mixin (a curie major).
      *
      * @param string $mixin
+     * @param bool   $returnWithMajor
      *
      * @return string[]
      *
      * @throws NoMessageForMixin
      */
-    public static function findAllUsingMixin(string $mixin): array
+    public static function findAllUsingMixin(string $mixin, bool $returnWithMajor = true): array
     {
         if (!isset(self::$resolvedMixins[$mixin])) {
             $file = self::$manifestDir . str_replace(':', '/', $mixin) . '.php';
@@ -237,7 +239,13 @@ final class MessageResolver
             throw new NoMessageForMixin($mixin);
         }
 
-        return self::$resolvedMixins[$mixin];
+        if ($returnWithMajor) {
+            return self::$resolvedMixins[$mixin];
+        }
+
+        return array_map(function ($curie) {
+            return substr($curie, 0, strrpos($curie, ':') - strlen($curie));
+        }, self::$resolvedMixins[$mixin]);
     }
 
     /**
