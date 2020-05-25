@@ -157,7 +157,7 @@ final class SchemaId implements \JsonSerializable
         return $this->package;
     }
 
-    public function getCategory(): string
+    public function getCategory(): ?string
     {
         return $this->category;
     }

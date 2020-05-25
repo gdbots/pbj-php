@@ -36,10 +36,10 @@ final class MessageRef implements \JsonSerializable
      *
      * @throws \Throwable
      */
-    public function __construct(SchemaCurie $curie, string $id, ?string $tag = null)
+    public function __construct(SchemaCurie $curie, ?string $id = null, ?string $tag = null)
     {
         $this->curie = $curie;
-        $this->id = trim($id) ?: 'null';
+        $this->id = trim((string)$id) ?: 'null';
         Assertion::regex($this->id, '/^[\w\/\.:-]+$/', null, 'MessageRef.id');
 
         if (null !== $tag) {
