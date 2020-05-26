@@ -198,6 +198,18 @@ final class MessageResolver
     }
 
     /**
+     * Return true if any messages are using the provided mixin (a curie major).
+     *
+     * @param string $mixin
+     *
+     * @return bool
+     */
+    public static function hasAnyUsingMixin(string $mixin): bool
+    {
+        return !empty(self::findAllUsingMixin($mixin));
+    }
+
+    /**
      * Return the one curie expected to be using the provided mixin (a curie major).
      *
      * @param string $mixin
@@ -206,16 +218,18 @@ final class MessageResolver
      * @return string
      *
      * @throws MoreThanOneMessageForMixin
-     * @throws NoMessageForMixin
      */
-    public static function findOneUsingMixin($mixin, bool $returnWithMajor = true): string
+    public static function findOneUsingMixin(string $mixin, bool $returnWithMajor = true): string
     {
         $curies = self::findAllUsingMixin($mixin, $returnWithMajor);
-        if (1 !== count($curies)) {
+        $count = count($curies);
+        if ($count === 1) {
+            return $curies[0];
+        } elseif ($count === 0) {
+            throw new NoMessageForMixin($mixin);
+        } else {
             throw new MoreThanOneMessageForMixin($mixin, $curies);
         }
-
-        return $curies[0];
     }
 
     /**
@@ -225,18 +239,12 @@ final class MessageResolver
      * @param bool   $returnWithMajor
      *
      * @return string[]
-     *
-     * @throws NoMessageForMixin
      */
     public static function findAllUsingMixin(string $mixin, bool $returnWithMajor = true): array
     {
         if (!isset(self::$resolvedMixins[$mixin])) {
             $file = self::$manifestDir . str_replace(':', '/', $mixin) . '.php';
             self::$resolvedMixins[$mixin] = file_exists($file) ? require $file : [];
-        }
-
-        if (empty(self::$resolvedMixins[$mixin])) {
-            throw new NoMessageForMixin($mixin);
         }
 
         if ($returnWithMajor) {

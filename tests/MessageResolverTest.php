@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Gdbots\Tests\Pbj;
 
 use Gdbots\Pbj\Exception\MoreThanOneMessageForMixin;
-use Gdbots\Pbj\Exception\NoMessageForMixin;
 use Gdbots\Pbj\Exception\NoMessageForQName;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\SchemaQName;
@@ -49,10 +48,16 @@ class MessageResolverTest extends TestCase
         );
     }
 
+    public function testHasAnyUsingMixin()
+    {
+        $this->assertTrue(MessageResolver::hasAnyUsingMixin('gdbots:tests.pbj:mixin:one:v1'));
+        $this->assertTrue(MessageResolver::hasAnyUsingMixin('gdbots:tests.pbj:mixin:many:v1'));
+        $this->assertFalse(MessageResolver::hasAnyUsingMixin('gdbots:tests.pbj:mixin:fake:v1'));
+    }
+
     public function testFindAllUsingMixinWhenNone()
     {
-        $this->expectException(NoMessageForMixin::class);
-        MessageResolver::findAllUsingMixin('gdbots:tests.pbj:mixin:fake:v1');
+        $this->assertSame([], MessageResolver::findAllUsingMixin('gdbots:tests.pbj:mixin:fake:v1'));
     }
 
     public function testFindOneUsingMixinWhenOne()
