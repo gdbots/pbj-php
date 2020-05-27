@@ -83,7 +83,7 @@ class ElasticaTest extends TestCase
     public function testAddDocument(): void
     {
         $document = $this->marshaler->marshal($this->message);
-        $document->setId('1')->setParam('__type', 'message');
+        $document->setId('1')->setParam('d__type', 'message');
         self::$index->addDocument($document);
         $this->assertTrue(true);
     }

@@ -15,7 +15,7 @@ final class MessageResolver
     private static string $manifestDir = __DIR__;
 
     /**
-     * An array of all the available schemas keyed by a curie or curie major.
+     * An array of all the available schemas keyed by a curie major.
      *
      * @var Message[]
      */
@@ -38,9 +38,9 @@ final class MessageResolver
     private static array $resolvedMixins = [];
 
     /**
-     * An array of class names keyed by curie or curie major.
+     * An array of class names keyed by a curie major.
      * [
-     *     'vendor:package:category:message' => 'Vendor\Package\Category\MessageV1'
+     *     'vendor:package:category:message:v1' => 'Vendor\Package\Category\MessageV1'
      * ],
      *
      * @param Message[] $messages

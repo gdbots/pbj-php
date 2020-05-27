@@ -16,6 +16,16 @@ use Gdbots\Pbj\Util\StringUtil;
 class MappingBuilder
 {
     /**
+     * Generally we use "__" to indicate a derived field but kibana won't recognize it.
+     * So for now, we'll use "d__" to indicate a derived field for ES.
+     *
+     * @link  https://github.com/elastic/kibana/issues/2551
+     * @link  https://github.com/elastic/kibana/issues/4762
+     */
+    const ALL_FIELD = 'd__all';
+    const TYPE_FIELD = 'd__type';
+
+    /**
      * Map of pbj type to elasticsearch data types.
      */
     const TYPES = [
@@ -36,10 +46,10 @@ class MappingBuilder
                 'int_val'    => ['type' => 'long'],
                 'string_val' => [
                     'type'    => 'text',
-                    'copy_to' => '__all',
+                    'copy_to' => self::ALL_FIELD,
                     'fields'  => ['raw' => ['type' => 'keyword', 'normalizer' => 'pbj_keyword']],
                 ],
-                'text_val'   => ['type' => 'text', 'copy_to' => '__all'],
+                'text_val'   => ['type' => 'text', 'copy_to' => self::ALL_FIELD],
             ],
         ],
         'float'             => ['type' => 'float'],
@@ -49,7 +59,7 @@ class MappingBuilder
         'int-enum'          => ['type' => 'integer'],
         'medium-blob'       => ['type' => 'binary'],
         'medium-int'        => ['type' => 'integer'],
-        'medium-text'       => ['type' => 'text', 'copy_to' => '__all'],
+        'medium-text'       => ['type' => 'text', 'copy_to' => self::ALL_FIELD],
         'message'           => ['type' => 'object'],
         'message-ref'       => [
             'type'       => 'object',
@@ -67,9 +77,9 @@ class MappingBuilder
         'signed-small-int'  => ['type' => 'short'],
         'signed-tiny-int'   => ['type' => 'byte'],
         'small-int'         => ['type' => 'integer'],
-        'string'            => ['type' => 'text', 'copy_to' => '__all'],
+        'string'            => ['type' => 'text', 'copy_to' => self::ALL_FIELD],
         'string-enum'       => ['type' => 'keyword'],
-        'text'              => ['type' => 'text', 'copy_to' => '__all'],
+        'text'              => ['type' => 'text', 'copy_to' => self::ALL_FIELD],
         'time-uuid'         => ['type' => 'keyword'],
         'timestamp'         => ['type' => 'date'],
         'tiny-int'          => ['type' => 'short'],
@@ -140,8 +150,8 @@ class MappingBuilder
     public function build(): Mapping
     {
         $properties = $this->properties;
-        $properties['__type'] = ['type' => 'keyword'];
-        $properties['__all'] = ['type' => 'text', 'analyzer' => $this->analyzer];
+        $properties[self::TYPE_FIELD] = ['type' => 'keyword'];
+        $properties[self::ALL_FIELD] = ['type' => 'text', 'analyzer' => $this->analyzer];
         $mapping = new Mapping($properties);
         $dynamicTemplates = $this->getDynamicTemplates();
         if (!empty($dynamicTemplates)) {
@@ -154,6 +164,7 @@ class MappingBuilder
     public function setAnalyzer(string $analyzer): self
     {
         $this->analyzer = $analyzer;
+        return $this;
     }
 
     public function addDynamicTemplate(string $name, array $template): self

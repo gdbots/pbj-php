@@ -96,7 +96,8 @@ interface Message
     /**
      * Freezes the message, making it immutable.  The message must be validated
      * before it can be frozen so this may throw an exception if some required
-     * fields have not been populated. Using strict
+     * fields have not been populated. Using strict validation will also ensure
+     * the value has been guarded by the field and type constraints.
      *
      * @param bool $withStrictValidation
      *
