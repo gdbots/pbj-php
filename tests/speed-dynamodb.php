@@ -1,21 +1,23 @@
 <?php
+declare(strict_types=1);
 
 require 'speed-bootstrap.php';
 
-use Gdbots\Pbj\Serializer\YamlSerializer;
+use Gdbots\Pbj\Marshaler\DynamoDb\ItemMarshaler;
 
 $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
-$serializer = new YamlSerializer();
+$marshaler = new ItemMarshaler();
+$marshaler->skipValidation(true);
 
 do {
     $i++;
-    $yaml = $serializer->serialize($message);
-    $message = $serializer->deserialize($yaml);
+    $document = $marshaler->marshal($message);
+    $message = $marshaler->unmarshal($document);
 } while ($i < numTimes());
 
-echo $serializer->serialize($message) . PHP_EOL;
+echo json_encode($marshaler->marshal($message), JSON_PRETTY_PRINT) . PHP_EOL;
 
 // speed report
 $benchmark = microtime(true) - $startTime;
@@ -45,3 +47,4 @@ Rate:
 
 STRING;
 echo $report;
+

@@ -1,52 +1,35 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Pbj\Schema;
-
-class MoreThanOneMessageForMixin extends \LogicException implements GdbotsPbjException
+final class MoreThanOneMessageForMixin extends \LogicException implements GdbotsPbjException
 {
-    /** @var string */
-    private $mixin;
+    private string $mixin;
+    private array $curies;
 
-    /** @var Schema[] */
-    private $schemas;
-
-    /**
-     * @param string   $mixin
-     * @param Schema[] $schemas
-     */
-    public function __construct(string $mixin, array $schemas)
+    public function __construct(string $mixin, array $curies)
     {
         $this->mixin = $mixin;
-        $this->schemas = $schemas;
-        $ids = array_map(function (Schema $schema) {
-            return $schema->getId()->toString() . ' => ' . $schema->getClassName();
-        }, $schemas);
+        $this->curies = $curies;
         parent::__construct(
             sprintf(
-                'MessageResolver returned multiple messages using [%s] when one was expected.  ' .
-                'Messages found:' . PHP_EOL . '%s',
+                'MessageResolver returned multiple curies using [%s] when one was expected.  ' .
+                'Curies found:' . PHP_EOL . '%s',
                 $mixin,
-                implode(PHP_EOL, $ids)
+                implode(PHP_EOL, $this->curies)
             )
         );
     }
 
-    /**
-     * @return string
-     */
     public function getMixin(): string
     {
         return $this->mixin;
     }
 
-    /**
-     * @return Schema[]
-     */
-    public function getSchemas(): array
+    public function getCuries(): array
     {
-        return $this->schemas;
+        return $this->curies;
     }
 }
 

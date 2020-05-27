@@ -1,196 +1,99 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Pbj\Exception\LogicException;
-use Gdbots\Pbj\Exception\SchemaNotDefined;
-use Gdbots\Pbj\Serializer\PhpArraySerializer;
-use Gdbots\Pbj\Serializer\YamlSerializer;
 use Gdbots\Pbj\Exception\RequiredFieldNotSet;
+use Gdbots\Pbj\Serializer\PhpArraySerializer;
+use Gdbots\Pbj\WellKnown\MessageRef;
+use Gdbots\Pbj\WellKnown\NodeRef;
 
-abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSerializable
+abstract class AbstractMessage implements Message, \JsonSerializable
 {
-    /**
-     * An array of schemas per message type.
-     * ['Fully\Qualified\ClassName' => [ array of Schema objects ]
-     * @var array
-     */
-    private static $schemas = [];
+    private static ?PhpArraySerializer $serializer = null;
+    protected array $data = [];
+    protected array $decoded = [];
 
-    /** @var PhpArraySerializer */
-    private static $serializer;
+    /** @see Message::freeze */
+    private bool $isFrozen = false;
 
-    /** @var YamlSerializer */
-    private static $yamlSerializer;
-
-    /** @var array */
-    private $data = [];
-
-    /**
-     * An array of fields that have been cleared or set to null that
-     * must be included when serialized so it's clear that the
-     * value has been unset.
-     *
-     * @var array
-     */
-    private $clearedFields = [];
-
-    /**
-     * @see Message::freeze
-     * @var bool
-     */
-    private $isFrozen = false;
-
-    /**
-     * @see Message::isReplay
-     * @var bool
-     */
-    private $isReplay;
+    /** @see Message::isReplay */
+    private ?bool $isReplay = null;
 
     /**
      * Nothing fancy on new messages... we let the serializers or application code get fancy.
      */
-    final public function __construct() {}
-
-    /**
-     * {@inheritdoc}
-     * @return Schema
-     */
-    final public static function schema()
+    final public function __construct()
     {
-        $type = get_called_class();
-        if (!isset(self::$schemas[$type])) {
+    }
+
+    final public static function schema(): Schema
+    {
+        static $schema;
+
+        if (null === $schema) {
             $schema = static::defineSchema();
-
-            if (!$schema instanceof Schema) {
-                throw new SchemaNotDefined(
-                    sprintf('Message [%s] must return a Schema from the defineSchema method.', $type)
-                );
-            }
-
-            if ($schema->getClassName() !== $type) {
-                throw new SchemaNotDefined(
-                    sprintf(
-                        'Schema [%s] returned from defineSchema must be for class [%s], not [%s]',
-                        $schema->getId()->toString(),
-                        $type,
-                        $schema->getClassName()
-                    )
-                );
-            }
-            self::$schemas[$type] = $schema;
-        }
-        return self::$schemas[$type];
-    }
-
-    /**
-     * @return Schema
-     * @throws SchemaNotDefined
-     */
-    protected static function defineSchema()
-    {
-        throw new SchemaNotDefined(
-            sprintf('Message [%s] must return a Schema from the defineSchema method.', get_called_class())
-        );
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public static function create()
-    {
-        /** @var Message $message */
-        $message = new static();
-        return $message->populateDefaults();
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public static function fromArray(array $data = [])
-    {
-        if (null === self::$serializer) {
-            self::$serializer = new PhpArraySerializer();
         }
 
+        return $schema;
+    }
+
+    abstract protected static function defineSchema(): Schema;
+
+    final public static function create(): self
+    {
+        return (new static())->populateDefaults();
+    }
+
+    final public static function fromArray(array $data = []): self
+    {
         if (!isset($data[Schema::PBJ_FIELD_NAME])) {
             $data[Schema::PBJ_FIELD_NAME] = static::schema()->getId()->toString();
         }
 
-        $message = self::$serializer->deserialize($data);
-        return $message;
+        return self::getSerializer()->deserialize($data);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function toArray()
+    final public function toArray(): array
     {
-        if (null === self::$serializer) {
-            self::$serializer = new PhpArraySerializer();
-        }
-        return self::$serializer->serialize($this);
+        return self::getSerializer()->serialize($this);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function toYaml(array $options = [])
-    {
-        try {
-            if (null === self::$yamlSerializer) {
-                self::$yamlSerializer = new YamlSerializer();
-            }
-            return self::$yamlSerializer->serialize($this, $options);
-        } catch (\Exception $e) {
-            return sprintf(
-                'Failed to render [%s] as a yaml string with error: %s',
-                self::schema()->toString(),
-                $e->getMessage()
-            );
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     final public function __toString()
     {
-        return $this->toYaml();
+        return json_encode($this, JSON_PRETTY_PRINT);
     }
 
-    /**
-     * @return array
-     */
     final public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @return static
-     */
+    final public function __sleep()
+    {
+        return ['data'];
+    }
+
+    final public function __wakeup()
+    {
+        $this->decoded = [];
+        $this->isFrozen = false;
+        $this->isReplay = null;
+    }
+
     final public function __clone()
     {
         $this->data = unserialize(serialize($this->data));
-        $this->unFreeze();
+        $this->decoded = [];
+        $this->isFrozen = false;
+        $this->isReplay = null;
     }
 
-    /**
-     * {@inheritdoc}
-     * todo: review performance
-     */
-    final public function generateEtag(array $ignoredFields = [])
+    final public function generateEtag(array $ignoredFields = []): string
     {
-        if (null === self::$serializer) {
-            self::$serializer = new PhpArraySerializer();
-        }
-        $array = self::$serializer->serialize($this, ['includeAllFields' => true]);
+        $array = $this->toArray();
 
         if (empty($ignoredFields)) {
             return md5(json_encode($array));
@@ -203,101 +106,82 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return md5(json_encode($array));
     }
 
-    /**
-     * todo: recursively validate nested messages?
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function validate()
+    public function generateMessageRef(?string $tag = null): MessageRef
     {
-        foreach (static::schema()->getRequiredFields() as $field) {
-            if (!$this->has($field->getName())) {
-                throw new RequiredFieldNotSet($this, $field);
+        return new MessageRef(static::schema()->getCurie(), 'null', $tag);
+    }
+
+    public function generateNodeRef(): NodeRef
+    {
+        return NodeRef::fromNode($this);
+    }
+
+    public function getUriTemplateVars(): array
+    {
+        return [];
+    }
+
+    final public function validate(bool $strict = false, bool $recursive = false): self
+    {
+        if (!$strict && $this->isFrozen()) {
+            return $this;
+        }
+
+        if (!$strict) {
+            foreach (static::schema()->getRequiredFields() as $field) {
+                if (!$this->has($field->getName())) {
+                    throw new RequiredFieldNotSet($this, $field);
+                }
             }
+        } else {
+            foreach (static::schema()->getFields() as $field) {
+                if ($field->isRequired() && !$this->has($field->getName())) {
+                    throw new RequiredFieldNotSet($this, $field);
+                }
+
+                // just getting the field will decode/guard the values
+                $this->get($field->getName());
+            }
+        }
+
+        if (!$recursive) {
+            return $this;
+        }
+
+        foreach ($this->getNestedMessages() as $message) {
+            $message->validate($strict, $recursive);
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function freeze()
+    final public function freeze(bool $withStrictValidation = true): self
     {
         if ($this->isFrozen()) {
             return $this;
         }
 
-        $this->validate();
+        $this->validate($withStrictValidation);
         $this->isFrozen = true;
 
-        foreach (static::schema()->getFields() as $field) {
-            if ($field->getType()->isMessage()) {
-                /** @var self $value */
-                $value = $this->get($field->getName());
-                if (empty($value)) {
-                    continue;
-                }
-
-                if ($value instanceof Message) {
-                    $value->freeze();
-                    continue;
-                }
-
-                /** @var self $v */
-                foreach ($value as $v) {
-                    $v->freeze();
-                }
-            }
+        foreach ($this->getNestedMessages() as $message) {
+            $message->freeze($withStrictValidation);
         }
 
         return $this;
     }
 
-    /**
-     * Recursively unfreezes this object and any of its children.
-     * Used internally during the clone process.
-     */
-    private function unFreeze()
-    {
-        $this->isFrozen = false;
-        $this->isReplay = null;
-
-        foreach (static::schema()->getFields() as $field) {
-            if ($field->getType()->isMessage()) {
-                /** @var self $value */
-                $value = $this->get($field->getName());
-                if (empty($value)) {
-                    continue;
-                }
-
-                if ($value instanceof Message) {
-                    $value->unFreeze();
-                    continue;
-                }
-
-                /** @var self $v */
-                foreach ($value as $v) {
-                    $v->unFreeze();
-                }
-            }
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public function isFrozen()
+    final public function isFrozen(): bool
     {
         return $this->isFrozen;
     }
 
     /**
      * Ensures a frozen message can't be modified.
+     *
      * @throws FrozenMessageIsImmutable
      */
-    private function guardFrozenMessage()
+    private function guardFrozenMessage(): void
     {
         if ($this->isFrozen) {
             throw new FrozenMessageIsImmutable($this);
@@ -308,15 +192,12 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * {@inheritdoc}
      * This could probably use some work.  :)  low level serialization string match.
      */
-    public function equals(Message $other)
+    public function equals(Message $other): bool
     {
         return json_encode($this) === json_encode($other);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isReplay($replay = null)
+    final public function isReplay(?bool $replay = null): bool
     {
         if (null === $replay) {
             if (null === $this->isReplay) {
@@ -326,7 +207,7 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         }
 
         if (null === $this->isReplay) {
-            $this->isReplay = (bool) $replay;
+            $this->isReplay = (bool)$replay;
             if ($this->isReplay) {
                 $this->freeze();
             }
@@ -336,15 +217,11 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         throw new LogicException('You can only set the replay mode on one time.');
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function populateDefaults($fieldName = null)
+    final public function populateDefaults(?string $fieldName = null): self
     {
         $this->guardFrozenMessage();
 
-        if (!empty($fieldName)) {
+        if ($fieldName) {
             $this->populateDefault(static::schema()->getField($fieldName));
             return $this;
         }
@@ -361,11 +238,14 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
      * and the default generated is not a null value or empty array.
      *
      * @param Field $field
+     *
      * @return bool Returns true if a non null/empty default was applied or already present.
      */
-    private function populateDefault(Field $field)
+    private function populateDefault(Field $field): bool
     {
-        if ($this->has($field->getName())) {
+        $fieldName = $field->getName();
+
+        if ($this->has($fieldName)) {
             return true;
         }
 
@@ -375,8 +255,8 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         }
 
         if ($field->isASingleValue()) {
-            $this->data[$field->getName()] = $default;
-            unset($this->clearedFields[$field->getName()]);
+            $this->decoded[$fieldName] = $default;
+            $this->data[$fieldName] = $this->encodeValue($default, $field);
             return true;
         }
 
@@ -388,19 +268,39 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
          * sets have a special handling to deal with unique values
          */
         if ($field->isASet()) {
-            $this->addToSet($field->getName(), $default);
+            $this->addToSet($fieldName, $default);
             return true;
         }
 
-        $this->data[$field->getName()] = $default;
-        unset($this->clearedFields[$field->getName()]);
+        $this->decoded[$fieldName] = $default;
+        $this->data[$fieldName] = $this->encodeValue($default, $field);
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function has($fieldName)
+    final public function setWithoutValidation(string $fieldName, $value): self
+    {
+        $this->guardFrozenMessage();
+        $field = static::schema()->getField($fieldName);
+
+        if (null === $value) {
+            return $this->clear($fieldName);
+        }
+
+        unset($this->decoded[$fieldName]);
+
+        if ($field->isASet()) {
+            $this->data[$fieldName] = [];
+            foreach ($value as $v) {
+                $this->data[$fieldName][strtolower(trim((string)$v))] = $v;
+            }
+            return $this;
+        }
+
+        $this->data[$fieldName] = $value;
+        return $this;
+    }
+
+    final public function has(string $fieldName): bool
     {
         if (!isset($this->data[$fieldName])) {
             return false;
@@ -413,10 +313,30 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function get($fieldName, $default = null)
+    final public function get(string $fieldName, $default = null)
+    {
+        if (!$this->has($fieldName)) {
+            return $default;
+        }
+
+        $field = static::schema()->getField($fieldName);
+        if ($this->hasDecoded($fieldName)) {
+            return $field->isASet() ? array_values($this->decoded[$fieldName]) : $this->decoded[$fieldName];
+        }
+
+        if ($field->isASingleValue()) {
+            $decoded = $this->decodeValue($this->data[$fieldName], $field);
+        } else {
+            $decoded = array_map(function ($value) use ($fieldName, $field) {
+                return $this->decodeValue($value, $field);
+            }, $this->data[$fieldName]);
+        }
+
+        $this->decoded[$fieldName] = $decoded;
+        return $field->isASet() ? array_values($this->decoded[$fieldName]) : $this->decoded[$fieldName];
+    }
+
+    final public function fget(string $fieldName, $default = null)
     {
         if (!$this->has($fieldName)) {
             return $default;
@@ -430,280 +350,239 @@ abstract class AbstractMessage implements Message, FromArray, ToArray, \JsonSeri
         return $this->data[$fieldName];
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function clear($fieldName)
+    final public function clear(string $fieldName): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
+        unset($this->decoded[$fieldName]);
         unset($this->data[$fieldName]);
-        $this->clearedFields[$fieldName] = true;
         $this->populateDefault($field);
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function hasClearedField($fieldName)
-    {
-        return isset($this->clearedFields[$fieldName]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    final public function getClearedFields()
-    {
-        return array_keys($this->clearedFields);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function setSingleValue($fieldName, $value)
-    {
-        return $this->set($fieldName, $value);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function set($fieldName, $value)
+    final public function set(string $fieldName, $value): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isASingleValue(), sprintf('Field [%s] must be a single value.', $fieldName), $fieldName);
+        Assertion::true($field->isASingleValue(), 'Field must be a single value.', $fieldName);
 
         if (null === $value) {
             return $this->clear($fieldName);
         }
 
         $field->guardValue($value);
-        $this->data[$fieldName] = $value;
-        unset($this->clearedFields[$fieldName]);
+        $this->decoded[$fieldName] = $value;
+        $this->data[$fieldName] = $this->encodeValue($value, $field);
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isInSet($fieldName, $value)
+    final public function isInSet(string $fieldName, $value): bool
     {
-        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
+        if (!$this->has($fieldName)) {
             return false;
         }
 
-        if (is_scalar($value) || (is_object($value) && method_exists($value, '__toString'))) {
-            $key = trim((string) $value);
-        } else {
-            return false;
-        }
-
-        if (0 === strlen($key)) {
-            return false;
-        }
-
-        return isset($this->data[$fieldName][strtolower($key)]);
+        return isset($this->data[$fieldName][strtolower(trim((string)$value))]);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function addToSet($fieldName, array $values)
+    final public function addToSet(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
+        Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
         foreach ($values as $value) {
-            if (0 === strlen($value)) {
+            if (0 === strlen((string)$value)) {
                 continue;
             }
+
             $field->guardValue($value);
-            $key = strtolower(trim((string) $value));
-            $this->data[$fieldName][$key] = $value;
-        }
-
-        if (!empty($this->data[$fieldName])) {
-            unset($this->clearedFields[$fieldName]);
+            $key = strtolower(trim((string)$value));
+            $this->decoded[$fieldName][$key] = $value;
+            $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
         }
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function removeFromSet($fieldName, array $values)
+    final public function removeFromSet(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isASet(), sprintf('Field [%s] must be a set.', $fieldName), $fieldName);
+        Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
         foreach ($values as $value) {
             if (0 === strlen($value)) {
                 continue;
             }
-            $key = strtolower(trim((string) $value));
+
+            $key = strtolower(trim((string)$value));
+            unset($this->decoded[$fieldName][$key]);
             unset($this->data[$fieldName][$key]);
         }
 
-        if (empty($this->data[$fieldName])) {
-            $this->clearedFields[$fieldName] = true;
-        }
-
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isInList($fieldName, $value)
+    final public function isInList(string $fieldName, $value): bool
     {
-        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName])) {
+        if (!$this->has($fieldName)) {
             return false;
         }
 
-        return in_array($value, $this->data[$fieldName]);
+        return in_array($value, $this->get($fieldName));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getFromListAt($fieldName, $index, $default = null)
+    final public function getFromListAt(string $fieldName, int $index, $default = null)
     {
-        $index = (int) $index;
-        if (empty($this->data[$fieldName])
-            || !is_array($this->data[$fieldName])
-            || !isset($this->data[$fieldName][$index])
-        ) {
+        if (!$this->has($fieldName)) {
             return $default;
         }
-        return $this->data[$fieldName][$index];
+
+        $values = $this->get($fieldName);
+        return $values[$index] ?? $default;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function addToList($fieldName, array $values)
+    final public function addToList(string $fieldName, array $values): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
+        Assertion::true($field->isAList(), 'Field must be a list.', $fieldName);
 
         foreach ($values as $value) {
             $field->guardValue($value);
-            $this->data[$fieldName][] = $value;
+            $this->decoded[$fieldName][] = $value;
+            $this->data[$fieldName][] = $this->encodeValue($value, $field);
         }
 
-        unset($this->clearedFields[$fieldName]);
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function removeFromListAt($fieldName, $index)
+    final public function removeFromListAt(string $fieldName, int $index): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAList(), sprintf('Field [%s] must be a list.', $fieldName), $fieldName);
-        $index = (int) $index;
+        Assertion::true($field->isAList(), 'Field must be a list.', $fieldName);
 
         if (empty($this->data[$fieldName])) {
             return $this;
         }
 
+        unset($this->decoded[$fieldName]);
         array_splice($this->data[$fieldName], $index, 1);
         if (empty($this->data[$fieldName])) {
-            $this->clearedFields[$fieldName] = true;
             return $this;
         }
 
         // reset the numerical indexes
-        // todo: review, does this need to be optimized?
         $this->data[$fieldName] = array_values($this->data[$fieldName]);
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function isInMap($fieldName, $key)
+    final public function isInMap(string $fieldName, string $key): bool
     {
-        if (empty($this->data[$fieldName]) || !is_array($this->data[$fieldName]) || !is_string($key)) {
+        if (!$this->has($fieldName)) {
             return false;
         }
+
         return isset($this->data[$fieldName][$key]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    final public function getFromMap($fieldName, $key, $default = null)
+    final public function getFromMap(string $fieldName, string $key, $default = null)
     {
         if (!$this->isInMap($fieldName, $key)) {
             return $default;
         }
-        return $this->data[$fieldName][$key];
+
+        $values = $this->get($fieldName);
+        return $values[$key] ?? $default;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function addToMap($fieldName, $key, $value)
+    final public function addToMap(string $fieldName, string $key, $value): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
+        Assertion::true($field->isAMap(), 'Field must be a map.', $fieldName);
 
         if (null === $value) {
             return $this->removeFromMap($fieldName, $key);
         }
 
         $field->guardValue($value);
-        $this->data[$fieldName][$key] = $value;
-        unset($this->clearedFields[$fieldName]);
+        $this->decoded[$fieldName][$key] = $value;
+        $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
 
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    final public function removeFromMap($fieldName, $key)
+    final public function removeFromMap(string $fieldName, string $key): self
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
-        Assertion::true($field->isAMap(), sprintf('Field [%s] must be a map.', $fieldName), $fieldName);
+        Assertion::true($field->isAMap(), 'Field must be a map.', $fieldName);
 
+        unset($this->decoded[$fieldName][$key]);
         unset($this->data[$fieldName][$key]);
-
-        if (empty($this->data[$fieldName])) {
-            $this->clearedFields[$fieldName] = true;
-        }
-
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function __wakeup()
+    private static function getSerializer(): PhpArraySerializer
     {
-        $this->isFrozen = false;
-        $this->isReplay = null;
-        $this->clearedFields = [];
+        if (null === self::$serializer) {
+            self::$serializer = new PhpArraySerializer();
+        }
+
+        return self::$serializer;
+    }
+
+    private function hasDecoded(string $fieldName): bool
+    {
+        return isset($this->decoded[$fieldName]);
+    }
+
+    private function encodeValue($value, Field $field)
+    {
+        $type = $field->getType();
+        if ($type->isMessage()) {
+            return $value;
+        }
+
+        return $type->encode($value, $field, self::getSerializer());
+    }
+
+    private function decodeValue($value, Field $field)
+    {
+        $decoded = $field->getType()->decode($value, $field, self::getSerializer());
+        $field->guardValue($decoded);
+        return $decoded;
+    }
+
+    /**
+     * @return self[]
+     */
+    private function getNestedMessages(): array
+    {
+        $messages = [];
+        foreach (static::schema()->getFields() as $field) {
+            if ($field->getType()->isMessage()) {
+                /** @var self $value */
+                $value = $this->get($field->getName());
+                if (empty($value)) {
+                    continue;
+                }
+
+                if ($value instanceof self) {
+                    $messages[] = $value;
+                    continue;
+                }
+
+                /** @var self $v */
+                foreach ($value as $v) {
+                    $messages[] = $v;
+                }
+            }
+        }
+
+        return $messages;
     }
 }

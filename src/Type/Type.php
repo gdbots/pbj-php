@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -11,30 +12,24 @@ use Gdbots\Pbj\Field;
 
 interface Type
 {
-    /**
-     * @return Type
-     */
-    public static function create();
+    public static function create(): self;
 
-    /**
-     * @return TypeName
-     */
-    public function getTypeName();
+    public function getTypeName(): TypeName;
 
     /**
      * Shortcut to returning the value of the TypeName
      *
      * @return string
      */
-    public function getTypeValue();
+    public function getTypeValue(): string;
 
     /**
      * @param mixed $value
      * @param Field $field
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function guard($value, Field $field);
+    public function guard($value, Field $field): void;
 
     /**
      * @param mixed $value
@@ -46,7 +41,7 @@ interface Type
      * @throws GdbotsPbjException
      * @throws EncodeValueFailed
      */
-    public function encode($value, Field $field, Codec $codec = null);
+    public function encode($value, Field $field, ?Codec $codec = null);
 
     /**
      * @param mixed $value
@@ -58,14 +53,14 @@ interface Type
      * @throws GdbotsPbjException
      * @throws DecodeValueFailed
      */
-    public function decode($value, Field $field, Codec $codec = null);
+    public function decode($value, Field $field, ?Codec $codec = null);
 
     /**
      * Returns true if the value gets decoded and stored during runtime as a scalar value.
      *
      * @return bool
      */
-    public function isScalar();
+    public function isScalar(): bool;
 
     /**
      * Returns true if the value gets encoded to a scalar value.  This is important to
@@ -74,61 +69,43 @@ interface Type
      *
      * @return bool
      */
-    public function encodesToScalar();
+    public function encodesToScalar(): bool;
 
     /**
      * @return mixed
      */
     public function getDefault();
 
-    /**
-     * @return bool
-     */
-    public function isBoolean();
+    public function isBoolean(): bool;
 
-    /**
-     * @return bool
-     */
-    public function isBinary();
+    public function isBinary(): bool;
 
-    /**
-     * @return bool
-     */
-    public function isNumeric();
+    public function isNumeric(): bool;
 
-    /**
-     * @return bool
-     */
-    public function isString();
+    public function isString(): bool;
 
-    /**
-     * @return bool
-     */
-    public function isMessage();
+    public function isMessage(): bool;
 
     /**
      * Returns the minimum value supported by an integer type.
      *
      * @return int
      */
-    public function getMin();
+    public function getMin(): int;
 
     /**
      * Returns the maximum value supported by an integer type.
      *
      * @return int
      */
-    public function getMax();
+    public function getMax(): int;
 
     /**
      * Returns the maximum number of bytes supported by the string or binary type.
      *
      * @return int
      */
-    public function getMaxBytes();
+    public function getMaxBytes(): int;
 
-    /**
-     * @return bool
-     */
-    public function allowedInSet();
+    public function allowedInSet(): bool;
 }

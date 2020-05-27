@@ -1,105 +1,89 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\DateUtils;
-use Gdbots\Common\Util\HashtagUtils;
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\DateUtil;
+use Gdbots\Pbj\Util\HashtagUtil;
+use Gdbots\Pbj\Util\NumberUtil;
 
 abstract class AbstractStringType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        Assertion::string($value, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::string($value, null, $fieldName);
 
         // intentionally using strlen to get byte length, not mb_strlen
         $length = strlen($value);
         $minLength = $field->getMinLength();
-        $maxLength = NumberUtils::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
+        $maxLength = NumberUtil::bound($field->getMaxLength(), $minLength, $this->getMaxBytes());
         $okay = $length >= $minLength && $length <= $maxLength;
 
-        Assertion::true(
-            $okay,
-            sprintf(
-                'Field [%s] must be between [%d] and [%d] bytes, [%d] bytes given.',
-                $field->getName(),
-                $minLength,
-                $maxLength,
-                $length
-            ),
-            $field->getName()
-        );
+        if (!$okay) {
+            Assertion::true(
+                $okay,
+                sprintf(
+                    'Field [%s] must be between [%d] and [%d] bytes, [%d] bytes given.',
+                    $fieldName,
+                    $minLength,
+                    $maxLength,
+                    $length
+                ),
+                $fieldName
+            );
+        }
 
         if ($pattern = $field->getPattern()) {
-            Assertion::regex($value, $pattern, null, $field->getName());
+            Assertion::regex($value, $pattern, null, $fieldName);
+        }
+
+        if (!$field->hasFormat()) {
+            return;
         }
 
         switch ($field->getFormat()->getValue()) {
-            case Format::UNKNOWN:
-                break;
-
             case Format::DATE:
-                Assertion::regex($value, '/^\d{4}-\d{2}-\d{2}$/', null, $field->getName());
+                Assertion::regex($value, '/^\d{4}-\d{2}-\d{2}$/', null, $fieldName);
                 break;
 
             case Format::DATE_TIME:
                 Assertion::true(
-                    DateUtils::isValidISO8601Date($value),
-                    sprintf(
-                        'Field [%s] must be a valid ISO8601 date-time.  Format must match one of [%s], [%s] or [%s].',
-                        $field->getName(),
-                        DateUtils::ISO8601_ZULU,
-                        DateUtils::ISO8601,
-                        \DateTime::ISO8601
-                    ),
-                    $field->getName()
+                    DateUtil::isValidISO8601Date($value),
+                    'Field must be a valid ISO8601 date-time.',
+                    $fieldName
                 );
                 break;
 
             case Format::SLUG:
-                Assertion::regex($value, '/^([\w\/-]|[\w-][\w\/-]*[\w-])$/', null, $field->getName());
+                Assertion::regex($value, '/^([\w\/-]|[\w-][\w\/-]*[\w-])$/', null, $fieldName);
                 break;
 
             case Format::EMAIL:
-                Assertion::email($value, null, $field->getName());
+                Assertion::email($value, null, $fieldName);
                 break;
 
             case Format::HASHTAG:
                 Assertion::true(
-                    HashtagUtils::isValid($value),
-                    sprintf('Field [%s] must be a valid hashtag.  @see HashtagUtils::isValid', $field->getName()),
-                    $field->getName()
+                    HashtagUtil::isValid($value),
+                    'Field must be a valid hashtag.',
+                    $fieldName
                 );
                 break;
 
             case Format::IPV4:
-                Assertion::url(
-                    'http://' . $value,
-                    sprintf(
-                        'Field [%s] must be a valid [%s].',
-                        $field->getName(),
-                        $field->getFormat()->getValue()
-                    ),
-                    $field->getName()
-                );
+                Assertion::url('https://' . $value, 'Field must be a valid IPV4.', $fieldName);
                 break;
 
             case Format::IPV6:
                 Assertion::url(
-                    'http://[' . $value . ']',
-                    sprintf(
-                        'Field [%s] must be a valid [%s].',
-                        $field->getName(),
-                        $field->getFormat()->getValue()
-                    ),
-                    $field->getName()
+                    'https://[' . $value . ']',
+                    'Field must be a valid IPV6.',
+                    $fieldName
                 );
                 break;
 
@@ -113,22 +97,14 @@ abstract class AbstractStringType extends AbstractType
                  * urn:, etc.
                  */
                 if (false === strpos($value, 'http')) {
-                    $value = 'http://' . $value;
+                    $value = 'https://' . $value;
                 }
 
-                Assertion::url(
-                    $value,
-                    sprintf(
-                        'Field [%s] must be a valid [%s].',
-                        $field->getName(),
-                        $field->getFormat()->getValue()
-                    ),
-                    $field->getName()
-                );
+                Assertion::url($value, 'Field must be a valid URL.', $fieldName);
                 break;
 
             case Format::UUID:
-                Assertion::uuid($value, null, $field->getName());
+                Assertion::uuid($value, null, $fieldName);
                 break;
 
             default:
@@ -136,23 +112,7 @@ abstract class AbstractStringType extends AbstractType
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
-    {
-        $value = trim($value);
-        if ($value === '') {
-            return null;
-        }
-
-        return $value;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         $value = trim((string)$value);
         if ($value === '') {
@@ -162,10 +122,17 @@ abstract class AbstractStringType extends AbstractType
         return $value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function decode($value, Field $field, ?Codec $codec = null)
+    {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return null;
+        }
+
+        return $value;
+    }
+
+    public function isString(): bool
     {
         return true;
     }

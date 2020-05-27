@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,22 +10,20 @@ use Gdbots\Pbj\Message;
 
 final class MessageType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         /** @var Message $value */
         Assertion::isInstanceOf($value, Message::class, null, $field->getName());
 
-        $classNames = $field->getAnyOfClassNames();
-        if (empty($classNames)) {
+        if (!$field->hasAnyOfCuries()) {
             // means it can be "any message"
             return;
         }
 
-        foreach ($classNames as $className) {
-            if ($value instanceof $className) {
+        $curies = $field->getAnyOfCuries();
+        $schema = $value::schema();
+        foreach ($curies as $curie) {
+            if ($schema->usesCurie($curie)) {
                 return;
             }
         }
@@ -32,58 +31,48 @@ final class MessageType extends AbstractType
         Assertion::true(
             false,
             sprintf(
-                'Field [%s] must be an instance of at least one of: %s.',
+                'Field [%s] must be use at least one of: %s.',
                 $field->getName(),
-                implode(',', $classNames)
+                implode(',', $curies)
             ),
             $field->getName()
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value) {
+            return null;
+        }
+
         return $codec->encodeMessage($value, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
+        if (null === $value || $value instanceof Message) {
+            return $value;
+        }
+
         return $codec->decodeMessage($value, $field);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encodesToScalar()
+    public function encodesToScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isMessage()
+    public function isMessage(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return false;
     }

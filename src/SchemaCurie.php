@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
@@ -12,7 +13,7 @@ use Gdbots\Pbj\Exception\InvalidSchemaCurie;
  * Schema Curie Format:
  *  vendor:package:category:message
  *
- * @see SchemaId
+ * @see  SchemaId
  *
  */
 final class SchemaCurie implements \JsonSerializable
@@ -23,36 +24,16 @@ final class SchemaCurie implements \JsonSerializable
      */
     const VALID_PATTERN = '/^([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+)$/';
 
-    private static $instances = [];
+    private static array $instances = [];
+    private string $curie;
+    private string $vendor;
+    private string $package;
+    private ?string $category;
+    private string $message;
+    private bool $isMixin = false;
+    private SchemaQName $qname;
 
-    /** @var string */
-    private $curie;
-
-    /** @var string */
-    private $vendor;
-
-    /** @var string */
-    private $package;
-
-    /** @var string */
-    private $category;
-
-    /** @var string */
-    private $message;
-
-    /** @var bool */
-    private $isMixin = false;
-
-    /** @var SchemaQName */
-    private $qname;
-
-    /**
-     * @param string $vendor
-     * @param string $package
-     * @param string $category
-     * @param string $message
-     */
-    private function __construct($vendor, $package, $category, $message)
+    private function __construct(string $vendor, string $package, ?string $category, string $message)
     {
         $this->vendor = $vendor;
         $this->package = $package;
@@ -63,11 +44,7 @@ final class SchemaCurie implements \JsonSerializable
         $this->qname = SchemaQName::fromCurie($this);
     }
 
-    /**
-     * @param SchemaId $id
-     * @return SchemaCurie
-     */
-    public static function fromId(SchemaId $id)
+    public static function fromId(SchemaId $id): self
     {
         $curie = substr(str_replace(':' . $id->getVersion()->toString(), '', $id->toString()), 4);
 
@@ -81,10 +58,12 @@ final class SchemaCurie implements \JsonSerializable
 
     /**
      * @param string $curie
+     *
      * @return SchemaCurie
+     *
      * @throws InvalidSchemaCurie
      */
-    public static function fromString($curie)
+    public static function fromString(string $curie): self
     {
         if (isset(self::$instances[$curie])) {
             return self::$instances[$curie];
@@ -106,74 +85,47 @@ final class SchemaCurie implements \JsonSerializable
         return self::$instances[$curie];
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->curie;
     }
 
-    /**
-     * @return string
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
-    public function getVendor()
+    public function getVendor(): string
     {
         return $this->vendor;
     }
 
-    /**
-     * @return string
-     */
-    public function getPackage()
+    public function getPackage(): string
     {
         return $this->package;
     }
 
-    /**
-     * @return string
-     */
-    public function getCategory()
+    public function getCategory(): ?string
     {
         return $this->category;
     }
 
-    /**
-     * @return string
-     */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    /**
-     * @return bool
-     */
-    public function isMixin()
+    public function isMixin(): bool
     {
         return $this->isMixin;
     }
 
-    /**
-     * @return SchemaQName
-     */
-    public function getQName()
+    public function getQName(): SchemaQName
     {
         return $this->qname;
     }

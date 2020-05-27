@@ -1,287 +1,170 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
 use Gdbots\Pbj\Enum\FieldRule;
+use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Type\Type;
 
 final class FieldBuilder
 {
-    /** @var string */
-    private $name;
-
-    /** @var Type */
-    private $type;
-
-    /** @var FieldRule */
-    private $rule;
-
-    /** @var bool */
-    private $required = false;
-
-    /** @var int */
-    private $minLength;
-
-    /** @var int */
-    private $maxLength;
-
-    /** @var string */
-    private $pattern;
-
-    /** @var string */
-    private $format;
-
-    /** @var int */
-    private $min;
-
-    /** @var int */
-    private $max;
-
-    /** @var int */
-    private $precision = 10;
-
-    /** @var int */
-    private $scale = 2;
+    private string $name;
+    private Type $type;
+    private ?FieldRule $rule = null;
+    private bool $required = false;
+    private ?int $minLength = null;
+    private ?int $maxLength = null;
+    private ?string $pattern = null;
+    private ?Format $format = null;
+    private ?int $min = null;
+    private ?int $max = null;
+    private int $precision = 10;
+    private int $scale = 2;
 
     /** @var mixed */
     private $default;
 
-    /** @var bool */
-    private $useTypeDefault = true;
+    private bool $useTypeDefault = true;
+    private ?string $className = null;
+    private ?array $anyOfCuries = null;
+    private ?\Closure $assertion = null;
+    private bool $overridable = false;
 
-    /** @var string */
-    private $className;
-
-    /** @var array */
-    private $anyOfClassNames;
-
-    /** @var \Closure */
-    private $assertion;
-
-    /** @var bool */
-    private $overridable = false;
-
-    /**
-     * @param string $name
-     * @param Type $type
-     */
-    final private function __construct($name, Type $type)
+    final private function __construct(string $name, Type $type)
     {
         $this->name = $name;
         $this->type = $type;
     }
 
-    /**
-     * @param string $name
-     * @param Type $type
-     * @return self
-     */
-    public static function create($name, Type $type)
+    public static function create(string $name, Type $type): self
     {
-        $builder = new static($name, $type);
-        return $builder;
+        return new static($name, $type);
     }
 
-    /**
-     * @return self
-     */
-    public function required()
+    public function required(): self
     {
         $this->required = true;
         return $this;
     }
 
-    /**
-     * @return self
-     */
-    public function optional()
+    public function optional(): self
     {
         $this->required = false;
         return $this;
     }
 
-    /**
-     * @return self
-     */
-    public function asASingleValue()
+    public function asASingleValue(): self
     {
         $this->rule = FieldRule::A_SINGLE_VALUE();
         return $this;
     }
 
-    /**
-     * @return self
-     */
-    public function asASet()
+    public function asASet(): self
     {
         $this->rule = FieldRule::A_SET();
         return $this;
     }
 
-    /**
-     * @return self
-     */
-    public function asAList()
+    public function asAList(): self
     {
         $this->rule = FieldRule::A_LIST();
         return $this;
     }
 
-    /**
-     * @return self
-     */
-    public function asAMap()
+    public function asAMap(): self
     {
         $this->rule = FieldRule::A_MAP();
         return $this;
     }
 
-    /**
-     * @param int $minLength
-     * @return self
-     */
-    public function minLength($minLength)
+    public function minLength(int $minLength): self
     {
-        $this->minLength = (int) $minLength;
+        $this->minLength = $minLength;
         return $this;
     }
 
-    /**
-     * @param int $maxLength
-     * @return self
-     */
-    public function maxLength($maxLength)
+    public function maxLength(int $maxLength): self
     {
-        $this->maxLength = (int) $maxLength;
+        $this->maxLength = $maxLength;
         return $this;
     }
 
-    /**
-     * @param string $pattern
-     * @return self
-     */
-    public function pattern($pattern)
+    public function pattern(string $pattern): self
     {
         $this->pattern = $pattern;
         return $this;
     }
 
-    /**
-     * @param string $format
-     * @return self
-     */
-    public function format($format)
+    public function format(Format $format): self
     {
         $this->format = $format;
         return $this;
     }
 
-    /**
-     * @param int $min
-     * @return self
-     */
-    public function min($min)
+    public function min(int $min): self
     {
-        $this->min = (int) $min;
+        $this->min = $min;
         return $this;
     }
 
-    /**
-     * @param int $max
-     * @return self
-     */
-    public function max($max)
+    public function max(int $max): self
     {
-        $this->max = (int) $max;
+        $this->max = $max;
         return $this;
     }
 
-    /**
-     * @param int $precision
-     * @return self
-     */
-    public function precision($precision)
+    public function precision(int $precision): self
     {
-        $this->precision = (int) $precision;
+        $this->precision = $precision;
         return $this;
     }
 
-    /**
-     * @param int $scale
-     * @return self
-     */
-    public function scale($scale)
+    public function scale(int $scale): self
     {
-        $this->scale = (int) $scale;
+        $this->scale = $scale;
         return $this;
     }
 
-    /**
-     * @param mixed $default
-     * @return self
-     */
-    public function withDefault($default)
+    public function withDefault($default): self
     {
         $this->default = $default;
         return $this;
     }
 
-    /**
-     * @param bool $useTypeDefault
-     * @return self
-     */
-    public function useTypeDefault($useTypeDefault)
+    public function useTypeDefault(bool $useTypeDefault): self
     {
-        $this->useTypeDefault = (bool) $useTypeDefault;
+        $this->useTypeDefault = $useTypeDefault;
         return $this;
     }
 
-    /**
-     * @param string $className
-     * @return self
-     */
-    public function className($className)
+    public function className(string $className): self
     {
         $this->className = $className;
-        $this->anyOfClassNames = null;
+        $this->anyOfCuries = null;
         return $this;
     }
 
-    /**
-     * @param array $anyOfClassNames
-     * @return self
-     */
-    public function anyOfClassNames(array $anyOfClassNames)
+    public function anyOfCuries(array $anyOfCuries): self
     {
-        $this->anyOfClassNames = $anyOfClassNames;
+        $this->anyOfCuries = $anyOfCuries;
         $this->className = null;
         return $this;
     }
 
-    /**
-     * @param \Closure $assertion
-     * @return self
-     */
-    public function assertion(\Closure $assertion)
+    public function assertion(\Closure $assertion): self
     {
         $this->assertion = $assertion;
         return $this;
     }
 
-    /**
-     * @param bool $overridable
-     * @return self
-     */
-    public function overridable($overridable)
+    public function overridable(bool $overridable): self
     {
-        $this->overridable = (bool) $overridable;
+        $this->overridable = $overridable;
         return $this;
     }
 
-    /**
-     * @return Field
-     */
-    public function build()
+    public function build(): Field
     {
         if (null === $this->rule) {
             $this->rule = FieldRule::A_SINGLE_VALUE();
@@ -303,7 +186,7 @@ final class FieldBuilder
             $this->default,
             $this->useTypeDefault,
             $this->className,
-            $this->anyOfClassNames,
+            $this->anyOfCuries,
             $this->assertion,
             $this->overridable
         );

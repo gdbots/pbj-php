@@ -1,13 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj;
 
-use Gdbots\Common\Util\StringUtils;
-use Gdbots\Pbj\MessageRef;
-use Gdbots\Pbj\WellKnown\BigNumber;
+use Brick\Math\BigInteger;
+use Gdbots\Pbj\Util\StringUtil;
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
+use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Pbj\WellKnown\Microtime;
+use Gdbots\Pbj\WellKnown\NodeRef;
 use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
 use Gdbots\Pbj\WellKnown\UuidIdentifier;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
@@ -24,7 +26,7 @@ class AddTypesTest extends TestCase
     protected function getTypeValues()
     {
         return [
-            'BigInt'          => [new BigNumber(0), new BigNumber('18446744073709551615')],
+            'BigInt'          => [BigInteger::zero(), BigInteger::of('18446744073709551615')],
             'Binary'          => 'aG9tZXIgc2ltcHNvbg==',
             'Blob'            => 'aG9tZXIgc2ltcHNvbg==',
             'Boolean'         => [false, true],
@@ -40,9 +42,10 @@ class AddTypesTest extends TestCase
             'MediumBlob'      => 'aG9tZXIgc2ltcHNvbg==',
             'MediumText'      => 'medium text',
             'Message'         => NestedMessage::create(),
-            'MessageRef'      => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()),
+            'MessageRef'      => new MessageRef(NestedMessage::schema()->getCurie(), UuidIdentifier::generate()->toString()),
             'Microtime'       => Microtime::create(),
-            'SignedBigInt'    => [new BigNumber('-9223372036854775808'), new BigNumber('9223372036854775807')],
+            'NodeRef'         => NodeRef::fromString('acme:article:123'),
+            'SignedBigInt'    => [BigInteger::of('-9223372036854775808'), BigInteger::of('9223372036854775807')],
             'SignedMediumInt' => [-8388608, 8388607],
             'SignedSmallInt'  => [-32768, 32767],
             'SignedTinyInt'   => [-128, 127],
@@ -60,7 +63,7 @@ class AddTypesTest extends TestCase
     protected function getInvalidTypeValues()
     {
         return [
-            'BigInt'          => [new BigNumber(-1), new BigNumber('18446744073709551616')],
+            'BigInt'          => [BigInteger::of(-1), BigInteger::of('18446744073709551616')],
             'Binary'          => false,
             'Blob'            => false,
             'Boolean'         => 'not_a_bool',
@@ -78,7 +81,8 @@ class AddTypesTest extends TestCase
             'Message'         => EmailMessage::create(), // not the correct message
             'MessageRef'      => 'not_a_message_ref',
             'Microtime'       => microtime(),
-            'SignedBigInt'    => [new BigNumber('-9223372036854775809'), new BigNumber('9223372036854775808')],
+            'NodeRef'         => 'not_a_node_ref',
+            'SignedBigInt'    => [BigInteger::of('-9223372036854775809'), BigInteger::of('9223372036854775808')],
             'SignedMediumInt' => [-8388609, 8388608],
             'SignedSmallInt'  => [-32769, 32768],
             'SignedTinyInt'   => [-129, 128],
@@ -106,7 +110,7 @@ class AddTypesTest extends TestCase
                 } else {
                     $message->addToMap($k, 'test1', $v);
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $thrown = true;
             }
 
@@ -114,10 +118,10 @@ class AddTypesTest extends TestCase
 
             if (!$thrown) {
                 if (is_array($v)) {
-                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v[0])));
-                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v[1])));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtil::varToString($v[0])));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtil::varToString($v[1])));
                 } else {
-                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtils::varToString($v)));
+                    $this->fail(sprintf('[%s] accepted an invalid [%s] value', $k, StringUtil::varToString($v)));
                 }
             }
         }
@@ -252,7 +256,7 @@ class AddTypesTest extends TestCase
                     if (false !== strpos($type, 'Int') && in_array($k, $allInts)) {
                         continue;
                     }
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $thrown = true;
                 }
 
@@ -260,14 +264,16 @@ class AddTypesTest extends TestCase
 
                 if (!$thrown) {
                     if (is_array($v)) {
-                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[0])));
-                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v[1])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtil::varToString($v[0])));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtil::varToString($v[1])));
                     } else {
-                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtils::varToString($v)));
+                        $this->fail(sprintf('[%s] accepted an invalid/mismatched [%s] value', $type, StringUtil::varToString($v)));
                     }
                 }
             }
         }
-        //echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+
+        // echo json_encode($shouldWork, JSON_PRETTY_PRINT);
+        // echo json_encode($shouldWork::schema(), JSON_PRETTY_PRINT);
     }
 }

@@ -1,10 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures;
 
 use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\FieldBuilder as Fb;
-use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
@@ -14,10 +14,7 @@ use Gdbots\Tests\Pbj\Fixtures\Enum\StringEnum;
 
 final class MapsMessage extends AbstractMessage
 {
-    /**
-     * @return array
-     */
-    public static function getAllTypes()
+    public static function getAllTypes(): array
     {
         $reflector = new \ReflectionClass(T\Type::class);
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname($reflector->getFileName())));
@@ -38,26 +35,7 @@ final class MapsMessage extends AbstractMessage
         return $types;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function generateMessageRef($tag = null)
-    {
-        return new MessageRef(static::schema()->getCurie(), null, $tag);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getUriTemplateVars()
-    {
-        return [];
-    }
-
-    /**
-     * @return Schema
-     */
-    protected static function defineSchema()
+    protected static function defineSchema(): Schema
     {
         $fields = [];
 
@@ -88,8 +66,8 @@ final class MapsMessage extends AbstractMessage
                 case 'Message':
                     $fields[] = Fb::create($type, $class::create())
                         ->asAMap()
-                        ->anyOfClassNames([
-                            NestedMessage::class
+                        ->anyOfCuries([
+                            NestedMessage::schema()->getCurie()->toString(),
                         ])
                         ->build();
                     break;

@@ -1,19 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
 use Assert\InvalidArgumentException;
 
-class AssertionFailed extends InvalidArgumentException implements GdbotsPbjException
+final class AssertionFailed extends InvalidArgumentException implements GdbotsPbjException
 {
-    /**
-     * @param string $message
-     * @param int $code
-     * @param null $propertyPath
-     * @param $value
-     * @param array $constraints
-     */
-    public function __construct($message, $code, $propertyPath = null, $value, array $constraints = array())
+    public function __construct($message, $code, string $propertyPath = null, $value = null, array $constraints = [])
     {
         if (null !== $propertyPath) {
             $message = $propertyPath . ' :: ' . $message;

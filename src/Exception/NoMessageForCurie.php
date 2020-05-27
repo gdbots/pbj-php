@@ -1,17 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\SchemaCurie;
 
-class NoMessageForCurie extends \LogicException implements GdbotsPbjException
+final class NoMessageForCurie extends \LogicException implements GdbotsPbjException
 {
-    /** @var SchemaCurie */
-    private $curie;
+    private SchemaCurie $curie;
 
-    /**
-     * @param SchemaCurie $curie
-     */
     public function __construct(SchemaCurie $curie)
     {
         $this->curie = $curie;
@@ -20,10 +17,7 @@ class NoMessageForCurie extends \LogicException implements GdbotsPbjException
         );
     }
 
-    /**
-     * @return SchemaCurie
-     */
-    public function getCurie()
+    public function getCurie(): SchemaCurie
     {
         return $this->curie;
     }

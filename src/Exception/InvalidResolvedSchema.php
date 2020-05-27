@@ -1,24 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\SchemaId;
 
-class InvalidResolvedSchema extends SchemaException
+final class InvalidResolvedSchema extends SchemaException
 {
-    /** @var SchemaId */
-    private $resolvedSchemaId;
+    private SchemaId $resolvedSchemaId;
+    private string $resolvedClassName;
 
-    /** @var string */
-    private $resolvedClassName;
-
-    /**
-     * @param Schema $schema
-     * @param SchemaId $resolvedSchemaId
-     * @param string $resolvedClassName
-     */
-    public function __construct(Schema $schema, SchemaId $resolvedSchemaId, $resolvedClassName)
+    public function __construct(Schema $schema, SchemaId $resolvedSchemaId, string $resolvedClassName)
     {
         $this->schema = $schema;
         $this->resolvedSchemaId = $resolvedSchemaId;
@@ -35,18 +28,12 @@ class InvalidResolvedSchema extends SchemaException
         );
     }
 
-    /**
-     * @return SchemaId
-     */
-    public function getResolvedSchemaId()
+    public function getResolvedSchemaId(): SchemaId
     {
         return $this->resolvedSchemaId;
     }
 
-    /**
-     * @return string
-     */
-    public function getResolvedClassName()
+    public function getResolvedClassName(): string
     {
         return $this->resolvedClassName;
     }

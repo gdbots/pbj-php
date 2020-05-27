@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,34 +10,23 @@ use Gdbots\Pbj\Field;
 
 final class DateType extends AbstractType
 {
-    /** @var \DateTimeZone */
-    private $utc;
+    private ?\DateTimeZone $utc = null;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        /** @var \DateTimeInterface $value */
         Assertion::isInstanceOf($value, \DateTimeInterface::class, null, $field->getName());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof \DateTimeInterface) {
             return $value->format('Y-m-d');
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (empty($value)) {
             return null;
@@ -45,6 +35,10 @@ final class DateType extends AbstractType
         if ($value instanceof \DateTimeInterface) {
             // ensures we're always in UTC and have no time parts.
             $value = $value->format('Y-m-d');
+        }
+
+        if ($codec && $codec->skipValidation()) {
+            return (string)$value;
         }
 
         $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, $this->getUtcTimeZone());
@@ -62,34 +56,22 @@ final class DateType extends AbstractType
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return false;
     }
 
-    /**
-     * @return \DateTimeZone
-     */
-    private function getUtcTimeZone()
+    private function getUtcTimeZone(): \DateTimeZone
     {
         if (null === $this->utc) {
             $this->utc = new \DateTimeZone('UTC');

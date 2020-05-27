@@ -1,55 +1,42 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\NumberUtil;
 
 abstract class AbstractIntType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        Assertion::integer($value, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::integer($value, null, $fieldName);
         $intMin = $this->getMin();
         $intMax = $this->getMax();
-        $min = NumberUtils::bound($field->getMin(), $intMin, $intMax);
-        $max = NumberUtils::bound($field->getMax(), $intMin, $intMax);
-        Assertion::range($value, $min, $max, null, $field->getName());
+        $min = NumberUtil::bound($field->getMin(), $intMin, $intMax);
+        $max = NumberUtil::bound($field->getMax(), $intMin, $intMax);
+        Assertion::range($value, $min, $max, null, $fieldName);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
-        return (int) $value;
+        return (int)$value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        return (int) $value;
+        return (int)$value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return 0;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return true;
     }

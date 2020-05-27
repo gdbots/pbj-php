@@ -1,73 +1,76 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
 use Gdbots\Pbj\WellKnown\DynamicField;
 use Gdbots\Pbj\WellKnown\GeoPoint;
+use Gdbots\Pbj\WellKnown\MessageRef;
 
 interface Codec
 {
     /**
-     * @param Message $message
-     * @param Field $field
+     * If validation is not enabled Codecs and Types can use
+     * faster methods for encoding/decoding. This should only
+     * be used with very trusted input.
+     *
+     * Provide a boolean to change the value.
+     *
+     * @param bool $skipValidation
+     *
+     * @return bool
+     */
+    public function skipValidation(?bool $skipValidation = null): bool;
+
+    /**
+     * @param DynamicField|array $dynamicField
+     * @param Field              $field
      *
      * @return mixed
      */
-    public function encodeMessage(Message $message, Field $field);
+    public function encodeDynamicField($dynamicField, Field $field);
 
     /**
      * @param mixed $value
      * @param Field $field
      *
-     * @return Message
+     * @return DynamicField|array
      */
-    public function decodeMessage($value, Field $field);
+    public function decodeDynamicField($value, Field $field);
 
     /**
-     * @param MessageRef $messageRef
-     * @param Field $field
+     * @param GeoPoint|array $geoPoint
+     * @param Field          $field
      *
      * @return mixed
      */
-    public function encodeMessageRef(MessageRef $messageRef, Field $field);
+    public function encodeGeoPoint($geoPoint, Field $field);
 
     /**
      * @param mixed $value
      * @param Field $field
      *
-     * @return MessageRef
-     */
-    public function decodeMessageRef($value, Field $field);
-
-    /**
-     * @param GeoPoint $geoPoint
-     * @param Field $field
-     *
-     * @return mixed
-     */
-    public function encodeGeoPoint(GeoPoint $geoPoint, Field $field);
-
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return GeoPoint
+     * @return GeoPoint|array
      */
     public function decodeGeoPoint($value, Field $field);
 
+    public function encodeMessage(Message $message, Field $field);
+
+    public function decodeMessage($value, Field $field): Message;
+
     /**
-     * @param DynamicField $dynamicField
-     * @param Field $field
+     * @param MessageRef|array $messageRef
+     * @param Field            $field
      *
      * @return mixed
      */
-    public function encodeDynamicField(DynamicField $dynamicField, Field $field);
+    public function encodeMessageRef($messageRef, Field $field);
 
     /**
      * @param mixed $value
      * @param Field $field
      *
-     * @return DynamicField
+     * @return MessageRef|array
      */
-    public function decodeDynamicField($value, Field $field);
+    public function decodeMessageRef($value, Field $field);
 }

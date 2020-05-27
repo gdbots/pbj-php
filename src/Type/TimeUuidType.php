@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,36 +10,32 @@ use Gdbots\Pbj\WellKnown\TimeUuidIdentifier;
 
 final class TimeUuidType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        Assertion::isInstanceOf($value, TimeUuidIdentifier::class, null, $field->getName());
+        $fieldName = $field->getName();
+        Assertion::isInstanceOf($value, TimeUuidIdentifier::class, null, $fieldName);
         if ($field->hasClassName()) {
-            Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+            Assertion::isInstanceOf($value, $field->getClassName(), null, $fieldName);
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof TimeUuidIdentifier) {
             return $value->toString();
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (empty($value)) {
-            return null;
+        if (null === $value || $value instanceof TimeUuidIdentifier) {
+            return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && !empty($value)) {
+            return (string)$value;
         }
 
         /** @var TimeUuidIdentifier $className */
@@ -47,29 +44,20 @@ final class TimeUuidType extends AbstractType
             return $value;
         }
 
-        return $className::fromString((string) $value);
+        return $className::fromString((string)$value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return TimeUuidIdentifier::generate();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }

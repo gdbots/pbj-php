@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
-namespace Gdbots\Tests\Pbj;
+namespace Gdbots\Tests\Pbj\WellKnown;
 
-use Gdbots\Pbj\MessageRef;
+use Gdbots\Pbj\WellKnown\MessageRef;
 use PHPUnit\Framework\TestCase;
 
 class MessageRefTest extends TestCase
@@ -39,7 +40,7 @@ class MessageRefTest extends TestCase
     {
         try {
             $ref = MessageRef::fromString($string);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertTrue(true, sprintf('MessageRef correctly failed on string [%s].', $string));
             return;
         }

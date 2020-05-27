@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures;
 
@@ -6,31 +7,28 @@ use Gdbots\Pbj\AbstractMessage;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\FieldBuilder as Fb;
 use Gdbots\Pbj\Message;
-use Gdbots\Pbj\MessageRef;
 use Gdbots\Pbj\MessageResolver;
 use Gdbots\Pbj\Schema;
 use Gdbots\Pbj\Type as T;
+use Gdbots\Pbj\WellKnown\MessageRef;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Provider;
 
 final class EmailMessage extends AbstractMessage
 {
-    /**
-     * @return Schema
-     */
-    protected static function defineSchema()
+    protected static function defineSchema(): Schema
     {
         $schema = new Schema('pbj:gdbots:tests.pbj:fixtures:email-message:1-0-0', __CLASS__,
             [
                 Fb::create('id', T\TimeUuidType::create())
-                    //->useTypeDefault(false)
+                    ->useTypeDefault(false)
                     ->required()
                     ->build(),
                 Fb::create('from_name', T\StringType::create())
                     ->build(),
                 Fb::create('from_email', T\StringType::create())
                     ->required()
-                    ->format('email')
+                    ->format(Format::EMAIL())
                     ->build(),
                 Fb::create('subject', T\StringType::create())
                     ->withDefault(function (EmailMessage $message = null) {
@@ -61,8 +59,8 @@ final class EmailMessage extends AbstractMessage
                     ->format(Format::URL())
                     ->build(),
                 Fb::create('nested', T\MessageType::create())
-                    ->anyOfClassNames([
-                        NestedMessage::class
+                    ->anyOfCuries([
+                        NestedMessage::schema()->getCurie()->toString(),
                     ])
                     ->build(),
                 Fb::create('enum_in_set', T\StringEnumType::create())
@@ -80,6 +78,14 @@ final class EmailMessage extends AbstractMessage
                 Fb::create('dynamic_fields', T\DynamicFieldType::create())
                     ->asAList()
                     ->build(),
+                Fb::create('node_ref', T\NodeRefType::create())
+                    ->build(),
+            ],
+            [
+                'gdbots:tests.pbj:mixin:many:v1',
+                'gdbots:tests.pbj:mixin:many',
+                'gdbots:tests.pbj:mixin:one:v1',
+                'gdbots:tests.pbj:mixin:one',
             ]
         );
 
@@ -87,18 +93,12 @@ final class EmailMessage extends AbstractMessage
         return $schema;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function generateMessageRef($tag = null)
+    public function generateMessageRef(?string $tag = null): MessageRef
     {
         return new MessageRef(static::schema()->getCurie(), $this->get('id'), $tag);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getUriTemplateVars()
+    public function getUriTemplateVars(): array
     {
         return ['id' => $this->get('id')->toString()];
     }

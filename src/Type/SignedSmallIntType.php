@@ -1,21 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
 final class SignedSmallIntType extends AbstractIntType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getMin()
+    public function getMin(): int
     {
         return -32768;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMax()
+    public function getMax(): int
     {
         return 32767;
     }

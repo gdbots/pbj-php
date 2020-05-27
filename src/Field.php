@@ -1,19 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\Enum;
-use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\ArrayUtils;
-use Gdbots\Common\Util\NumberUtils;
 use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Enum\TypeName;
-use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\Type\Type;
+use Gdbots\Pbj\Util\ArrayUtil;
+use Gdbots\Pbj\Util\NumberUtil;
 use Gdbots\Pbj\WellKnown\Identifier;
 
-final class Field implements ToArray, \JsonSerializable
+final class Field implements \JsonSerializable
 {
     /**
      * Regular expression pattern for matching a valid field name.  The pattern allows
@@ -23,23 +21,12 @@ final class Field implements ToArray, \JsonSerializable
      */
     const VALID_NAME_PATTERN = '/^[a-zA-Z_]{1}[a-zA-Z0-9_]*$/';
 
-    /** @var string */
-    private $name;
-
-    /** @var Type */
-    private $type;
-
-    /** @var FieldRule */
-    private $rule;
-
-    /** @var bool */
-    private $required = false;
-
-    /** @var int */
-    private $minLength;
-
-    /** @var int */
-    private $maxLength;
+    private string $name;
+    private Type $type;
+    private FieldRule $rule;
+    private bool $required;
+    private ?int $minLength = null;
+    private ?int $maxLength = null;
 
     /**
      * A regular expression to match against for string types.
@@ -47,177 +34,119 @@ final class Field implements ToArray, \JsonSerializable
      *
      * @var string
      */
-    private $pattern;
-
-    /**
-     * @link http://spacetelescope.github.io/understanding-json-schema/reference/string.html#format
-     *
-     * @var Format
-     */
-    private $format;
-
-    /** @var int */
-    private $min;
-
-    /** @var int */
-    private $max;
-
-    /** @var int */
-    private $precision = 10;
-
-    /** @var int */
-    private $scale = 2;
-
+    private ?string $pattern = null;
+    private ?Format $format = null;
+    private ?int $min = null;
+    private ?int $max = null;
+    private int $precision = 10;
+    private int $scale = 2;
     /** @var mixed */
     private $default;
+    private bool $useTypeDefault;
+    private ?string $className;
+    private ?array $anyOfCuries;
+    private ?\Closure $assertion;
+    private bool $overridable;
 
-    /** @var bool */
-    private $useTypeDefault = true;
+    private static ?FieldRule $aSingleValue = null;
+    private static ?FieldRule $aSet = null;
+    private static ?FieldRule $aList = null;
+    private static ?FieldRule $aMap = null;
 
-    /** @var string */
-    private $className;
-
-    /** @var array */
-    private $anyOfClassNames;
-
-    /** @var \Closure */
-    private $assertion;
-
-    /** @var bool */
-    private $overridable = false;
-
-    /**
-     * @param string        $name
-     * @param Type          $type
-     * @param FieldRule     $rule
-     * @param bool          $required
-     * @param null|int      $minLength
-     * @param null|int      $maxLength
-     * @param null|string   $pattern
-     * @param null|string   $format
-     * @param null|int      $min
-     * @param null|int      $max
-     * @param int           $precision
-     * @param int           $scale
-     * @param null|mixed    $default
-     * @param bool          $useTypeDefault
-     * @param null|string   $className
-     * @param null|array    $anyOfClassNames
-     * @param \Closure|null $assertion
-     * @param bool          $overridable
-     */
     public function __construct(
-        $name,
+        string $name,
         Type $type,
-        FieldRule $rule = null,
-        $required = false,
-        $minLength = null,
-        $maxLength = null,
-        $pattern = null,
-        $format = null,
-        $min = null,
-        $max = null,
+        FieldRule $rule,
+        bool $required = false,
+        ?int $minLength = null,
+        ?int $maxLength = null,
+        ?string $pattern = null,
+        ?Format $format = null,
+        ?int $min = null,
+        ?int $max = null,
         $precision = 10,
         $scale = 2,
         $default = null,
-        $useTypeDefault = true,
-        $className = null,
-        array $anyOfClassNames = null,
-        \Closure $assertion = null,
-        $overridable = false
+        bool $useTypeDefault = true,
+        ?string $className = null,
+        ?array $anyOfCuries = null,
+        ?\Closure $assertion = null,
+        bool $overridable = false
     ) {
-        Assertion::betweenLength($name, 1, 127);
-        Assertion::regex($name, self::VALID_NAME_PATTERN,
-            sprintf('Field [%s] must match pattern [%s].', $name, self::VALID_NAME_PATTERN)
-        );
-        Assertion::boolean($required);
-        Assertion::boolean($useTypeDefault);
-        Assertion::boolean($overridable);
+        if (null === self::$aSingleValue) {
+            self::$aSingleValue = FieldRule::A_SINGLE_VALUE();
+            self::$aSet = FieldRule::A_SET();
+            self::$aList = FieldRule::A_LIST();
+            self::$aMap = FieldRule::A_MAP();
+        }
 
-        if ($type->getTypeValue() !== TypeName::MESSAGE) {
+        Assertion::betweenLength($name, 1, 127);
+        Assertion::regex($name, self::VALID_NAME_PATTERN, 'Field name must match pattern.', $name);
+
+        if (!$type->isMessage()) {
             // anyOf is only supported on nested messages
             Assertion::nullOrClassExists($className);
-            $anyOfClassNames = null;
+            $anyOfCuries = null;
         }
 
         $this->name = $name;
         $this->type = $type;
+        $this->rule = $rule;
         $this->required = $required;
         $this->useTypeDefault = $useTypeDefault;
         $this->className = $className;
-        $this->anyOfClassNames = $anyOfClassNames;
+        $this->anyOfCuries = $anyOfCuries;
         $this->assertion = $assertion;
         $this->overridable = $overridable;
 
-        $this->applyFieldRule($rule);
+        $this->applyFieldRule();
         $this->applyStringOptions($minLength, $maxLength, $pattern, $format);
         $this->applyNumericOptions($min, $max, $precision, $scale);
         $this->applyDefault($default);
     }
 
-    /**
-     * @param FieldRule $rule
-     *
-     * @throws AssertionFailed
-     */
-    private function applyFieldRule(FieldRule $rule = null)
+    private function applyFieldRule(): void
     {
-        $this->rule = $rule ?: FieldRule::A_SINGLE_VALUE();
         if ($this->isASet()) {
             Assertion::true(
                 $this->type->allowedInSet(),
-                sprintf(
-                    'Field [%s] with type [%s] cannot be used in a set.',
-                    $this->name,
-                    $this->type->getTypeValue()
-                )
+                'Field cannot be used in a set.',
+                $this->name
             );
         }
     }
 
-    /**
-     * @param null|int    $minLength
-     * @param null|int    $maxLength
-     * @param null|string $pattern
-     * @param null|string $format
-     */
-    private function applyStringOptions($minLength = null, $maxLength = null, $pattern = null, $format = null)
-    {
+    private function applyStringOptions(
+        ?int $minLength = null,
+        ?int $maxLength = null,
+        ?string $pattern = null,
+        ?Format $format = null
+    ): void {
         $minLength = (int)$minLength;
         $maxLength = (int)$maxLength;
         if ($maxLength > 0) {
             $this->maxLength = $maxLength;
-            $this->minLength = NumberUtils::bound($minLength, 0, $this->maxLength);
+            $this->minLength = NumberUtil::bound($minLength, 0, $this->maxLength);
         } else {
             // arbitrary string minimum range
-            $this->minLength = NumberUtils::bound($minLength, 0, $this->type->getMaxBytes());
+            $this->minLength = NumberUtil::bound($minLength, 0, $this->type->getMaxBytes());
         }
 
         if (null !== $pattern) {
             $this->pattern = '/' . trim($pattern, '/') . '/';
         }
 
-        if (null !== $format && in_array($format, Format::values())) {
-            $this->format = Format::create($format);
-        } else {
-            $this->format = Format::UNKNOWN();
-        }
+        $this->format = $format;
     }
 
-    /**
-     * @param null|int $min
-     * @param null|int $max
-     * @param int      $precision
-     * @param int      $scale
-     */
-    private function applyNumericOptions($min = null, $max = null, $precision = 10, $scale = 2)
+    private function applyNumericOptions(?int $min = null, ?int $max = null, int $precision = 10, int $scale = 2): void
     {
         if (null !== $max) {
-            $this->max = (int)$max;
+            $this->max = $max;
         }
 
         if (null !== $min) {
-            $this->min = (int)$min;
+            $this->min = $min;
             if (null !== $this->max) {
                 if ($this->min > $this->max) {
                     $this->min = $this->max;
@@ -225,17 +154,11 @@ final class Field implements ToArray, \JsonSerializable
             }
         }
 
-        $this->precision = NumberUtils::bound((int)$precision, 1, 65);
-        $this->scale = NumberUtils::bound((int)$scale, 0, $this->precision);
+        $this->precision = NumberUtil::bound($precision, 1, 65);
+        $this->scale = NumberUtil::bound($scale, 0, $this->precision);
     }
 
-    /**
-     * @param mixed $default
-     *
-     * @throws AssertionFailed
-     * @throws \Exception
-     */
-    private function applyDefault($default = null)
+    private function applyDefault($default = null): void
     {
         $this->default = $default;
 
@@ -247,7 +170,7 @@ final class Field implements ToArray, \JsonSerializable
             $decodeDefault = null !== $this->default && !$this->default instanceof \Closure;
             switch ($this->type->getTypeValue()) {
                 case TypeName::IDENTIFIER:
-                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    Assertion::notNull($this->className, 'Field requires a className.', $this->name);
                     if ($decodeDefault && !$this->default instanceof Identifier) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
@@ -255,7 +178,7 @@ final class Field implements ToArray, \JsonSerializable
 
                 case TypeName::INT_ENUM:
                 case TypeName::STRING_ENUM:
-                    Assertion::notNull($this->className, sprintf('Field [%s] requires a className.', $this->name));
+                    Assertion::notNull($this->className, 'Field requires a className.', $this->name);
                     if ($decodeDefault && !$this->default instanceof Enum) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
@@ -271,149 +194,104 @@ final class Field implements ToArray, \JsonSerializable
         }
     }
 
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return Type
-     */
-    public function getType()
+    public function getType(): Type
     {
         return $this->type;
     }
 
-    /**
-     * @return FieldRule
-     */
-    public function getRule()
+    public function getRule(): FieldRule
     {
         return $this->rule;
     }
 
-    /**
-     * @return bool
-     */
-    public function isASingleValue()
+    public function isASingleValue(): bool
     {
-        return FieldRule::A_SINGLE_VALUE === $this->rule->getValue();
+        return self::$aSingleValue === $this->rule;
     }
 
-    /**
-     * @return bool
-     */
-    public function isASet()
+    public function isASet(): bool
     {
-        return FieldRule::A_SET === $this->rule->getValue();
+        return self::$aSet === $this->rule;
     }
 
-    /**
-     * @return bool
-     */
-    public function isAList()
+    public function isAList(): bool
     {
-        return FieldRule::A_LIST === $this->rule->getValue();
+        return self::$aList === $this->rule;
     }
 
-    /**
-     * @return bool
-     */
-    public function isAMap()
+    public function isAMap(): bool
     {
-        return FieldRule::A_MAP === $this->rule->getValue();
+        return self::$aMap === $this->rule;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRequired()
+    public function isRequired(): bool
     {
         return $this->required;
     }
 
-    /**
-     * @return int
-     */
-    public function getMinLength()
+    public function getMinLength(): int
     {
         return $this->minLength;
     }
 
-    /**
-     * @return int
-     */
-    public function getMaxLength()
+    public function getMaxLength(): int
     {
         if (null === $this->maxLength) {
             return $this->type->getMaxBytes();
         }
+
         return $this->maxLength;
     }
 
-    /**
-     * @return string
-     */
-    public function getPattern()
+    public function getPattern(): ?string
     {
         return $this->pattern;
     }
 
-    /**
-     * @return Format
-     */
-    public function getFormat()
+    public function hasFormat(): bool
+    {
+        return null !== $this->format;
+    }
+
+    public function getFormat(): ?Format
     {
         return $this->format;
     }
 
-    /**
-     * @return int
-     */
-    public function getMin()
+    public function getMin(): int
     {
         if (null === $this->min) {
             return $this->type->getMin();
         }
+
         return $this->min;
     }
 
-    /**
-     * @return int
-     */
-    public function getMax()
+    public function getMax(): int
     {
         if (null === $this->max) {
             return $this->type->getMax();
         }
+
         return $this->max;
     }
 
-    /**
-     * @return int
-     */
-    public function getPrecision()
+    public function getPrecision(): int
     {
         return $this->precision;
     }
 
-    /**
-     * @return int
-     */
-    public function getScale()
+    public function getScale(): int
     {
         return $this->scale;
     }
 
-    /**
-     * @param Message $message
-     *
-     * @return mixed
-     */
-    public function getDefault(Message $message = null)
+    public function getDefault(?Message $message = null)
     {
         if (null === $this->default) {
             if ($this->useTypeDefault) {
@@ -437,87 +315,61 @@ final class Field implements ToArray, \JsonSerializable
         return $this->default;
     }
 
-    /**
-     * @param mixed $default
-     *
-     * @throws AssertionFailed
-     * @throws \Exception
-     */
-    private function guardDefault($default)
+    private function guardDefault($default): void
     {
         if ($this->isASingleValue()) {
             $this->guardValue($default);
             return;
         }
 
-        Assertion::nullOrIsArray($default, sprintf('Field [%s] default must be an array.', $this->name));
+        Assertion::nullOrIsArray($default, 'Field default must be an array.', $this->name);
         if (null === $default) {
             return;
         }
 
         if ($this->isAMap()) {
             Assertion::true(
-                ArrayUtils::isAssoc($default),
-                sprintf('Field [%s] default must be an associative array.', $this->name)
+                ArrayUtil::isAssoc($default),
+                'Field default must be an associative array.',
+                $this->name
             );
         }
 
         foreach ($default as $k => $v) {
-            Assertion::notNull($v, sprintf('Field [%s] default for key [%s] cannot be null.', $this->name, $k));
+            Assertion::notNull($v, 'Field default for key cannot be null.', $this->name);
             $this->guardValue($v);
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function hasClassName()
+    public function hasClassName(): bool
     {
         return null !== $this->className;
     }
 
-    /**
-     * @return string
-     */
-    public function getClassName()
+    public function getClassName(): ?string
     {
         return $this->className;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasAnyOfClassNames()
+    public function hasAnyOfCuries(): bool
     {
-        return null !== $this->anyOfClassNames;
+        return !empty($this->anyOfCuries);
     }
 
-    /**
-     * @return array
-     */
-    public function getAnyOfClassNames()
+    public function getAnyOfCuries(): ?array
     {
-        return $this->anyOfClassNames;
+        return $this->anyOfCuries;
     }
 
-    /**
-     * @return bool
-     */
-    public function isOverridable()
+    public function isOverridable(): bool
     {
         return $this->overridable;
     }
 
-    /**
-     * @param mixed $value
-     *
-     * @throws AssertionFailed
-     * @throws \Exception
-     */
-    public function guardValue($value)
+    public function guardValue($value): void
     {
         if ($this->required) {
-            Assertion::notNull($value, sprintf('Field [%s] is required and cannot be null.', $this->name));
+            Assertion::notNull($value, 'Field is required and cannot be null.');
         }
 
         if (null !== $value) {
@@ -529,52 +381,36 @@ final class Field implements ToArray, \JsonSerializable
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toArray()
+    public function toArray(): array
     {
         return [
-            'name'               => $this->name,
-            'type'               => $this->type->getTypeValue(),
-            'rule'               => $this->rule->getName(),
-            'required'           => $this->required,
-            'min_length'         => $this->minLength,
-            'max_length'         => $this->maxLength,
-            'pattern'            => $this->pattern,
-            'format'             => $this->format->getValue(),
-            'min'                => $this->min,
-            'max'                => $this->max,
-            'precision'          => $this->precision,
-            'scale'              => $this->scale,
-            'default'            => $this->getDefault(),
-            'use_type_default'   => $this->useTypeDefault,
-            'class_name'         => $this->className,
-            'any_of_class_names' => $this->anyOfClassNames,
-            'has_assertion'      => null !== $this->assertion,
-            'overridable'        => $this->overridable,
+            'name'             => $this->name,
+            'type'             => $this->type->getTypeValue(),
+            'rule'             => $this->rule->getName(),
+            'required'         => $this->required,
+            'min_length'       => $this->minLength,
+            'max_length'       => $this->maxLength,
+            'pattern'          => $this->pattern,
+            'format'           => $this->format ? $this->format->getValue() : Format::UNKNOWN,
+            'min'              => $this->min,
+            'max'              => $this->max,
+            'precision'        => $this->precision,
+            'scale'            => $this->scale,
+            'default'          => $this->getDefault(),
+            'use_type_default' => $this->useTypeDefault,
+            'class_name'       => $this->className,
+            'any_of_curies'    => $this->anyOfCuries,
+            'has_assertion'    => null !== $this->assertion,
+            'overridable'      => $this->overridable,
         ];
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * Returns true if this field is likely compatible with the
-     * provided field during a mergeFrom operation.
-     *
-     * todo: implement/test isCompatibleForMerge
-     *
-     * @param Field $other
-     *
-     * @return bool
-     */
-    public function isCompatibleForMerge(Field $other)
+    public function isCompatibleForMerge(Field $other): bool
     {
         if ($this->name !== $other->name) {
             return false;
@@ -592,22 +428,14 @@ final class Field implements ToArray, \JsonSerializable
             return false;
         }
 
-        if (!array_intersect($this->anyOfClassNames, $other->anyOfClassNames)) {
+        if (!array_intersect($this->anyOfCuries, $other->anyOfCuries)) {
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Returns true if the provided field can be used as an
-     * override to this field.
-     *
-     * @param Field $other
-     *
-     * @return bool
-     */
-    public function isCompatibleForOverride(Field $other)
+    public function isCompatibleForOverride(Field $other): bool
     {
         if (!$this->overridable) {
             return false;

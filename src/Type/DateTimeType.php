@@ -1,43 +1,33 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\DateUtil;
 
 final class DateTimeType extends AbstractType
 {
-    /** @var \DateTimeZone */
-    private $utc;
+    private ?\DateTimeZone $utc = null;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        /** @var \DateTimeInterface $value */
         Assertion::isInstanceOf($value, \DateTimeInterface::class, null, $field->getName());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof \DateTimeInterface) {
-            return $this->convertToUtc($value)->format(DateUtils::ISO8601_ZULU);
+            return $this->convertToUtc($value)->format(DateUtil::ISO8601_ZULU);
         }
 
-        return null;
+        return !empty($value) ? (string)$value : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
         if (empty($value)) {
             return null;
@@ -47,7 +37,11 @@ final class DateTimeType extends AbstractType
             return $this->convertToUtc($value);
         }
 
-        $date = \DateTimeImmutable::createFromFormat(DateUtils::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
+        if ($codec && $codec->skipValidation()) {
+            return str_replace('+00:00', 'Z', (string)$value);
+        }
+
+        $date = \DateTimeImmutable::createFromFormat(DateUtil::ISO8601_ZULU, str_replace('+00:00', 'Z', $value));
         if ($date instanceof \DateTimeInterface) {
             return $this->convertToUtc($date);
         }
@@ -57,43 +51,29 @@ final class DateTimeType extends AbstractType
             $field,
             sprintf(
                 'Format must be [%s].  Errors: [%s]',
-                DateUtils::ISO8601_ZULU,
+                DateUtil::ISO8601_ZULU,
                 // this is mutant
                 print_r(\DateTimeImmutable::getLastErrors() ?: \DateTime::getLastErrors(), true)
             )
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isString()
+    public function isString(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function allowedInSet()
+    public function allowedInSet(): bool
     {
         return false;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     *
-     * @return \DateTimeInterface
-     */
-    private function convertToUtc(\DateTimeInterface $date)
+    private function convertToUtc(\DateTimeInterface $date): \DateTimeInterface
     {
         if ($date->getOffset() !== 0) {
             if (null === $this->utc) {
@@ -102,8 +82,8 @@ final class DateTimeType extends AbstractType
 
             if ($date instanceof \DateTimeImmutable) {
                 $date = \DateTime::createFromFormat(
-                    DateUtils::ISO8601_ZULU,
-                    $date->format(DateUtils::ISO8601_ZULU)
+                    DateUtil::ISO8601_ZULU,
+                    $date->format(DateUtil::ISO8601_ZULU)
                 );
             }
 

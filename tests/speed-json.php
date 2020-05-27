@@ -1,13 +1,15 @@
 <?php
+declare(strict_types=1);
 
 require 'speed-bootstrap.php';
 
-use \Gdbots\Pbj\Serializer\JsonSerializer;
+use Gdbots\Pbj\Serializer\JsonSerializer;
 
 $startTime = microtime(true);
 $i = 0;
 $message = createEmailMessage();
 $serializer = new JsonSerializer();
+$serializer->skipValidation(true);
 
 do {
     $i++;

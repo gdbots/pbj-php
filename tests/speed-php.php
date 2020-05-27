@@ -1,9 +1,9 @@
 <?php
+declare(strict_types=1);
 
 require 'speed-bootstrap.php';
 
 use Gdbots\Pbj\Serializer\PhpSerializer;
-use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 
 $startTime = microtime(true);
 $i = 0;

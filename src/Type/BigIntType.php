@@ -1,77 +1,66 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
+use Brick\Math\BigInteger;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Field;
-use Gdbots\Pbj\WellKnown\BigNumber;
 
 final class BigIntType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
-        /** @var BigNumber $value */
-        Assertion::isInstanceOf($value, BigNumber::class, null, $field->getName());
+        $fieldName = $field->getName();
+        /** @var BigInteger $value */
+        Assertion::isInstanceOf($value, BigInteger::class, null, $fieldName);
         Assertion::true(
             !$value->isNegative(),
-            sprintf('Field [%s] cannot be negative.', $field->getName()),
-            $field->getName()
+            'Field cannot be negative.',
+            $fieldName
         );
         Assertion::true(
             $value->isLessThanOrEqualTo('18446744073709551615'),
-            sprintf('Field [%s] cannot be greater than [18446744073709551615].', $field->getName()),
-            $field->getName()
+            'Field cannot be greater than [18446744073709551615].',
+            $fieldName
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
-        if ($value instanceof BigNumber) {
-            return $value->getValue();
+        if ($value instanceof BigInteger) {
+            return (string)$value;
         }
 
-        return '0';
+        $str = (string)$value;
+        return strlen($str) ? $str : '0';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (null === $value || $value instanceof BigNumber) {
+        if (null === $value || $value instanceof BigInteger) {
             return $value;
         }
 
-        return new BigNumber((string) $value);
+        if ($codec && $codec->skipValidation() && strlen((string)$value)) {
+            return (string)$value;
+        }
+
+        return BigInteger::of((string)$value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
-        return new BigNumber(0);
+        return BigInteger::zero();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return true;
     }

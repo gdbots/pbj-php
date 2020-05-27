@@ -1,14 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Type;
 
-use Gdbots\Common\Util\DateUtils;
 use Gdbots\Pbj\Exception\AssertionFailed;
 use Gdbots\Pbj\FieldBuilder;
 use Gdbots\Pbj\Type\BinaryType;
 use Gdbots\Pbj\Type\DateTimeType;
 use Gdbots\Pbj\Type\DateType;
 use Gdbots\Pbj\Type\Type;
+use Gdbots\Pbj\Util\DateUtil;
 use Gdbots\Pbj\WellKnown\GeoPoint;
 use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 use PHPUnit\Framework\TestCase;
@@ -43,17 +44,17 @@ class TypeTest extends TestCase
     public function testDateTimeType()
     {
         $expected = '2014-12-25T12:13:14.123456Z';
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, $expected);
+        $dateTime = \DateTime::createFromFormat(DateUtil::ISO8601_ZULU, $expected);
         $field = FieldBuilder::create('date_time', DateTimeType::create())->build();
 
         $encoded = $field->getType()->encode($dateTime, $field);
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, $encoded);
+        $dateTime = \DateTime::createFromFormat(DateUtil::ISO8601_ZULU, $encoded);
         $this->assertSame($expected, $encoded);
 
         $decoded = $field->getType()->decode($encoded, $field);
         $this->assertSame(
-            $dateTime->format(DateUtils::ISO8601_ZULU),
-            $decoded->format(DateUtils::ISO8601_ZULU)
+            $dateTime->format(DateUtil::ISO8601_ZULU),
+            $decoded->format(DateUtil::ISO8601_ZULU)
         );
     }
 
@@ -61,17 +62,17 @@ class TypeTest extends TestCase
     {
         $notUtc = '2014-12-25T12:13:14.123456+08:00';
         $expected = '2014-12-25T04:13:14.123456Z';
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601, $notUtc);
+        $dateTime = \DateTime::createFromFormat(DateUtil::ISO8601, $notUtc);
         $field = FieldBuilder::create('date_time', DateTimeType::create())->build();
 
         $encoded = $field->getType()->encode($dateTime, $field);
-        $dateTime = \DateTime::createFromFormat(DateUtils::ISO8601_ZULU, $encoded);
+        $dateTime = \DateTime::createFromFormat(DateUtil::ISO8601_ZULU, $encoded);
         $this->assertSame($expected, $encoded);
 
         $decoded = $field->getType()->decode($encoded, $field);
         $this->assertSame(
-            $dateTime->format(DateUtils::ISO8601_ZULU),
-            $decoded->format(DateUtils::ISO8601_ZULU)
+            $dateTime->format(DateUtil::ISO8601_ZULU),
+            $decoded->format(DateUtil::ISO8601_ZULU)
         );
     }
 

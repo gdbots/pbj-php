@@ -1,49 +1,42 @@
 <?php
+declare(strict_types=1);
 
-namespace Gdbots\Pbj;
+namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\FromArray;
-use Gdbots\Common\ToArray;
+use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
 use Gdbots\Pbj\Exception\LogicException;
+use Gdbots\Pbj\SchemaCurie;
 
 /**
  * Represents a reference to a message.  Typically used to link messages
  * together via a correlator or "links".  Format for a reference:
  * vendor:package:category:message:id#tag (tag is optional)
  */
-final class MessageRef implements FromArray, ToArray, \JsonSerializable
+final class MessageRef implements \JsonSerializable
 {
-    /** @var SchemaCurie */
-    private $curie;
+    private SchemaCurie $curie;
 
     /**
      * Any string matching pattern /^[\w\/\.:-]+$/
-     * @var string
      */
-    private $id;
-
-    /** @var string */
-    private $tag;
+    private string $id;
+    private ?string $tag = null;
 
     /**
      * When serialized we store the curie as a string so we can
      * restore the singleton instance upon wakeup.
-     *
-     * @var string
      */
-    private $cs;
+    private ?string $cs = null;
 
     /**
-     * todo: review random failures from YamlSerializer on $id when no tag is present.
-     *
      * @param SchemaCurie $curie
      * @param string      $id
      * @param string      $tag The tag will be automatically fixed to a slug-formatted-string.
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function __construct(SchemaCurie $curie, $id, $tag = null)
+    public function __construct(SchemaCurie $curie, ?string $id = null, ?string $tag = null)
     {
         $this->curie = $curie;
         $this->id = trim((string)$id) ?: 'null';
@@ -58,23 +51,18 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function fromArray(array $data = [])
+    public static function fromArray(array $data = []): self
     {
         if (isset($data['curie'])) {
-            $id = isset($data['id']) ? $data['id'] : 'null';
+            $id = isset($data['id']) ? (string)$data['id'] : 'null';
             $tag = isset($data['tag']) ? $data['tag'] : null;
             return new self(SchemaCurie::fromString($data['curie']), $id, $tag);
         }
+
         throw new InvalidArgumentException('Payload must be a MessageRef type.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toArray()
+    public function toArray(): array
     {
         if (null !== $this->tag) {
             return ['curie' => $this->curie->toString(), 'id' => $this->id, 'tag' => $this->tag];
@@ -83,20 +71,12 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         return ['curie' => $this->curie->toString(), 'id' => $this->id];
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @param string $string A string with format curie:id#tag
-     *
-     * @return self
-     */
-    public static function fromString($string)
+    public static function fromString(string $string): self
     {
         $parts = explode('#', $string, 2);
         $ref = $parts[0];
@@ -108,10 +88,7 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         return new self($curie, $id, $tag);
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         if (null !== $this->tag) {
             return $this->curie->toString() . ':' . $this->id . '#' . $this->tag;
@@ -120,76 +97,47 @@ final class MessageRef implements FromArray, ToArray, \JsonSerializable
         return $this->curie->toString() . ':' . $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return SchemaCurie
-     */
-    public function getCurie()
+    public function getCurie(): SchemaCurie
     {
         return $this->curie;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasId()
+    public function hasId(): bool
     {
         return 'null' != $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasTag()
+    public function hasTag(): bool
     {
         return null !== $this->tag;
     }
 
-    /**
-     * @return string
-     */
-    public function getTag()
+    public function getTag(): ?string
     {
         return $this->tag;
     }
 
-    /**
-     * @param MessageRef $other
-     *
-     * @return bool
-     */
-    public function equals(MessageRef $other)
+    public function equals(self $other): bool
     {
         return $this->toString() === $other->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __sleep()
     {
         $this->cs = $this->curie->toString();
         return ['cs', 'id', 'tag'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __wakeup()
     {
         $this->curie = SchemaCurie::fromString($this->cs);

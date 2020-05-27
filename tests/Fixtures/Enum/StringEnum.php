@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
-use Gdbots\Common\Enum;
+use Gdbots\Pbj\Enum;
 
 /**
  * @method static StringEnum UNKNOWN()
@@ -10,6 +11,6 @@ use Gdbots\Common\Enum;
  */
 final class StringEnum extends Enum
 {
-    const UNKNOWN  = 'unknown';
+    const UNKNOWN = 'unknown';
     const A_STRING = 'string';
 }

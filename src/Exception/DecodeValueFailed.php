@@ -1,30 +1,23 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Field;
+use Gdbots\Pbj\Util\StringUtil;
 
-class DecodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
+final class DecodeValueFailed extends \InvalidArgumentException implements GdbotsPbjException
 {
-    /** @var mixed */
     private $value;
+    private Field $field;
 
-    /** @var Field */
-    private $field;
-
-    /**
-     * @param mixed $value
-     * @param string Field $field
-     * @param string $message
-     */
-    public function __construct($value, Field $field, $message = null)
+    public function __construct($value, Field $field, ?string $message = null)
     {
         $this->value = $value;
         $this->field = $field;
         $message = sprintf(
             'Failed to decode [%s] for field [%s] to a [%s].  Detail: %s',
-            is_scalar($this->value) ? $this->value : StringUtils::varToString($this->value),
+            is_scalar($this->value) ? $this->value : StringUtil::varToString($this->value),
             $this->field->getName(),
             $this->field->getType()->getTypeValue(),
             $message
@@ -32,26 +25,17 @@ class DecodeValueFailed extends \InvalidArgumentException implements GdbotsPbjEx
         parent::__construct($message);
     }
 
-    /**
-     * @return mixed
-     */
     public function getValue()
     {
         return $this->value;
     }
 
-    /**
-     * @return Field
-     */
-    public function getField()
+    public function getField(): Field
     {
         return $this->field;
     }
 
-    /**
-     * @return string
-     */
-    public function getFieldName()
+    public function getFieldName(): string
     {
         return $this->field->getName();
     }

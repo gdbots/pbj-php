@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
@@ -48,10 +49,9 @@ use Gdbots\Pbj\Exception\InvalidSchemaId;
  * major revision specific.  As in GetVideoV1, GetVideoV2, etc.  Only "major" revisions
  * should require a unique class since all other schema changes should not break anything.
  *
- * @see SchemaVersion
+ * @see  SchemaVersion
  *
  */
-
 final class SchemaId implements \JsonSerializable
 {
     /**
@@ -60,10 +60,9 @@ final class SchemaId implements \JsonSerializable
      */
     const VALID_PATTERN = '/^pbj:([a-z0-9-]+):([a-z0-9\.-]+):([a-z0-9-]+)?:([a-z0-9-]+):([0-9]+-[0-9]+-[0-9]+)$/';
 
-    private static $instances = [];
+    private static array $instances = [];
 
-    /** @var string */
-    private $id;
+    private string $id;
 
     /**
      * The curie is the short name for the schema (without the version) that can be used
@@ -71,22 +70,13 @@ final class SchemaId implements \JsonSerializable
      *
      * @var SchemaCurie
      */
-    private $curie;
+    private SchemaCurie $curie;
 
-    /** @var string */
-    private $vendor;
-
-    /** @var string */
-    private $package;
-
-    /** @var string */
-    private $category;
-
-    /** @var string */
-    private $message;
-
-    /** @var SchemaVersion */
-    private $version;
+    private string $vendor;
+    private string $package;
+    private ?string $category;
+    private string $message;
+    private SchemaVersion $version;
 
     /**
      * @param string $vendor
@@ -95,7 +85,7 @@ final class SchemaId implements \JsonSerializable
      * @param string $message
      * @param string $version
      */
-    private function __construct($vendor, $package, $category, $message, $version)
+    private function __construct(string $vendor, string $package, string $category, string $message, string $version)
     {
         $this->vendor = $vendor;
         $this->package = $package;
@@ -116,10 +106,11 @@ final class SchemaId implements \JsonSerializable
 
     /**
      * @param string $schemaId
+     *
      * @return SchemaId
      * @throws InvalidSchemaId
      */
-    public static function fromString($schemaId)
+    public static function fromString(string $schemaId): self
     {
         if (isset(self::$instances[$schemaId])) {
             return self::$instances[$schemaId];
@@ -141,74 +132,47 @@ final class SchemaId implements \JsonSerializable
         return self::$instances[$schemaId];
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * @return string
-     */
-    public function getVendor()
+    public function getVendor(): string
     {
         return $this->vendor;
     }
 
-    /**
-     * @return string
-     */
-    public function getPackage()
+    public function getPackage(): string
     {
         return $this->package;
     }
 
-    /**
-     * @return string
-     */
-    public function getCategory()
+    public function getCategory(): ?string
     {
         return $this->category;
     }
 
-    /**
-     * @return string
-     */
-    public function getMessage()
+    public function getMessage(): string
     {
         return $this->message;
     }
 
-    /**
-     * @return SchemaVersion
-     */
-    public function getVersion()
+    public function getVersion(): SchemaVersion
     {
         return $this->version;
     }
 
-    /**
-     * @return SchemaCurie
-     */
-    public function getCurie()
+    public function getCurie(): SchemaCurie
     {
         return $this->curie;
     }
@@ -221,18 +185,13 @@ final class SchemaId implements \JsonSerializable
      * same message.
      *
      * e.g. "vendor:package:category:message:v1"
-     *
-     * @return string
      */
-    public function getCurieMajor()
+    public function getCurieMajor(): string
     {
         return $this->curie . ':v' . $this->version->getMajor();
     }
 
-    /**
-     * @return SchemaQName
-     */
-    public function getQName()
+    public function getQName(): SchemaQName
     {
         return $this->curie->getQName();
     }

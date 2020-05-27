@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Marshaler\Elastica;
 
+use Elastica\Document;
 use Gdbots\Pbj\Marshaler\Elastica\DocumentMarshaler;
 use Gdbots\Tests\Pbj\FixtureLoader;
 use PHPUnit\Framework\TestCase;
@@ -10,10 +12,9 @@ class DocumentMarshalerTest extends TestCase
 {
     use FixtureLoader;
 
-    /** @var DocumentMarshaler */
-    protected $marshaler;
+    protected DocumentMarshaler $marshaler;
 
-    public function setup()
+    public function setup(): void
     {
         $this->marshaler = new DocumentMarshaler();
     }
@@ -22,7 +23,7 @@ class DocumentMarshalerTest extends TestCase
     {
         $message = $this->createEmailMessage();
         $document = $this->marshaler->marshal($message);
-        $this->assertInstanceOf('Elastica\Document', $document);
+        $this->assertInstanceOf(Document::class, $document);
         $message2 = $this->marshaler->unmarshal($document);
         $this->assertTrue($message->equals($message2));
     }

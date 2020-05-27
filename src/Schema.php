@@ -1,61 +1,41 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj;
 
-use Gdbots\Common\ToArray;
-use Gdbots\Common\Util\ClassUtils;
 use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
 use Gdbots\Pbj\Exception\FieldOverrideNotCompatible;
-use Gdbots\Pbj\Exception\MixinAlreadyAdded;
-use Gdbots\Pbj\Exception\MixinNotDefined;
+use Gdbots\Pbj\Util\ClassUtil;
 
-final class Schema implements ToArray, \JsonSerializable
+final class Schema implements \JsonSerializable
 {
     const PBJ_FIELD_NAME = '_schema';
 
-    /** @var string */
-    private $className;
-
-    /** @var string */
-    private $classShortName;
-
-    /** @var SchemaId */
-    private $id;
+    private string $className;
+    private string $classShortName;
+    private SchemaId $id;
 
     /** @var Field[] */
-    private $fields = [];
+    private array $fields = [];
 
     /** @var Field[] */
-    private $requiredFields = [];
+    private array $requiredFields = [];
 
-    /** @var Mixin[] */
-    private $mixins = [];
-
-    /** @var Mixin[] */
-    private $mixinsByCurie = [];
-
-    /** @var string[] */
-    private $mixinIds = [];
-
-    /** @var string[] */
-    private $mixinCuries = [];
+    private array $mixins = [];
+    private array $mixinKeys = [];
 
     /**
      * @param SchemaId|string $id
      * @param string          $className
      * @param Field[]         $fields
-     * @param Mixin[]         $mixins
+     * @param string[]        $mixins
      */
-    public function __construct($id, $className, array $fields = [], array $mixins = [])
+    public function __construct($id, string $className, array $fields = [], array $mixins = [])
     {
-        Assertion::classExists($className, null, 'className');
-        Assertion::allIsInstanceOf($fields, Field::class, null, 'fields');
-        Assertion::allIsInstanceOf($mixins, Mixin::class, null, 'mixins');
-
         $this->id = $id instanceof SchemaId ? $id : SchemaId::fromString($id);
         $this->className = $className;
-        $this->classShortName = ClassUtils::getShortName($this->className);
+        $this->classShortName = ClassUtil::getShortName($this->className);
 
         $this->addField(
             FieldBuilder::create(self::PBJ_FIELD_NAME, Type\StringType::create())
@@ -65,30 +45,20 @@ final class Schema implements ToArray, \JsonSerializable
                 ->build()
         );
 
-        foreach ($mixins as $mixin) {
-            $this->addMixin($mixin);
-        }
-
         foreach ($fields as $field) {
             $this->addField($field);
         }
 
-        $this->mixinIds = array_keys($this->mixins);
-        $this->mixinCuries = array_keys($this->mixinsByCurie);
+        $this->mixins = $mixins;
+        $this->mixinKeys = array_flip($mixins);
     }
 
-    /**
-     * @return string
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->id->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id'          => $this->id,
@@ -96,27 +66,16 @@ final class Schema implements ToArray, \JsonSerializable
             'curie_major' => $this->getCurieMajor(),
             'qname'       => $this->getQName(),
             'class_name'  => $this->className,
-            'mixins'      => array_map(
-                function (Mixin $mixin) {
-                    return $mixin->getId();
-                },
-                array_values($this->mixins)
-            ),
+            'mixins'      => $this->mixins,
             'fields'      => $this->fields,
         ];
     }
 
-    /**
-     * @return array
-     */
     public function jsonSerialize()
     {
         return $this->toArray();
     }
 
-    /**
-     * @return string
-     */
     public function __toString()
     {
         return $this->id->toString();
@@ -128,7 +87,7 @@ final class Schema implements ToArray, \JsonSerializable
      * @throws FieldAlreadyDefined
      * @throws FieldOverrideNotCompatible
      */
-    private function addField(Field $field)
+    private function addField(Field $field): void
     {
         $fieldName = $field->getName();
         if ($this->hasField($fieldName)) {
@@ -148,73 +107,35 @@ final class Schema implements ToArray, \JsonSerializable
         }
     }
 
-    /**
-     * @param Mixin $mixin
-     *
-     * @throws MixinAlreadyAdded
-     */
-    private function addMixin(Mixin $mixin)
-    {
-        $id = $mixin->getId();
-        $curieStr = $id->getCurie()->toString();
-
-        if (isset($this->mixinsByCurie[$curieStr])) {
-            throw new MixinAlreadyAdded($this, $this->mixinsByCurie[$curieStr], $mixin);
-        }
-
-        $this->mixins[$id->getCurieMajor()] = $mixin;
-        $this->mixinsByCurie[$curieStr] = $mixin;
-
-        foreach ($mixin->getFields() as $field) {
-            $this->addField($field);
-        }
-    }
-
-    /**
-     * @return SchemaId
-     */
-    public function getId()
+    public function getId(): SchemaId
     {
         return $this->id;
     }
 
-    /**
-     * @return SchemaCurie
-     */
-    public function getCurie()
+    public function getCurie(): SchemaCurie
     {
         return $this->id->getCurie();
     }
 
     /**
      * @see SchemaId::getCurieMajor
-     * @return string
      */
-    public function getCurieMajor()
+    public function getCurieMajor(): string
     {
         return $this->id->getCurieMajor();
     }
 
-    /**
-     * @return SchemaQName
-     */
-    public function getQName()
+    public function getQName(): SchemaQName
     {
         return $this->id->getCurie()->getQName();
     }
 
-    /**
-     * @return string
-     */
-    public function getClassName()
+    public function getClassName(): string
     {
         return $this->className;
     }
 
-    /**
-     * @return string
-     */
-    public function getClassShortName()
+    public function getClassShortName(): string
     {
         return $this->classShortName;
     }
@@ -224,15 +145,25 @@ final class Schema implements ToArray, \JsonSerializable
      * exist to handle this message.
      *
      * For example, an ImportUserV1 message would be handled by:
-     * SomeClass::importUserV1(ImportUserV1 $command)
+     * SomeClass::importUserV1(Message $command)
      *
-     * @param bool $withMajor
+     * @param bool   $withMajor
+     * @param string $prefix
      *
      * @return string
      */
-    public function getHandlerMethodName($withMajor = true)
+    public function getHandlerMethodName(bool $withMajor = true, ?string $prefix = null): string
     {
-        if (true === $withMajor) {
+        if (null !== $prefix) {
+            if ($withMajor) {
+                return "{$prefix}{$this->classShortName}";
+            }
+
+            $method = str_replace('V' . $this->id->getVersion()->getMajor(), '', $this->classShortName);
+            return "{$prefix}{$method}";
+        }
+
+        if ($withMajor) {
             return lcfirst($this->classShortName);
         }
 
@@ -246,7 +177,7 @@ final class Schema implements ToArray, \JsonSerializable
      *
      * @return Message
      */
-    public function createMessage(array $data = [])
+    public function createMessage(array $data = []): Message
     {
         /** @var Message $className */
         $className = $this->className;
@@ -257,12 +188,7 @@ final class Schema implements ToArray, \JsonSerializable
         return $className::fromArray($data);
     }
 
-    /**
-     * @param string $fieldName
-     *
-     * @return bool
-     */
-    public function hasField($fieldName)
+    public function hasField(string $fieldName): bool
     {
         return isset($this->fields[$fieldName]);
     }
@@ -271,20 +197,22 @@ final class Schema implements ToArray, \JsonSerializable
      * @param string $fieldName
      *
      * @return Field
+     *
      * @throws FieldNotDefined
      */
-    public function getField($fieldName)
+    public function getField(string $fieldName): Field
     {
         if (!isset($this->fields[$fieldName])) {
             throw new FieldNotDefined($this, $fieldName);
         }
+
         return $this->fields[$fieldName];
     }
 
     /**
      * @return Field[]
      */
-    public function getFields()
+    public function getFields(): array
     {
         return $this->fields;
     }
@@ -292,7 +220,7 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * @return Field[]
      */
-    public function getRequiredFields()
+    public function getRequiredFields(): array
     {
         return $this->requiredFields;
     }
@@ -300,62 +228,48 @@ final class Schema implements ToArray, \JsonSerializable
     /**
      * Returns true if the mixin is on this schema.  Id provided can be
      * qualified to major rev or just the curie.
-     * @see SchemaId::getCurieMajor
      *
-     * @param string $mixinId
+     * @param string $mixin
      *
      * @return bool
-     */
-    public function hasMixin($mixinId)
-    {
-        return isset($this->mixins[$mixinId]) || isset($this->mixinsByCurie[$mixinId]);
-    }
-
-    /**
-     * @param string $mixinId
      *
-     * @return Mixin
-     * @throws MixinNotDefined
+     * @see SchemaId::getCurieMajor
+     *
      */
-    public function getMixin($mixinId)
+    public function hasMixin(string $mixin): bool
     {
-        if (isset($this->mixins[$mixinId])) {
-            return $this->mixins[$mixinId];
-        }
-
-        if (isset($this->mixinsByCurie[$mixinId])) {
-            return $this->mixinsByCurie[$mixinId];
-        }
-
-        throw new MixinNotDefined($this, $mixinId);
+        return isset($this->mixinKeys[$mixin]);
     }
 
     /**
-     * @return Mixin[]
+     * @return string[]
      */
-    public function getMixins()
+    public function getMixins(): array
     {
         return $this->mixins;
     }
 
     /**
-     * Returns an array of curies with the major rev.
-     * @see SchemaId::getCurieMajor
+     * @param SchemaCurie|string $curie
      *
-     * @return array
+     * @return bool
      */
-    public function getMixinIds()
+    public function usesCurie($curie): bool
     {
-        return $this->mixinIds;
-    }
+        $curie = (string)$curie;
 
-    /**
-     * Returns an array of curies (string version).
-     *
-     * @return array
-     */
-    public function getMixinCuries()
-    {
-        return $this->mixinCuries;
+        if ($this->hasMixin($curie)) {
+            return true;
+        }
+
+        if ($this->getCurie()->toString() === $curie) {
+            return true;
+        }
+
+        if ($this->getCurieMajor() === $curie) {
+            return true;
+        }
+
+        return false;
     }
 }

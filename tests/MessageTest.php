@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj;
 
-use Gdbots\Common\Enum;
+use Gdbots\Pbj\Enum;
 use Gdbots\Pbj\Exception\FrozenMessageIsImmutable;
 use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
 use Gdbots\Tests\Pbj\Fixtures\Enum\Priority;
@@ -17,7 +18,6 @@ class MessageTest extends TestCase
 
     public function testCreateMessageFromArray()
     {
-        /** @var EmailMessage $message */
         $message = $this->createEmailMessage();
         $message->set('priority', Priority::HIGH());
 
@@ -180,11 +180,9 @@ class MessageTest extends TestCase
         $this->assertTrue($nestedMessage->isFrozen());
     }
 
-    /**
-     * @expectedException \Gdbots\Pbj\Exception\FrozenMessageIsImmutable
-     */
     public function testFrozenMessageIsImmutable()
     {
+        $this->expectException(FrozenMessageIsImmutable::class);
         $message = $this->createEmailMessage();
         $nestedMessage = NestedMessage::create();
         $message->set('nested', $nestedMessage);

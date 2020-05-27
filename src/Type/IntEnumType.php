@@ -1,86 +1,72 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
-use Gdbots\Common\Enum;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
+use Gdbots\Pbj\Enum;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
 
 final class IntEnumType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
+        $fieldName = $field->getName();
+
         /** @var Enum $value */
-        Assertion::isInstanceOf($value, Enum::class, null, $field->getName());
-        Assertion::isInstanceOf($value, $field->getClassName(), null, $field->getName());
+        // Assertion::isInstanceOf($value, Enum::class, null, $fieldName);
+        Assertion::isInstanceOf($value, $field->getClassName(), null, $fieldName);
         Assertion::integer($value->getValue(), null, $field->getName());
-        Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $field->getName());
+        Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $fieldName);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
         if ($value instanceof Enum) {
-            return (int) $value->getValue();
+            return (int)$value->getValue();
         }
 
-        return 0;
+        return strlen((string)$value) ? (int)$value : 0;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        if (null === $value) {
-            return null;
+        if (null === $value || $value instanceof Enum) {
+            return $value;
+        }
+
+        if ($codec && $codec->skipValidation() && strlen((string)$value)) {
+            return (int)$value;
         }
 
         /** @var Enum $className */
         $className = $field->getClassName();
 
         try {
-            return $className::create((int) $value);
-        } catch (\Exception $e) {
+            return $className::create((int)$value);
+        } catch (\Throwable $e) {
             throw new DecodeValueFailed($value, $field, $e->getMessage());
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isScalar()
+    public function isScalar(): bool
     {
         return false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMin()
+    public function getMin(): int
     {
         return 0;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMax()
+    public function getMax(): int
     {
         return 65535;
     }

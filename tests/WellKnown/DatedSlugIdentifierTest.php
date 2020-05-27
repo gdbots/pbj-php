@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\WellKnown;
 
@@ -41,11 +42,9 @@ class DatedSlugIdentifierTest extends TestCase
         $this->assertTrue($slug->equals($slug2));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testFromStringInvalid()
     {
-        $slug = SampleDatedSlugIdentifier::fromString('invalid-slug');
+        $this->expectException(\InvalidArgumentException::class);
+        SampleDatedSlugIdentifier::fromString('invalid-slug');
     }
 }

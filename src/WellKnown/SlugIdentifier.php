@@ -1,29 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\WellKnown;
 
-use Gdbots\Common\Util\SlugUtils;
-use Gdbots\Common\Util\StringUtils;
 use Gdbots\Pbj\Exception\InvalidArgumentException;
+use Gdbots\Pbj\Util\SlugUtil;
 
 abstract class SlugIdentifier implements Identifier
 {
-    /** @var string */
-    protected $slug;
+    protected string $slug;
 
-    /**
-     * @param string $slug
-     * @throws InvalidArgumentException
-     */
-    protected function __construct($slug)
+    protected function __construct(string $slug)
     {
-        if (!is_string($slug)) {
-            throw new InvalidArgumentException(
-                sprintf('String expected but got [%s].', StringUtils::varToString($slug))
-            );
-        }
-
-        if (!SlugUtils::isValid($slug)) {
+        if (!SlugUtil::isValid($slug)) {
             throw new InvalidArgumentException(
                 sprintf('The value [%s] is not a valid slug.', $slug)
             );
@@ -32,52 +21,32 @@ abstract class SlugIdentifier implements Identifier
         $this->slug = $slug;
     }
 
-    /**
-     * @param string $string
-     * @return static
-     */
-    public static function create($string)
+    public static function create(string $string): self
     {
-        return new static(SlugUtils::create($string));
+        return new static(SlugUtil::create($string));
     }
 
-    /**
-     * {@inheritdoc}
-     * @return static
-     */
-    public static function fromString($string)
+    public static function fromString(string $string): self
     {
         return new static($string);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function toString()
+    public function toString(): string
     {
         return $this->slug;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function jsonSerialize()
     {
         return $this->toString();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function equals(Identifier $other)
+    public function equals(Identifier $other): bool
     {
         return $this == $other;
     }

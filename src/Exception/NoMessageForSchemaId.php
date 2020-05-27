@@ -1,17 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\SchemaId;
 
-class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
+final class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
 {
-    /** @var SchemaId */
-    private $schemaId;
+    private SchemaId $schemaId;
 
-    /**
-     * @param SchemaId $schemaId
-     */
     public function __construct(SchemaId $schemaId)
     {
         $this->schemaId = $schemaId;
@@ -25,10 +22,7 @@ class NoMessageForSchemaId extends \LogicException implements GdbotsPbjException
         );
     }
 
-    /**
-     * @return SchemaId
-     */
-    public function getSchemaId()
+    public function getSchemaId(): SchemaId
     {
         return $this->schemaId;
     }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Type;
 
@@ -62,7 +63,7 @@ class TrinaryTypeTest extends TestCase
             try {
                 $type->guard($val, $field);
                 $thrown = false;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $thrown = true;
             }
 

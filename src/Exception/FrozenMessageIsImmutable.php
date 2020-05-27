@@ -1,27 +1,21 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Exception;
 
 use Gdbots\Pbj\Message;
 
-class FrozenMessageIsImmutable extends \LogicException implements GdbotsPbjException
+final class FrozenMessageIsImmutable extends \LogicException implements GdbotsPbjException
 {
-    /** @var Message */
-    private $type;
+    private Message $type;
 
-    /**
-     * @param Message $type
-     */
     public function __construct(Message $type)
     {
         $this->type = $type;
         parent::__construct('Message is frozen and cannot be modified.');
     }
 
-    /**
-     * @return Message
-     */
-    public function getType()
+    public function getType(): Message
     {
         return $this->type;
     }

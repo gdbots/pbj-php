@@ -1,28 +1,74 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj;
 
+use Gdbots\Pbj\Exception\MoreThanOneMessageForMixin;
+use Gdbots\Pbj\Exception\NoMessageForQName;
 use Gdbots\Pbj\MessageResolver;
-use Gdbots\Pbj\SchemaId;
 use Gdbots\Pbj\SchemaQName;
+use Gdbots\Tests\Pbj\Fixtures\EmailMessage;
+use Gdbots\Tests\Pbj\Fixtures\NestedMessage;
 use PHPUnit\Framework\TestCase;
 
 class MessageResolverTest extends TestCase
 {
     public function testResolveQName()
     {
-        $schemaId = SchemaId::fromString('pbj:acme:blog:node:article:1-0-0');
-        MessageResolver::register($schemaId, 'Fake');
-
-        $curie = MessageResolver::resolveQName(SchemaQName::fromString('acme:article'));
-        $this->assertSame($schemaId->getCurie(), $curie);
+        $class = MessageResolver::resolveQName('*:email-message');
+        $this->assertSame(EmailMessage::class, $class);
     }
 
-    /**
-     * @expectedException \Gdbots\Pbj\Exception\NoMessageForQName
-     */
     public function testResolveInvalidQName()
     {
-        $curie = MessageResolver::resolveQName(SchemaQName::fromString('acme:video'));
+        $this->expectException(NoMessageForQName::class);
+        MessageResolver::resolveQName(SchemaQName::fromString('acme:video'));
+    }
+
+    public function testHasCurie()
+    {
+        $this->assertFalse(MessageResolver::hasCurie('vendor:package:category:message'));
+        $this->assertTrue(MessageResolver::hasCurie(EmailMessage::schema()->getCurie()));
+    }
+
+    public function testHasQName()
+    {
+        $this->assertFalse(MessageResolver::hasQName('acme:nope'));
+        $this->assertTrue(MessageResolver::hasQName('*:email-message'));
+    }
+
+    public function testFindAllUsingMixin()
+    {
+        $curies = MessageResolver::findAllUsingMixin('gdbots:tests.pbj:mixin:many:v1');
+        $this->assertSame([
+            EmailMessage::schema()->getCurieMajor(),
+            NestedMessage::schema()->getCurieMajor(),
+        ],
+            $curies
+        );
+    }
+
+    public function testHasAnyUsingMixin()
+    {
+        $this->assertTrue(MessageResolver::hasAnyUsingMixin('gdbots:tests.pbj:mixin:one:v1'));
+        $this->assertTrue(MessageResolver::hasAnyUsingMixin('gdbots:tests.pbj:mixin:many:v1'));
+        $this->assertFalse(MessageResolver::hasAnyUsingMixin('gdbots:tests.pbj:mixin:fake:v1'));
+    }
+
+    public function testFindAllUsingMixinWhenNone()
+    {
+        $this->assertSame([], MessageResolver::findAllUsingMixin('gdbots:tests.pbj:mixin:fake:v1'));
+    }
+
+    public function testFindOneUsingMixinWhenOne()
+    {
+        $curie = MessageResolver::findOneUsingMixin('gdbots:tests.pbj:mixin:one:v1');
+        $this->assertSame(EmailMessage::schema()->getCurieMajor(), $curie);
+    }
+
+    public function testFindOneUsingMixinWhenMany()
+    {
+        $this->expectException(MoreThanOneMessageForMixin::class);
+        MessageResolver::findOneUsingMixin('gdbots:tests.pbj:mixin:many:v1');
     }
 }

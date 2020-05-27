@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Gdbots\Pbj\Type;
 
@@ -9,58 +10,37 @@ use Gdbots\Pbj\Field;
 // todo: review precision/scale handling.  this seems putrid
 final class DecimalType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function guard($value, Field $field)
+    public function guard($value, Field $field): void
     {
         Assertion::float($value, null, $field->getName());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function encode($value, Field $field, Codec $codec = null)
+    public function encode($value, Field $field, ?Codec $codec = null)
     {
-        return (float) bcadd((float) $value, '0', $field->getScale());
+        return (float)bcadd((string)$value, '0', $field->getScale());
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function decode($value, Field $field, Codec $codec = null)
+    public function decode($value, Field $field, ?Codec $codec = null)
     {
-        return (float) bcadd((float) $value, '0', $field->getScale());
+        return (float)bcadd((string)$value, '0', $field->getScale());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefault()
     {
         return 0.0;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isNumeric()
+    public function isNumeric(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMin()
+    public function getMin(): int
     {
         return -1;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getMax()
+    public function getMax(): int
     {
         return INF;
     }

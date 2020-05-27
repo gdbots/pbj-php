@@ -11,38 +11,15 @@ use Gdbots\Pbj\Exception\NoMessageForSchemaId;
 
 final class MessageResolver
 {
-    /**
-     * An array of all the available schemas keyed by a curie or curie major.
-     * The value is an int used to correlate with the other maps.
-     *
-     * @var int[]
-     */
-    private static $curies = [];
+    private static string $defaultVendor = '';
+    private static string $manifestDir = __DIR__;
 
     /**
-     * An array of all the classes, the numeric key relates to the int
-     * from the curies array.
+     * An array of all the available schemas keyed by a curie major.
      *
-     * @var string[]
+     * @var Message[]
      */
-    private static $classes = [];
-
-    /**
-     * An array of ints keyed by the mixin curie. The value is a list of
-     * ints which relate to the curies that are using the mixin.
-     *
-     * @var array
-     */
-    private static $mixins = [];
-
-    /**
-     * An array of resolved lookups by mixin, keyed by the mixin id with major rev
-     *
-     * @see SchemaId::getCurieMajor
-     *
-     * @var Schema[]
-     */
-    private static $resolvedMixins = [];
+    private static array $messages = [];
 
     /**
      * An array of resolved lookups by qname.
@@ -51,39 +28,52 @@ final class MessageResolver
      *
      * @var SchemaCurie[]
      */
-    private static $resolvedQnames = [];
+    private static array $resolvedQnames = [];
 
     /**
-     * An array with the following structure (gdbots/pbjc-php automatically creates this)
-     * [
-     *     'curies' => [
-     *         'vendor:package:category:message' => 1, // int is used to connect other values
-     *     ],
-     *     'classes' => [
-     *         1 => 'Vendor\Package\Category\MessageV1', // 1 refers to the value of the curies entry
-     *     ],
-     *     'mixins' => [
-     *         'gdbots:pbjx:mixin:command:v1' => [1] // 1 refers to the value of the curies entry
-     *     ],
-     * ]
+     * An array of curies (major) resolved by mixin.
      *
-     * @param array $manifest
+     * @var string[]
      */
-    public static function registerManifest(array $manifest): void
+    private static array $resolvedMixins = [];
+
+    /**
+     * An array of class names keyed by a curie major.
+     * [
+     *     'vendor:package:category:message:v1' => 'Vendor\Package\Category\MessageV1'
+     * ],
+     *
+     * @param Message[] $messages
+     */
+    public static function register(array $messages): void
     {
-        self::$curies = $manifest['curies'] ?? [];
-        self::$classes = $manifest['classes'] ?? [];
-        self::$mixins = $manifest['mixins'] ?? [];
+        if (empty(self::$messages)) {
+            self::$messages = $messages;
+            return;
+        }
+
+        self::$messages = array_merge(self::$messages, $messages);
     }
 
     /**
-     * Returns all of the registed schemas.
+     * Adds a single schema to the resolver.  This is used in tests or dynamic
+     * message schema creation (not a typical or recommended use case).
+     *
+     * @param Schema $schema
+     */
+    public static function registerSchema(Schema $schema): void
+    {
+        self::$messages[$schema->getId()->getCurieMajor()] = $schema->getClassName();
+    }
+
+    /**
+     * Returns all of the registered messages.
      *
      * @return Message[]
      */
     public static function all(): array
     {
-        return array_values(self::$classes);
+        return self::$messages;
     }
 
     /**
@@ -98,16 +88,34 @@ final class MessageResolver
     public static function resolveId(SchemaId $id): string
     {
         $curieMajor = $id->getCurieMajor();
-        if (isset(self::$curies[$curieMajor])) {
-            return self::$classes[self::$curies[$curieMajor]];
+        if (isset(self::$messages[$curieMajor])) {
+            return self::$messages[$curieMajor];
         }
 
         $curie = $id->getCurie()->toString();
-        if (isset(self::$curies[$curie])) {
-            return self::$classes[self::$curies[$curie]];
+        if (isset(self::$messages[$curie])) {
+            return self::$messages[$curie];
         }
 
         throw new NoMessageForSchemaId($id);
+    }
+
+    /**
+     * Returns true if the provided curie exists.
+     *
+     * @param SchemaCurie|string $curie
+     *
+     * @return bool
+     */
+    public static function hasCurie($curie): bool
+    {
+        try {
+            self::resolveCurie($curie);
+        } catch (NoMessageForCurie $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -122,39 +130,67 @@ final class MessageResolver
     public static function resolveCurie($curie): string
     {
         $key = (string)$curie;
-        if (isset(self::$curies[$key])) {
-            return self::$classes[self::$curies[$key]];
+        $key = str_replace('*', self::$defaultVendor, $key);
+        if (isset(self::$messages[$key])) {
+            return self::$messages[$key];
+        }
+
+        $v1key = "{$key}:v1";
+        if (isset(self::$messages[$v1key])) {
+            return self::$messages[$v1key];
         }
 
         throw new NoMessageForCurie(SchemaCurie::fromString($key));
     }
 
     /**
+     * Returns true if the provided qname exists.
+     *
      * @param SchemaQName|string $qname
      *
-     * @return SchemaCurie
+     * @return bool
+     */
+    public static function hasQName($qname): bool
+    {
+        try {
+            self::resolveQName($qname);
+        } catch (NoMessageForCurie $e) {
+            return false;
+        } catch (NoMessageForQName $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param SchemaQName|string $qname
+     *
+     * @return Message
      *
      * @throws NoMessageForQName
      */
-    public static function resolveQName($qname): SchemaCurie
+    public static function resolveQName($qname): string
     {
         if (!$qname instanceof SchemaQName) {
-            $qname = SchemaQName::fromString((string)$qname);
+            $qname = str_replace('*', self::$defaultVendor, (string)$qname);
+            $qname = SchemaQName::fromString($qname);
         }
 
         $key = $qname->toString();
 
         if (isset(self::$resolvedQnames[$key])) {
-            return self::$resolvedQnames[$key];
+            return self::resolveCurie(self::$resolvedQnames[$key]);
         }
 
         $qvendor = $qname->getVendor();
         $qmessage = $qname->getMessage();
 
-        foreach (self::$curies as $curie => $id) {
-            list($vendor, $package, $category, $message) = explode(':', $curie);
+        foreach (self::$messages as $curie => $class) {
+            [$vendor, $package, $category, $message] = explode(':', $curie);
             if ($qvendor === $vendor && $qmessage === $message) {
-                return self::$resolvedQnames[$key] = SchemaCurie::fromString($vendor . ':' . $package . ':' . $category . ':' . $message);
+                self::$resolvedQnames[$key] = SchemaCurie::fromString("{$vendor}:{$package}:{$category}:{$message}");
+                return self::resolveCurie(self::$resolvedQnames[$key]);
             }
         }
 
@@ -162,111 +198,101 @@ final class MessageResolver
     }
 
     /**
-     * Adds a single schema to the resolver.  This is used in tests or dynamic
-     * message schema creation (not a typical or recommended use case).
+     * Return true if any messages are using the provided mixin (a curie major).
      *
-     * @param Schema $schema
+     * @param string $mixin
+     *
+     * @return bool
      */
-    public static function registerSchema(Schema $schema): void
+    public static function hasAnyUsingMixin(string $mixin): bool
     {
-        $nextId = count(self::$curies) + 10000;
-        self::$curies[$schema->getId()->getCurieMajor()] = $nextId;
-        self::$classes[$nextId] = $schema->getClassName();
-        foreach ($schema->getMixinIds() as $mixin) {
-            unset(self::$resolvedMixins[$mixin]);
-            if (!isset(self::$mixins[$mixin])) {
-                self::$mixins[$mixin] = [];
-            }
-
-            self::$mixins[$mixin][] = $nextId;
-        }
+        return !empty(self::findAllUsingMixin($mixin));
     }
 
     /**
-     * Adds a single schema id and class name.
-     * @see SchemaId::getCurieMajor
+     * Return the one curie expected to be using the provided mixin (a curie major).
      *
-     * @param SchemaId|string $id
-     * @param string          $className
-     */
-    public static function register($id, string $className): void
-    {
-        @trigger_error(sprintf('"%s" is deprecated. Use "registerManifest" instead.', __CLASS__), E_USER_DEPRECATED);
-
-        if ($id instanceof SchemaId) {
-            $id = $id->getCurieMajor();
-        }
-
-        $nextId = count(self::$curies) + 20000;
-        self::$curies[$id] = $nextId;
-        self::$classes[$nextId] = $className;
-    }
-
-    /**
-     * Registers an array of id => className values to the resolver.
+     * @param string $mixin
+     * @param bool   $returnWithMajor
      *
-     * @param array $map
-     */
-    public static function registerMap(array $map)
-    {
-        @trigger_error(sprintf('"%s" is deprecated. Use "registerManifest" instead.', __CLASS__), E_USER_DEPRECATED);
-        $nextId = count(self::$curies) + 30000;
-        foreach ($map as $curie => $class) {
-            ++$nextId;
-            self::$curies[$curie] = $nextId;
-            self::$classes[$nextId] = $class;
-        }
-    }
-
-    /**
-     * Return the one schema expected to be using the provided mixin.
-     *
-     * @param Mixin|string $mixin Mixin or curie major
-     *
-     * @return Schema
+     * @return string
      *
      * @throws MoreThanOneMessageForMixin
-     * @throws NoMessageForMixin
      */
-    public static function findOneUsingMixin($mixin): Schema
+    public static function findOneUsingMixin(string $mixin, bool $returnWithMajor = true): string
     {
-        $schemas = self::findAllUsingMixin($mixin);
-        if (1 !== count($schemas)) {
-            throw new MoreThanOneMessageForMixin($mixin, $schemas);
+        $curies = self::findAllUsingMixin($mixin, $returnWithMajor);
+        $count = count($curies);
+        if ($count === 1) {
+            return $curies[0];
+        } elseif ($count === 0) {
+            throw new NoMessageForMixin($mixin);
+        } else {
+            throw new MoreThanOneMessageForMixin($mixin, $curies);
         }
-
-        return current($schemas);
     }
 
     /**
-     * Returns an array of Schemas using the provided mixin.
+     * Returns an array of curies of messages using the provided mixin (a curie major).
      *
-     * @param Mixin|string $mixin Mixin or curie major
+     * @param string $mixin
+     * @param bool   $returnWithMajor
      *
-     * @return Schema[]
-     *
-     * @throws NoMessageForMixin
+     * @return string[]
      */
-    public static function findAllUsingMixin($mixin): array
+    public static function findAllUsingMixin(string $mixin, bool $returnWithMajor = true): array
     {
-        if ($mixin instanceof Mixin) {
-            $key = $mixin->getId()->getCurieMajor();
-        } else {
-            $key = $mixin;
+        if (!isset(self::$resolvedMixins[$mixin])) {
+            $file = self::$manifestDir . str_replace(':', '/', $mixin) . '.php';
+            self::$resolvedMixins[$mixin] = file_exists($file) ? require $file : [];
         }
 
-        if (!isset(self::$resolvedMixins[$key])) {
-            $schemas = [];
-            foreach ((self::$mixins[$key] ?? []) as $id) {
-                $schemas[] = self::$classes[$id]::schema();
-            }
-            self::$resolvedMixins[$key] = $schemas;
+        if ($returnWithMajor) {
+            return self::$resolvedMixins[$mixin];
         }
 
-        if (empty(self::$resolvedMixins[$key])) {
-            throw new NoMessageForMixin($mixin);
-        }
+        return array_map(function ($curie) {
+            return substr($curie, 0, strrpos($curie, ':') - strlen($curie));
+        }, self::$resolvedMixins[$mixin]);
+    }
 
-        return self::$resolvedMixins[$key];
+    /**
+     * Resolving a curie or qname can be done without knowing the vendor ahead of time
+     * by using an '*' in a (qname) '*:article' or '*:news:node:article' (curie).
+     * The '*' will get replaced with the default vendor, e.g. 'acme:article'.
+     *
+     * @param string $vendor
+     */
+    public static function setDefaultVendor(string $vendor): void
+    {
+        self::$defaultVendor = $vendor;
+    }
+
+    public static function getDefaultVendor(): string
+    {
+        return self::$defaultVendor;
+    }
+
+    /**
+     * Finding messages using a mixin's curie major requires that
+     * it load a manifest file (generated by gdbots/pbjc) which
+     * contains an array of curies.
+     *
+     * e.g. $manifestDir/gdbots/ncr/mixin/node/v1.php
+     * return [
+     *     'acme:news:node:article:v1',
+     *     'acme:videos:node:video:v1',
+     * ]
+     *
+     * @param string $dir
+     */
+    public static function setManifestDir(string $dir): void
+    {
+        self::$manifestDir = rtrim($dir, '/') . '/';
+    }
+
+    public static function getManifestDir(): string
+    {
+        return self::$manifestDir;
     }
 }
