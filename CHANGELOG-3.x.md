@@ -2,6 +2,11 @@
 This changelog references the relevant changes done in 3.x versions.
 
 
+## v3.0.1
+* Use fget on `AbstractMessage::getNestedMessages` for better performance.
+* Use `static::MAX_PATH_DEPTH` on `Gdbots\Pbj\Marshaler\Elastica\MappingBuilder` to allow extended classes to customize the depth.
+
+
 ## v3.0.0
 __BREAKING CHANGES__
 

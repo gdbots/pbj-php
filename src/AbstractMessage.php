@@ -566,7 +566,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         foreach (static::schema()->getFields() as $field) {
             if ($field->getType()->isMessage()) {
                 /** @var self $value */
-                $value = $this->get($field->getName());
+                $value = $this->fget($field->getName());
                 if (empty($value)) {
                     continue;
                 }

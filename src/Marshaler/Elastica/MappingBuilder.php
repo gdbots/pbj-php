@@ -188,7 +188,7 @@ class MappingBuilder
     {
         $properties = [];
 
-        if ($this->getPathDepth() > self::MAX_PATH_DEPTH) {
+        if ($this->getPathDepth() > static::MAX_PATH_DEPTH) {
             return $properties;
         }
 
