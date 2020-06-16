@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 3.x versions.
 
 
+## v3.0.2
+* Fix bug in `AbstractMessage::removeFromSet` that doesn't stringify value before doing strlen check.
+
+
 ## v3.0.1
 * Use fget on `AbstractMessage::getNestedMessages` for better performance.
 * Use `static::MAX_PATH_DEPTH` on `Gdbots\Pbj\Marshaler\Elastica\MappingBuilder` to allow extended classes to customize the depth.

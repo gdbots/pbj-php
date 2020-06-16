@@ -392,12 +392,12 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
         foreach ($values as $value) {
-            if (0 === strlen((string)$value)) {
+            $key = strtolower(trim((string)$value));
+            if (0 === strlen($key)) {
                 continue;
             }
 
             $field->guardValue($value);
-            $key = strtolower(trim((string)$value));
             $this->decoded[$fieldName][$key] = $value;
             $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
         }
@@ -412,11 +412,11 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
         foreach ($values as $value) {
-            if (0 === strlen($value)) {
+            $key = strtolower(trim((string)$value));
+            if (0 === strlen($key)) {
                 continue;
             }
 
-            $key = strtolower(trim((string)$value));
             unset($this->decoded[$fieldName][$key]);
             unset($this->data[$fieldName][$key]);
         }

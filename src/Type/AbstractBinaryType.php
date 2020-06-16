@@ -51,7 +51,7 @@ abstract class AbstractBinaryType extends AbstractType
 
     public function encode($value, Field $field, ?Codec $codec = null)
     {
-        $value = trim($value);
+        $value = trim((string)$value);
         if ($value === '') {
             return null;
         }
