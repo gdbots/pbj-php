@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 3.x versions.
 
 
+## v3.0.3
+* In `TimeUuidIdentifier` use regex test as fallback as ramsey may be using `LazyUuidFromString`.
+
+
 ## v3.0.2
 * Fix bug in `AbstractMessage::removeFromSet` that doesn't stringify value before doing strlen check.
 

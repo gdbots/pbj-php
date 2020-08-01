@@ -5,6 +5,7 @@ namespace Gdbots\Tests\Pbj\WellKnown;
 
 use Gdbots\Pbj\WellKnown\UuidIdentifier;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Uuid\Lazy\LazyUuidFromString;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\Uuid;
 
@@ -16,7 +17,7 @@ class UuidIdentifierTest extends TestCase
         $this->assertTrue(Uuid::isValid((string)$id));
 
         $uuid = Uuid::fromString($id->toString());
-        $this->assertInstanceOf(UuidV4::class, $uuid);
+        $this->assertTrue($uuid instanceof UuidV4 || $uuid instanceof LazyUuidFromString);
     }
 
     public function testFromString()
