@@ -9,7 +9,7 @@
     "ext-bcmath": "*",
     "ext-json": "*",
     "beberlei/assert": "^3.2",
-    "brick/math": "^0.8",
+    "brick/math": "^0.9",
     "ramsey/uuid": "^4.0"
   },
   "require-dev": {
