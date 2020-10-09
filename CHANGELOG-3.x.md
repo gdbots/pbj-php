@@ -4,7 +4,6 @@ This changelog references the relevant changes done in 3.x versions.
 
 ## v3.0.4
 * Uses `"brick/math": "^0.9"`.
-* Enable php 8.0 for travis.
 
 
 ## v3.0.3
