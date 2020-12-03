@@ -60,7 +60,7 @@ final class GeoPoint implements \JsonSerializable
     public static function fromString(string $string): self
     {
         [$lat, $long] = explode(',', $string);
-        return new self($lat, $long);
+        return new self((float)$lat, (float)$long);
     }
 
     public function toString(): string

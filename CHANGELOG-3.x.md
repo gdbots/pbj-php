@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 3.x versions.
 
 
+## v3.0.5
+* Cast strings to floats in `GeoPoint::fromString`.
+
+
 ## v3.0.4
 * Uses `"brick/math": "^0.9"`.
 
