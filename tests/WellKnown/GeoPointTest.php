@@ -17,7 +17,7 @@ class GeoPointTest extends TestCase
 
         $expected = [
             'type'        => 'Point',
-            'coordinates' => [-90.5, 45.5]
+            'coordinates' => [-90.5, 45.5],
         ];
         $this->assertSame($geoPoint->toArray(), $expected);
         $this->assertSame('45.5,-90.5', $geoPoint->toString());
@@ -30,7 +30,7 @@ class GeoPointTest extends TestCase
         $this->assertSame(90.5, $geoPoint->getLongitude());
 
         $this->expectException(InvalidArgumentException::class);
-        $geoPoint = GeoPoint::fromArray([]);
+        GeoPoint::fromArray([]);
     }
 
     public function testFromString(): void
