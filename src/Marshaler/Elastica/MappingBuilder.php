@@ -94,17 +94,17 @@ class MappingBuilder
      * use the "english" analyzer unless something else is specified.
      * @link https://www.elastic.co/guide/en/elasticsearch/guide/current/custom-analyzers.html
      */
-    private string $analyzer = 'english';
+    protected string $analyzer = 'english';
 
     /**
      * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
      */
-    private array $properties = [];
+    protected array $properties = [];
 
     /**
      * @link https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html
      */
-    private array $dynamicTemplates = [];
+    protected array $dynamicTemplates = [];
 
     /**
      * When mappings are created with nested messages the path is tracked
@@ -112,7 +112,7 @@ class MappingBuilder
      *
      * @var array
      */
-    private array $path = [];
+    protected array $path = [];
 
     /**
      * Returns the custom analyzers that an index will need to when indexing some
@@ -200,6 +200,12 @@ class MappingBuilder
 
             if ($fieldName === Schema::PBJ_FIELD_NAME) {
                 $properties[$fieldName] = $this->filterProperties($schema, $field, $path, ['type' => 'keyword']);
+                $this->leaveField();
+                continue;
+            }
+
+            if ($this->shouldIgnoreField($field, $path)) {
+                $properties[$fieldName] = ['type' => 'text', 'index' => false];
                 $this->leaveField();
                 continue;
             }
@@ -371,6 +377,11 @@ class MappingBuilder
     protected function filterProperties(Schema $schema, Field $field, string $path, array $properties): array
     {
         return $properties;
+    }
+
+    protected function shouldIgnoreField(Field $field, string $path): bool
+    {
+        return false;
     }
 
     protected function enterField(string $fieldName): void
