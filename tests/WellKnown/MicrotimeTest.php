@@ -109,8 +109,8 @@ class MicrotimeTest extends TestCase
         do {
             $microtime = microtime(true);
             $m = Microtime::fromFloat($microtime);
-            $f1 = substr(str_pad(str_replace('.', '', $microtime), 16, '0'), 0, 16);
-            $f2 = substr(str_pad(str_replace('.', '', $m->toFloat()), 16, '0'), 0, 16);
+            $f1 = substr(str_pad(str_replace('.', '', (string)$microtime), 16, '0'), 0, 16);
+            $f2 = substr(str_pad(str_replace('.', '', (string)$m->toFloat()), 16, '0'), 0, 16);
             $this->assertSame($f1, $f2);
             --$i;
         } while ($i > 0);

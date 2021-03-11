@@ -52,7 +52,7 @@ final class Microtime implements \JsonSerializable
      */
     public static function fromFloat(float $float): self
     {
-        $str = substr(str_pad(str_replace('.', '', $float), 16, '0'), 0, 16);
+        $str = substr(str_pad(str_replace('.', '', (string)$float), 16, '0'), 0, 16);
         $m = new self();
         $m->int = (int)$str;
         $m->sec = (int)substr($str, 0, 10);
