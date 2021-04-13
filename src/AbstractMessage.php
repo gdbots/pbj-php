@@ -391,6 +391,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
+        unset($this->decoded[$fieldName]);
+
         foreach ($values as $value) {
             $key = strtolower(trim((string)$value));
             if (0 === strlen($key)) {
@@ -398,7 +400,6 @@ abstract class AbstractMessage implements Message, \JsonSerializable
             }
 
             $field->guardValue($value);
-            $this->decoded[$fieldName][$key] = $value;
             $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
         }
 
@@ -411,13 +412,14 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isASet(), 'Field must be a set.', $fieldName);
 
+        unset($this->decoded[$fieldName]);
+
         foreach ($values as $value) {
             $key = strtolower(trim((string)$value));
             if (0 === strlen($key)) {
                 continue;
             }
 
-            unset($this->decoded[$fieldName][$key]);
             unset($this->data[$fieldName][$key]);
         }
 
@@ -449,9 +451,10 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAList(), 'Field must be a list.', $fieldName);
 
+        unset($this->decoded[$fieldName]);
+
         foreach ($values as $value) {
             $field->guardValue($value);
-            $this->decoded[$fieldName][] = $value;
             $this->data[$fieldName][] = $this->encodeValue($value, $field);
         }
 
@@ -508,8 +511,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
             return $this->removeFromMap($fieldName, $key);
         }
 
+        unset($this->decoded[$fieldName]);
         $field->guardValue($value);
-        $this->decoded[$fieldName][$key] = $value;
         $this->data[$fieldName][$key] = $this->encodeValue($value, $field);
 
         return $this;
@@ -521,7 +524,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         $field = static::schema()->getField($fieldName);
         Assertion::true($field->isAMap(), 'Field must be a map.', $fieldName);
 
-        unset($this->decoded[$fieldName][$key]);
+        unset($this->decoded[$fieldName]);
         unset($this->data[$fieldName][$key]);
         return $this;
     }
