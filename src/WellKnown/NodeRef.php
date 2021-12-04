@@ -103,7 +103,7 @@ final class NodeRef implements Identifier
         return $this->toString();
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): string
     {
         return $this->toString();
     }

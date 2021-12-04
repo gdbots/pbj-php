@@ -12,6 +12,8 @@ use Gdbots\Pbj\WellKnown\NodeRef;
 
 abstract class AbstractMessage implements Message, \JsonSerializable
 {
+    /** @var Schema[] */
+    private static array $schemas = [];
     private static ?PhpArraySerializer $serializer = null;
     protected array $data = [];
     protected array $decoded = [];
@@ -31,13 +33,12 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     final public static function schema(): Schema
     {
-        static $schema;
-
-        if (null === $schema) {
-            $schema = static::defineSchema();
+        $class = static::class;
+        if (!isset(self::$schemas[$class])) {
+            self::$schemas[$class] = static::defineSchema();
         }
 
-        return $schema;
+        return self::$schemas[$class];
     }
 
     abstract protected static function defineSchema(): Schema;
@@ -66,7 +67,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return json_encode($this, JSON_PRETTY_PRINT);
     }
 
-    final public function jsonSerialize()
+    final public function jsonSerialize(): array
     {
         return $this->toArray();
     }

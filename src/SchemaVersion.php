@@ -82,7 +82,7 @@ final class SchemaVersion implements \JsonSerializable
         return $this->version;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): string
     {
         return $this->toString();
     }

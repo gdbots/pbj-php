@@ -2,6 +2,12 @@
 This changelog references the relevant changes done in 3.x versions.
 
 
+## v3.1.0
+* Require php `>=8.1`
+* Fix issue with use of static variables in functions for flyweight classes. https://wiki.php.net/rfc/static_variable_inheritance
+* Add return types to squash php8.1 warnings.
+
+
 ## v3.0.7
 * In `AbstractMessage` ensure decoded values are properly unset whenever array-like field values are changed.
 

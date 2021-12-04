@@ -71,7 +71,7 @@ final class MessageRef implements \JsonSerializable
         return ['curie' => $this->curie->toString(), 'id' => $this->id];
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

@@ -84,7 +84,7 @@ final class SchemaQName implements \JsonSerializable
         return $this->qname;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): string
     {
         return $this->toString();
     }
