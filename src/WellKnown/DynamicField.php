@@ -163,7 +163,7 @@ final class DynamicField implements \JsonSerializable
         return ['name' => $this->name, $this->kind => $field->getType()->encode($this->value, $field)];
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

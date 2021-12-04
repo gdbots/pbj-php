@@ -78,10 +78,7 @@ abstract class Enum implements \JsonSerializable
         return array_flip(static::values())[$this->value];
     }
 
-    /**
-     * @return int|string
-     */
-    final public function getValue()
+    final public function getValue(): int|string
     {
         return $this->value;
     }
@@ -91,7 +88,7 @@ abstract class Enum implements \JsonSerializable
         return (string)$this->value;
     }
 
-    final public function jsonSerialize()
+    final public function jsonSerialize(): int|string
     {
         return $this->value;
     }

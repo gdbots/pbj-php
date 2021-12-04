@@ -8,6 +8,8 @@ use Gdbots\Pbj\Util\StringUtil;
 
 abstract class AbstractType implements Type
 {
+    /** @var self[] */
+    private static array $instances = [];
     private TypeName $typeName;
 
     /**
@@ -22,14 +24,14 @@ abstract class AbstractType implements Type
 
     final public static function create(): self
     {
-        static $instance;
-        if (null === $instance) {
+        $class = static::class;
+        if (!isset(self::$instances[$class])) {
             $a = explode('\\', static::class);
             $typeName = StringUtil::toSlugFromCamel(str_replace('Type', '', end($a)));
-            $instance = new static(TypeName::create($typeName));
+            self::$instances[$class] = new static(TypeName::create($typeName));
         }
 
-        return $instance;
+        return self::$instances[$class];
     }
 
     final public function getTypeName(): TypeName

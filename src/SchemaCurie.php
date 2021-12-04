@@ -90,7 +90,7 @@ final class SchemaCurie implements \JsonSerializable
         return $this->curie;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): string
     {
         return $this->toString();
     }

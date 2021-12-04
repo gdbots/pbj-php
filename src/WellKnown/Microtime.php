@@ -139,7 +139,7 @@ final class Microtime implements \JsonSerializable
         return (string)$this->int;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): string
     {
         return $this->toString();
     }
