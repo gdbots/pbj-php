@@ -41,7 +41,7 @@ final class DateUtil
      *
      * @return bool
      */
-    public static function isValidTimestamp($timestamp, bool $allowNegative = false): bool
+    public static function isValidTimestamp(string|int $timestamp, bool $allowNegative = false): bool
     {
         $timestamp = (string)$timestamp;
 

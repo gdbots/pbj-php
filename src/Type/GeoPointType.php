@@ -10,12 +10,12 @@ use Gdbots\Pbj\WellKnown\GeoPoint;
 
 final class GeoPointType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::isInstanceOf($value, GeoPoint::class, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?array
     {
         if (null === $value) {
             return null;
@@ -24,7 +24,7 @@ final class GeoPointType extends AbstractType
         return $codec->encodeGeoPoint($value, $field);
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): GeoPoint|array|null
     {
         if (null === $value || $value instanceof GeoPoint) {
             return $value;

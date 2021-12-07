@@ -32,13 +32,13 @@ class PhpArraySerializer implements Serializer, Codec
         return $this->skipValidation;
     }
 
-    public function serialize(Message $message, array $options = [])
+    public function serialize(Message $message, array $options = []): mixed
     {
         $this->options = $options;
         return $this->doSerialize($message);
     }
 
-    public function deserialize($data, array $options = []): Message
+    public function deserialize(mixed $data, array $options = []): Message
     {
         $this->options = $options;
 
@@ -51,7 +51,7 @@ class PhpArraySerializer implements Serializer, Codec
         return $this->doDeserialize($data);
     }
 
-    public function encodeDynamicField($dynamicField, Field $field)
+    public function encodeDynamicField(DynamicField|array $dynamicField, Field $field): array
     {
         if ($dynamicField instanceof DynamicField) {
             return $dynamicField->toArray();
@@ -60,7 +60,7 @@ class PhpArraySerializer implements Serializer, Codec
         return $dynamicField;
     }
 
-    public function decodeDynamicField($value, Field $field)
+    public function decodeDynamicField(mixed $value, Field $field): DynamicField|array
     {
         if ($value instanceof DynamicField) {
             return $value;
@@ -73,7 +73,7 @@ class PhpArraySerializer implements Serializer, Codec
         return DynamicField::fromArray($value);
     }
 
-    public function encodeGeoPoint($geoPoint, Field $field)
+    public function encodeGeoPoint(GeoPoint|array $geoPoint, Field $field): array
     {
         if ($geoPoint instanceof GeoPoint) {
             return $geoPoint->toArray();
@@ -82,7 +82,7 @@ class PhpArraySerializer implements Serializer, Codec
         return $geoPoint;
     }
 
-    public function decodeGeoPoint($value, Field $field)
+    public function decodeGeoPoint(mixed $value, Field $field): GeoPoint|array
     {
         if ($value instanceof GeoPoint) {
             return $value;
@@ -95,12 +95,12 @@ class PhpArraySerializer implements Serializer, Codec
         return GeoPoint::fromArray($value);
     }
 
-    public function encodeMessage(Message $message, Field $field)
+    public function encodeMessage(Message $message, Field $field): array
     {
         return $this->doSerialize($message);
     }
 
-    public function decodeMessage($value, Field $field): Message
+    public function decodeMessage(mixed $value, Field $field): Message
     {
         if ($value instanceof Message) {
             return $value;
@@ -109,7 +109,7 @@ class PhpArraySerializer implements Serializer, Codec
         return $this->doDeserialize($value);
     }
 
-    public function encodeMessageRef($messageRef, Field $field)
+    public function encodeMessageRef(MessageRef|array $messageRef, Field $field): array
     {
         if ($messageRef instanceof MessageRef) {
             return $messageRef->toArray();
@@ -118,7 +118,7 @@ class PhpArraySerializer implements Serializer, Codec
         return $messageRef;
     }
 
-    public function decodeMessageRef($value, Field $field)
+    public function decodeMessageRef(mixed $value, Field $field): MessageRef|array
     {
         if ($value instanceof MessageRef) {
             return $value;
@@ -194,7 +194,7 @@ class PhpArraySerializer implements Serializer, Codec
                 continue;
             }
 
-            switch ($field->getRule()->getValue()) {
+            switch ($field->getRule()) {
                 case FieldRule::A_SINGLE_VALUE:
                     $message->set($fieldName, $type->decode($value, $field, $this));
                     break;

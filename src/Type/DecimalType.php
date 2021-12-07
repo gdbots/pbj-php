@@ -10,22 +10,22 @@ use Gdbots\Pbj\Field;
 // todo: review precision/scale handling.  this seems putrid
 final class DecimalType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::float($value, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): float
     {
         return (float)bcadd((string)$value, '0', $field->getScale());
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): float
     {
         return (float)bcadd((string)$value, '0', $field->getScale());
     }
 
-    public function getDefault()
+    public function getDefault(): float
     {
         return 0.0;
     }

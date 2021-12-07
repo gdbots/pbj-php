@@ -3,14 +3,8 @@ declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
-use Gdbots\Pbj\Enum;
-
-/**
- * @method static IntEnum UNKNOWN()
- * @method static IntEnum A_INT()
- */
-final class IntEnum extends Enum
+enum IntEnum: int
 {
-    const UNKNOWN = 0;
-    const A_INT = 1;
+    case UNKNOWN = 0;
+    case A_INT = 1;
 }

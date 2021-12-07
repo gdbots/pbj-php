@@ -9,22 +9,22 @@ use Gdbots\Pbj\Field;
 
 final class BooleanType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::boolean($value, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): bool
     {
         return (bool)$value;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): bool
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
-    public function getDefault()
+    public function getDefault(): bool
     {
         return false;
     }

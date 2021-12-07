@@ -21,10 +21,7 @@ final class FieldBuilder
     private ?int $max = null;
     private int $precision = 10;
     private int $scale = 2;
-
-    /** @var mixed */
-    private $default;
-
+    private mixed $default = null;
     private bool $useTypeDefault = true;
     private ?string $className = null;
     private ?array $anyOfCuries = null;
@@ -56,25 +53,25 @@ final class FieldBuilder
 
     public function asASingleValue(): self
     {
-        $this->rule = FieldRule::A_SINGLE_VALUE();
+        $this->rule = FieldRule::A_SINGLE_VALUE;
         return $this;
     }
 
     public function asASet(): self
     {
-        $this->rule = FieldRule::A_SET();
+        $this->rule = FieldRule::A_SET;
         return $this;
     }
 
     public function asAList(): self
     {
-        $this->rule = FieldRule::A_LIST();
+        $this->rule = FieldRule::A_LIST;
         return $this;
     }
 
     public function asAMap(): self
     {
-        $this->rule = FieldRule::A_MAP();
+        $this->rule = FieldRule::A_MAP;
         return $this;
     }
 
@@ -126,7 +123,7 @@ final class FieldBuilder
         return $this;
     }
 
-    public function withDefault($default): self
+    public function withDefault(mixed $default): self
     {
         $this->default = $default;
         return $this;
@@ -167,7 +164,7 @@ final class FieldBuilder
     public function build(): Field
     {
         if (null === $this->rule) {
-            $this->rule = FieldRule::A_SINGLE_VALUE();
+            $this->rule = FieldRule::A_SINGLE_VALUE;
         }
 
         return new Field(

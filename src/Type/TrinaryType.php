@@ -15,22 +15,22 @@ use Gdbots\Pbj\Field;
  */
 final class TrinaryType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::choice($value, [0, 1, 2], null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): int
     {
         return (int)$value;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): int
     {
         return (int)$value;
     }
 
-    public function getDefault()
+    public function getDefault(): int
     {
         return 0;
     }

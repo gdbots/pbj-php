@@ -11,10 +11,7 @@ class UuidIdentifier implements Identifier, GeneratesIdentifier
 {
     protected string $uuid;
 
-    /**
-     * @param UuidInterface|string $uuid
-     */
-    protected function __construct($uuid)
+    protected function __construct(UuidInterface|string $uuid)
     {
         if (!$uuid instanceof UuidInterface) {
             Assertion::uuid($uuid);
@@ -23,12 +20,12 @@ class UuidIdentifier implements Identifier, GeneratesIdentifier
         $this->uuid = (string)$uuid;
     }
 
-    public static function generate(): self
+    public static function generate(): static
     {
         return new static(Uuid::uuid4());
     }
 
-    public static function fromString(string $string): self
+    public static function fromString(string $string): static
     {
         return new static($string);
     }

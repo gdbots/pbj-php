@@ -18,7 +18,7 @@ abstract class StringIdentifier implements Identifier
         }
     }
 
-    public static function fromString(string $string): self
+    public static function fromString(string $string): static
     {
         return new static($string);
     }

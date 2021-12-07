@@ -50,7 +50,7 @@ final class NodeRef implements Identifier
         Assertion::regex($this->id, self::VALID_ID_PATTERN, null, 'NodeRef.id');
     }
 
-    public static function fromString(string $string): self
+    public static function fromString(string $string): static
     {
         $parts = explode(':', $string, 3);
         Assertion::count($parts, 3, 'NodeRef format must be "vendor:label:id');
@@ -59,7 +59,7 @@ final class NodeRef implements Identifier
         return new self($qname, $id);
     }
 
-    public static function fromNode(Message $node): self
+    public static function fromNode(Message $node): static
     {
         if ($node->has('_id')) {
             return new self($node::schema()->getQName(), (string)$node->fget('_id'));

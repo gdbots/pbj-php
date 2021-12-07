@@ -11,12 +11,12 @@ use Gdbots\Pbj\WellKnown\NodeRef;
 
 final class NodeRefType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::isInstanceOf($value, NodeRef::class, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         if ($value instanceof NodeRef) {
             return $value->toString();
@@ -25,7 +25,7 @@ final class NodeRefType extends AbstractType
         return !empty($value) ? (string)$value : null;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): NodeRef|string|null
     {
         if (null === $value || $value instanceof NodeRef) {
             return $value;

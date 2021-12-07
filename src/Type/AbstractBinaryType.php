@@ -24,7 +24,7 @@ abstract class AbstractBinaryType extends AbstractType
         $this->encodeToBase64 = $useBase64;
     }
 
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::string($value, null, $field->getName());
 
@@ -49,7 +49,7 @@ abstract class AbstractBinaryType extends AbstractType
         }
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         $value = trim((string)$value);
         if ($value === '') {
@@ -59,7 +59,7 @@ abstract class AbstractBinaryType extends AbstractType
         return $this->encodeToBase64 ? base64_encode($value) : $value;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         $value = trim((string)$value);
         if ($value === '') {

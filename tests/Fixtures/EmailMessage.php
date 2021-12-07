@@ -28,7 +28,7 @@ final class EmailMessage extends AbstractMessage
                     ->build(),
                 Fb::create('from_email', T\StringType::create())
                     ->required()
-                    ->format(Format::EMAIL())
+                    ->format(Format::EMAIL)
                     ->build(),
                 Fb::create('subject', T\StringType::create())
                     ->withDefault(function (EmailMessage $message = null) {
@@ -49,14 +49,14 @@ final class EmailMessage extends AbstractMessage
                 Fb::create('microtime_sent', T\MicrotimeType::create())->build(),
                 Fb::create('provider', T\StringEnumType::create())
                     ->className(Provider::class)
-                    ->withDefault(Provider::GMAIL())
+                    ->withDefault(Provider::GMAIL)
                     ->build(),
                 Fb::create('labels', T\StringType::create())
-                    ->format(Format::HASHTAG())
+                    ->format(Format::HASHTAG)
                     ->asASet()
                     ->build(),
                 Fb::create('unsubscribe_url', T\TextType::create())
-                    ->format(Format::URL())
+                    ->format(Format::URL)
                     ->build(),
                 Fb::create('nested', T\MessageType::create())
                     ->anyOfCuries([

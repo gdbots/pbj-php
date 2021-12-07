@@ -19,16 +19,14 @@ class MessageTest extends TestCase
     public function testCreateMessageFromArray()
     {
         $message = $this->createEmailMessage();
-        $message->set('priority', Priority::HIGH());
+        $message->set('priority', Priority::HIGH);
 
-        $this->assertTrue($message->get('priority')->equals(Priority::HIGH));
-        $this->assertTrue(Priority::HIGH() === $message->get('priority'));
+        $this->assertTrue($message->get('priority') === Priority::HIGH);
 
         $json = $this->getSerializer()->serialize($message);
         $message = $this->getSerializer()->deserialize($json);
 
-        $this->assertTrue($message->get('priority')->equals(Priority::HIGH));
-        $this->assertTrue(Priority::HIGH() === $message->get('priority'));
+        $this->assertTrue($message->get('priority') === Priority::HIGH);
         $this->assertSame($message->get('nested')->get('location')->getLatitude(), 0.5);
 
         //echo json_encode($message, JSON_PRETTY_PRINT);
@@ -52,15 +50,15 @@ class MessageTest extends TestCase
             ->addToSet(
                 'enum_in_set',
                 [
-                    Provider::AOL(),
-                    Provider::GMAIL(),
+                    Provider::AOL,
+                    Provider::GMAIL,
                 ]
             );
 
         $this->assertTrue($message->isInSet('labels', 'abc'));
         $this->assertFalse($message->isInSet('labels', 'idontexist'));
-        $this->assertTrue($message->isInSet('enum_in_set', Provider::AOL()));
-        $this->assertFalse($message->isInSet('enum_in_set', Provider::HOTMAIL()));
+        $this->assertTrue($message->isInSet('enum_in_set', Provider::AOL));
+        $this->assertFalse($message->isInSet('enum_in_set', Provider::HOTMAIL));
     }
 
     public function testEnumInSet()
@@ -69,16 +67,16 @@ class MessageTest extends TestCase
             ->addToSet(
                 'enum_in_set',
                 [
-                    Provider::AOL(),
-                    Provider::AOL(),
-                    Provider::GMAIL(),
-                    Provider::GMAIL(),
+                    Provider::AOL,
+                    Provider::AOL,
+                    Provider::GMAIL,
+                    Provider::GMAIL,
                 ]
             );
 
         $result = array_map(
-            function (Enum $enum) {
-                return $enum->getValue();
+            function (\BackedEnum $enum) {
+                return $enum->value;
             },
             $message->get('enum_in_set') ?: []
         );
@@ -100,10 +98,9 @@ class MessageTest extends TestCase
         $this->assertFalse($message->isInList('any_of_message', $messageNotInList));
         $this->assertFalse($message->isInList('any_of_message', 'notinlist'));
         $this->assertFalse($message->isInList('any_of_message', NestedMessage::create()));
-        $this->assertTrue($message->isInList('enum_in_list', 'aol'));
-        $this->assertTrue($message->isInList('enum_in_list', Provider::AOL()));
+        $this->assertTrue($message->isInList('enum_in_list', Provider::AOL));
         $this->assertFalse($message->isInList('enum_in_list', 'notinlist'));
-        $this->assertFalse($message->isInList('enum_in_list', Provider::HOTMAIL()));
+        $this->assertFalse($message->isInList('enum_in_list', Provider::HOTMAIL));
     }
 
     public function testEnumInList()
@@ -112,16 +109,16 @@ class MessageTest extends TestCase
             ->addToList(
                 'enum_in_list',
                 [
-                    Provider::AOL(),
-                    Provider::AOL(),
-                    Provider::GMAIL(),
-                    Provider::GMAIL(),
+                    Provider::AOL,
+                    Provider::AOL,
+                    Provider::GMAIL,
+                    Provider::GMAIL,
                 ]
             );
 
         $result = array_map(
-            function (Enum $enum) {
-                return $enum->getValue();
+            function (\BackedEnum $enum) {
+                return $enum->value;
             },
             $message->get('enum_in_list')
         );

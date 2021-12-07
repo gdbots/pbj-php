@@ -10,7 +10,7 @@ use Gdbots\Pbj\Field;
 
 final class SignedBigIntType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         $fieldName = $field->getName();
         /** @var BigInteger $value */
@@ -27,7 +27,7 @@ final class SignedBigIntType extends AbstractType
         );
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         if ($value instanceof BigInteger) {
             return (string)$value;
@@ -37,7 +37,7 @@ final class SignedBigIntType extends AbstractType
         return strlen($str) ? $str : '0';
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): BigInteger|string|null
     {
         if (null === $value || $value instanceof BigInteger) {
             return $value;
@@ -55,7 +55,7 @@ final class SignedBigIntType extends AbstractType
         return false;
     }
 
-    public function getDefault()
+    public function getDefault(): BigInteger
     {
         return BigInteger::zero();
     }

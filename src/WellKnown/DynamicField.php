@@ -55,15 +55,15 @@ final class DynamicField implements \JsonSerializable
 
     private string $name;
     private string $kind;
-    private $value;
+    private mixed $value;
 
-    private function __construct(string $name, DynamicFieldKind $kind, $value)
+    private function __construct(string $name, DynamicFieldKind $kind, mixed $value)
     {
         Assertion::betweenLength($name, 1, 127);
         Assertion::regex($name, self::VALID_NAME_PATTERN, 'DynamicField name must match pattern.');
 
         $this->name = $name;
-        $this->kind = $kind->getValue();
+        $this->kind = $kind->value;
         $field = self::createField($this->kind);
 
         $this->value = $field->getType()->decode($value, $field);
@@ -73,36 +73,17 @@ final class DynamicField implements \JsonSerializable
     public static function createField(string $kind): Field
     {
         if (!isset(self::$fields[$kind])) {
-            switch ($kind) {
-                case DynamicFieldKind::STRING_VAL:
-                    $type = StringType::create();
-                    break;
+            $type = match ($kind) {
+                DynamicFieldKind::STRING_VAL->value => StringType::create(),
+                DynamicFieldKind::TEXT_VAL->value => TextType::create(),
+                DynamicFieldKind::INT_VAL->value => IntType::create(),
+                DynamicFieldKind::BOOL_VAL->value => BooleanType::create(),
+                DynamicFieldKind::FLOAT_VAL->value => FloatType::create(),
+                DynamicFieldKind::DATE_VAL->value => DateType::create(),
+                default => throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid type.', $kind)),
+            };
 
-                case DynamicFieldKind::TEXT_VAL:
-                    $type = TextType::create();
-                    break;
-
-                case DynamicFieldKind::INT_VAL:
-                    $type = IntType::create();
-                    break;
-
-                case DynamicFieldKind::BOOL_VAL:
-                    $type = BooleanType::create();
-                    break;
-
-                case DynamicFieldKind::FLOAT_VAL:
-                    $type = FloatType::create();
-                    break;
-
-                case DynamicFieldKind::DATE_VAL:
-                    $type = DateType::create();
-                    break;
-
-                default:
-                    throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid type.', $kind));
-            }
-
-            self::$fields[$kind] = new Field($kind, $type, FieldRule::A_SINGLE_VALUE(), true);
+            self::$fields[$kind] = new Field($kind, $type, FieldRule::A_SINGLE_VALUE, true);
         }
 
         return self::$fields[$kind];
@@ -110,32 +91,32 @@ final class DynamicField implements \JsonSerializable
 
     public static function createBoolVal(string $name, bool $value = false): self
     {
-        return new self($name, DynamicFieldKind::BOOL_VAL(), $value);
+        return new self($name, DynamicFieldKind::BOOL_VAL, $value);
     }
 
     public static function createDateVal(string $name, \DateTimeInterface $value): self
     {
-        return new self($name, DynamicFieldKind::DATE_VAL(), $value);
+        return new self($name, DynamicFieldKind::DATE_VAL, $value);
     }
 
     public static function createFloatVal(string $name, float $value = 0.0): self
     {
-        return new self($name, DynamicFieldKind::FLOAT_VAL(), $value);
+        return new self($name, DynamicFieldKind::FLOAT_VAL, $value);
     }
 
     public static function createIntVal(string $name, int $value = 0): self
     {
-        return new self($name, DynamicFieldKind::INT_VAL(), $value);
+        return new self($name, DynamicFieldKind::INT_VAL, $value);
     }
 
     public static function createStringVal(string $name, string $value): self
     {
-        return new self($name, DynamicFieldKind::STRING_VAL(), $value);
+        return new self($name, DynamicFieldKind::STRING_VAL, $value);
     }
 
     public static function createTextVal(string $name, string $value): self
     {
-        return new self($name, DynamicFieldKind::TEXT_VAL(), $value);
+        return new self($name, DynamicFieldKind::TEXT_VAL, $value);
     }
 
     public static function fromArray(array $data = []): self
@@ -149,12 +130,12 @@ final class DynamicField implements \JsonSerializable
         $kind = key($data);
 
         try {
-            $kind = DynamicFieldKind::create($kind);
+            $kind = DynamicFieldKind::from($kind);
         } catch (\Throwable $e) {
             throw new InvalidArgumentException(sprintf('DynamicField "%s" is not a valid kind.', $kind));
         }
 
-        return new self($name, $kind, $data[$kind->getValue()]);
+        return new self($name, $kind, $data[$kind->value]);
     }
 
     public function toArray(): array

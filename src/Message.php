@@ -18,7 +18,7 @@ interface Message
      *
      * @return static
      */
-    public static function create(): self;
+    public static function create(): static;
 
     /**
      * Returns a new message from the provided array.
@@ -29,7 +29,7 @@ interface Message
      *
      * @see \Gdbots\Pbj\Serializer\PhpArraySerializer::deserialize
      */
-    public static function fromArray(array $data = []): self;
+    public static function fromArray(array $data = []): static;
 
     /**
      * Returns the message as an associative array.
@@ -59,7 +59,7 @@ interface Message
     /**
      * Generates a MessageRef of the current message with an optional tag.
      *
-     * @param string $tag
+     * @param string|null $tag
      *
      * @return MessageRef
      */
@@ -91,7 +91,7 @@ interface Message
      * @throws GdbotsPbjException
      * @throws RequiredFieldNotSet
      */
-    public function validate(bool $strict = false, bool $recursive = false): self;
+    public function validate(bool $strict = false, bool $recursive = false): static;
 
     /**
      * Freezes the message, making it immutable.  The message must be validated
@@ -106,7 +106,7 @@ interface Message
      * @throws GdbotsPbjException
      * @throws RequiredFieldNotSet
      */
-    public function freeze(bool $withStrictValidation = true): self;
+    public function freeze(bool $withStrictValidation = true): static;
 
     /**
      * Returns true if the message has been frozen.  A frozen message is
@@ -154,17 +154,17 @@ interface Message
      *
      * @internal
      */
-    public function setWithoutValidation(string $fieldName, $value): self;
+    public function setWithoutValidation(string $fieldName, mixed $value): static;
 
     /**
      * Populates the defaults on all fields or just the fieldName provided.
      * Operation will NOT overwrite any fields already set.
      *
-     * @param string $fieldName
+     * @param string|null $fieldName
      *
      * @return static
      */
-    public function populateDefaults(?string $fieldName = null): self;
+    public function populateDefaults(?string $fieldName = null): static;
 
     /**
      * Merges the field values from the provided message into this message.
@@ -191,12 +191,12 @@ interface Message
      * Returns the value for the given field.  If the field has not
      * been set you will get a null value.
      *
-     * @param string $fieldName
-     * @param mixed  $default
+     * @param string     $fieldName
+     * @param mixed|null $default
      *
      * @return mixed
      */
-    public function get(string $fieldName, $default = null);
+    public function get(string $fieldName, mixed $default = null): mixed;
 
     /**
      * A fast get method that returns the raw value instead of an
@@ -210,7 +210,7 @@ interface Message
      *
      * @return mixed
      */
-    public function fget(string $fieldName, $default = null);
+    public function fget(string $fieldName, mixed $default = null): mixed;
 
     /**
      * Clears the value of a field.
@@ -221,7 +221,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function clear(string $fieldName): self;
+    public function clear(string $fieldName): static;
 
     /**
      * Sets a single value field.
@@ -233,7 +233,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function set(string $fieldName, $value): self;
+    public function set(string $fieldName, mixed $value): static;
 
     /**
      * Returns true if the provided value is in the set of values.
@@ -243,7 +243,7 @@ interface Message
      *
      * @return bool
      */
-    public function isInSet(string $fieldName, $value): bool;
+    public function isInSet(string $fieldName, mixed $value): bool;
 
     /**
      * Adds an array of unique values to an unsorted set of values.
@@ -255,7 +255,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function addToSet(string $fieldName, array $values): self;
+    public function addToSet(string $fieldName, array $values): static;
 
     /**
      * Removes an array of values from a set.
@@ -267,7 +267,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function removeFromSet(string $fieldName, array $values): self;
+    public function removeFromSet(string $fieldName, array $values): static;
 
     /**
      * Returns true if the provided value is in the list of values.
@@ -279,18 +279,18 @@ interface Message
      *
      * @return bool
      */
-    public function isInList(string $fieldName, $value): bool;
+    public function isInList(string $fieldName, mixed $value): bool;
 
     /**
      * Returns an item in a list or null if it doesn't exist.
      *
-     * @param string $fieldName
-     * @param int    $index
-     * @param mixed  $default
+     * @param string     $fieldName
+     * @param int        $index
+     * @param mixed|null $default
      *
      * @return mixed
      */
-    public function getFromListAt(string $fieldName, int $index, $default = null);
+    public function getFromListAt(string $fieldName, int $index, mixed $default = null): mixed;
 
     /**
      * Adds an array of values to an unsorted list/array (not unique).
@@ -302,7 +302,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function addToList(string $fieldName, array $values): self;
+    public function addToList(string $fieldName, array $values): static;
 
     /**
      * Removes the element from the array at the index.
@@ -314,7 +314,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function removeFromListAt(string $fieldName, int $index): self;
+    public function removeFromListAt(string $fieldName, int $index): static;
 
     /**
      * Returns true if the map contains the provided key.
@@ -329,13 +329,13 @@ interface Message
     /**
      * Returns the value of a key in a map or null if it doesn't exist.
      *
-     * @param string $fieldName
-     * @param string $key
-     * @param mixed  $default
+     * @param string     $fieldName
+     * @param string     $key
+     * @param mixed|null $default
      *
      * @return mixed
      */
-    public function getFromMap(string $fieldName, string $key, $default = null);
+    public function getFromMap(string $fieldName, string $key, mixed $default = null): mixed;
 
     /**
      * Adds a key/value pair to a map.
@@ -348,7 +348,7 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function addToMap(string $fieldName, string $key, $value): self;
+    public function addToMap(string $fieldName, string $key, mixed $value): static;
 
     /**
      * Removes a key/value pair from a map.
@@ -360,5 +360,5 @@ interface Message
      *
      * @throws GdbotsPbjException
      */
-    public function removeFromMap(string $fieldName, string $key): self;
+    public function removeFromMap(string $fieldName, string $key): static;
 }

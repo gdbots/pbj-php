@@ -66,7 +66,7 @@ final class ItemMarshaler implements Codec
 
             $value = $this->skipValidation() ? $message->fget($fieldName) : $message->get($fieldName);
 
-            switch ($field->getRule()->getValue()) {
+            switch ($field->getRule()) {
                 case FieldRule::A_SINGLE_VALUE:
                     $payload[$fieldName] = $this->encodeValue($value, $field);
                     break;
@@ -104,7 +104,7 @@ final class ItemMarshaler implements Codec
         return $this->doUnmarshal(['M' => $data]);
     }
 
-    public function encodeDynamicField($dynamicField, Field $field)
+    public function encodeDynamicField(DynamicField|array $dynamicField, Field $field): array
     {
         if ($dynamicField instanceof DynamicField) {
             $name = $dynamicField->getName();
@@ -127,7 +127,7 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    public function decodeDynamicField($value, Field $field)
+    public function decodeDynamicField(mixed $value, Field $field): DynamicField|array
     {
         if ($value instanceof DynamicField) {
             return $value;
@@ -148,7 +148,7 @@ final class ItemMarshaler implements Codec
         return DynamicField::fromArray($data);
     }
 
-    public function encodeGeoPoint($geoPoint, Field $field)
+    public function encodeGeoPoint(GeoPoint|array $geoPoint, Field $field): array
     {
         if ($geoPoint instanceof GeoPoint) {
             $long = (string)$geoPoint->getLongitude();
@@ -171,7 +171,7 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    public function decodeGeoPoint($value, Field $field)
+    public function decodeGeoPoint(mixed $value, Field $field): GeoPoint|array
     {
         if ($value instanceof GeoPoint) {
             return $value;
@@ -187,17 +187,17 @@ final class ItemMarshaler implements Codec
         return new GeoPoint($lat, $long);
     }
 
-    public function encodeMessage(Message $message, Field $field)
+    public function encodeMessage(Message $message, Field $field): array
     {
         return ['M' => $this->marshal($message)];
     }
 
-    public function decodeMessage($value, Field $field): Message
+    public function decodeMessage(mixed $value, Field $field): Message
     {
         return $this->unmarshal($value);
     }
 
-    public function encodeMessageRef($messageRef, Field $field)
+    public function encodeMessageRef(MessageRef|array $messageRef, Field $field): array
     {
         if ($messageRef instanceof MessageRef) {
             $curie = $messageRef->getCurie()->toString();
@@ -218,7 +218,7 @@ final class ItemMarshaler implements Codec
         ];
     }
 
-    public function decodeMessageRef($value, Field $field)
+    public function decodeMessageRef(mixed $value, Field $field): MessageRef|array
     {
         if ($value instanceof MessageRef) {
             return $value;
@@ -274,7 +274,7 @@ final class ItemMarshaler implements Codec
             $field = $schema->getField($fieldName);
             $type = $field->getType();
 
-            switch ($field->getRule()->getValue()) {
+            switch ($field->getRule()) {
                 case FieldRule::A_SINGLE_VALUE:
                     $value = $type->decode($value, $field, $this);
                     if ($this->skipValidation()) {
@@ -289,7 +289,7 @@ final class ItemMarshaler implements Codec
                     $values = [];
                     if ('L' === $dynamoType) {
                         foreach ($value as $v) {
-                            $values[] = $type->decode(isset($v['M']) ? $v['M'] : current($v), $field, $this);
+                            $values[] = $type->decode($v['M'] ?? current($v), $field, $this);
                         }
                     } else {
                         foreach ($value as $v) {
@@ -330,7 +330,7 @@ final class ItemMarshaler implements Codec
         return $message->setWithoutValidation(Schema::PBJ_FIELD_NAME, $schema->getId()->toString())->populateDefaults();
     }
 
-    private function encodeValue($value, Field $field): array
+    private function encodeValue(mixed $value, Field $field): array
     {
         $type = $field->getType();
 

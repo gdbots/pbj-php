@@ -5,35 +5,34 @@ namespace Gdbots\Pbj\Type;
 
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
-use Gdbots\Pbj\Enum;
 use Gdbots\Pbj\Exception\DecodeValueFailed;
 use Gdbots\Pbj\Field;
+use IntBackedEnum;
 
 final class IntEnumType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         $fieldName = $field->getName();
-
-        /** @var Enum $value */
-        // Assertion::isInstanceOf($value, Enum::class, null, $fieldName);
         Assertion::isInstanceOf($value, $field->getClassName(), null, $fieldName);
-        Assertion::integer($value->getValue(), null, $field->getName());
-        Assertion::range($value->getValue(), $this->getMin(), $this->getMax(), null, $fieldName);
+        Assertion::integer($value->value, null, $field->getName());
+        Assertion::range($value->value, $this->getMin(), $this->getMax(), null, $fieldName);
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): int
     {
-        if ($value instanceof Enum) {
-            return (int)$value->getValue();
+        // if ($value instanceof IntBackedEnum) { // not working for some reason
+        if ($value instanceof \BackedEnum) {
+            return $value->value;
         }
 
         return strlen((string)$value) ? (int)$value : 0;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): \BackedEnum|int|null
     {
-        if (null === $value || $value instanceof Enum) {
+        // if (null === $value || $value instanceof IntBackedEnum) {
+        if (null === $value || $value instanceof \BackedEnum) {
             return $value;
         }
 
@@ -41,11 +40,11 @@ final class IntEnumType extends AbstractType
             return (int)$value;
         }
 
-        /** @var Enum $className */
+        /** @var IntBackedEnum $className */
         $className = $field->getClassName();
 
         try {
-            return $className::create((int)$value);
+            return $className::from((int)$value);
         } catch (\Throwable $e) {
             throw new DecodeValueFailed($value, $field, $e->getMessage());
         }

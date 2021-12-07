@@ -81,11 +81,11 @@ final class MessageResolver
      *
      * @param SchemaId $id
      *
-     * @return Message
+     * @return Message|string
      *
      * @throws NoMessageForSchemaId
      */
-    public static function resolveId(SchemaId $id): string
+    public static function resolveId(SchemaId $id): Message|string
     {
         $curieMajor = $id->getCurieMajor();
         if (isset(self::$messages[$curieMajor])) {
@@ -107,7 +107,7 @@ final class MessageResolver
      *
      * @return bool
      */
-    public static function hasCurie($curie): bool
+    public static function hasCurie(SchemaCurie|string $curie): bool
     {
         try {
             self::resolveCurie($curie);
@@ -123,11 +123,11 @@ final class MessageResolver
      *
      * @param SchemaCurie|string $curie
      *
-     * @return Message
+     * @return Message|string
      *
      * @throws NoMessageForCurie
      */
-    public static function resolveCurie($curie): string
+    public static function resolveCurie(SchemaCurie|string $curie): Message|string
     {
         $key = (string)$curie;
         $key = str_replace('*', self::$defaultVendor, $key);
@@ -150,13 +150,11 @@ final class MessageResolver
      *
      * @return bool
      */
-    public static function hasQName($qname): bool
+    public static function hasQName(SchemaQName|string $qname): bool
     {
         try {
             self::resolveQName($qname);
-        } catch (NoMessageForCurie $e) {
-            return false;
-        } catch (NoMessageForQName $e) {
+        } catch (NoMessageForCurie | NoMessageForQName $e) {
             return false;
         }
 
@@ -166,11 +164,11 @@ final class MessageResolver
     /**
      * @param SchemaQName|string $qname
      *
-     * @return Message
+     * @return Message|string
      *
      * @throws NoMessageForQName
      */
-    public static function resolveQName($qname): string
+    public static function resolveQName(SchemaQName|string $qname): Message|string
     {
         if (!$qname instanceof SchemaQName) {
             $qname = str_replace('*', self::$defaultVendor, (string)$qname);

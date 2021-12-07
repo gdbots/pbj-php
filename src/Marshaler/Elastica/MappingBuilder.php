@@ -297,7 +297,7 @@ class MappingBuilder
 
     protected function withFormat(Field $field): array
     {
-        $format = $field->hasFormat() ? $field->getFormat()->getValue() : null;
+        $format = $field->hasFormat() ? $field->getFormat() : null;
 
         switch ($format) {
             case Format::DATE:

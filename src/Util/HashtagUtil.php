@@ -60,7 +60,7 @@ final class HashtagUtil
      * @param string $str
      * @param bool   $camelize
      *
-     * @return string
+     * @return string|null
      */
     public static function create(string $str, bool $camelize = true): ?string
     {

@@ -21,13 +21,7 @@ abstract class DatedSlugIdentifier implements Identifier
         $this->slug = $slug;
     }
 
-    /**
-     * @param string             $string
-     * @param \DateTimeInterface $date
-     *
-     * @return static
-     */
-    public static function create(string $string, ?\DateTimeInterface $date = null): self
+    public static function create(string $string, ?\DateTimeInterface $date = null): static
     {
         $slug = SlugUtil::create($string, true);
 
@@ -40,7 +34,7 @@ abstract class DatedSlugIdentifier implements Identifier
         return new static($slug);
     }
 
-    public static function fromString(string $string): self
+    public static function fromString(string $string): static
     {
         return new static($string);
     }

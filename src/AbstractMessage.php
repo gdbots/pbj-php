@@ -43,12 +43,12 @@ abstract class AbstractMessage implements Message, \JsonSerializable
 
     abstract protected static function defineSchema(): Schema;
 
-    final public static function create(): self
+    final public static function create(): static
     {
         return (new static())->populateDefaults();
     }
 
-    final public static function fromArray(array $data = []): self
+    final public static function fromArray(array $data = []): static
     {
         if (!isset($data[Schema::PBJ_FIELD_NAME])) {
             $data[Schema::PBJ_FIELD_NAME] = static::schema()->getId()->toString();
@@ -122,7 +122,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return [];
     }
 
-    final public function validate(bool $strict = false, bool $recursive = false): self
+    final public function validate(bool $strict = false, bool $recursive = false): static
     {
         if (!$strict && $this->isFrozen()) {
             return $this;
@@ -156,7 +156,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function freeze(bool $withStrictValidation = true): self
+    final public function freeze(bool $withStrictValidation = true): static
     {
         if ($this->isFrozen()) {
             return $this;
@@ -218,7 +218,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         throw new LogicException('You can only set the replay mode on one time.');
     }
 
-    final public function populateDefaults(?string $fieldName = null): self
+    final public function populateDefaults(?string $fieldName = null): static
     {
         $this->guardFrozenMessage();
 
@@ -278,7 +278,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return true;
     }
 
-    final public function setWithoutValidation(string $fieldName, $value): self
+    final public function setWithoutValidation(string $fieldName, $value): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -314,7 +314,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return true;
     }
 
-    final public function get(string $fieldName, $default = null)
+    final public function get(string $fieldName, mixed $default = null): mixed
     {
         if (!$this->has($fieldName)) {
             return $default;
@@ -337,7 +337,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $field->isASet() ? array_values($this->decoded[$fieldName]) : $this->decoded[$fieldName];
     }
 
-    final public function fget(string $fieldName, $default = null)
+    final public function fget(string $fieldName, mixed $default = null): mixed
     {
         if (!$this->has($fieldName)) {
             return $default;
@@ -351,7 +351,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this->data[$fieldName];
     }
 
-    final public function clear(string $fieldName): self
+    final public function clear(string $fieldName): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -361,7 +361,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function set(string $fieldName, $value): self
+    final public function set(string $fieldName, mixed $value): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -377,16 +377,17 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function isInSet(string $fieldName, $value): bool
+    final public function isInSet(string $fieldName, mixed $value): bool
     {
         if (!$this->has($fieldName)) {
             return false;
         }
 
-        return isset($this->data[$fieldName][strtolower(trim((string)$value))]);
+        $v = $value instanceof \BackedEnum ? $value->value : $value;
+        return isset($this->data[$fieldName][strtolower(trim((string)$v))]);
     }
 
-    final public function addToSet(string $fieldName, array $values): self
+    final public function addToSet(string $fieldName, array $values): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -395,7 +396,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         unset($this->decoded[$fieldName]);
 
         foreach ($values as $value) {
-            $key = strtolower(trim((string)$value));
+            $v = $value instanceof \BackedEnum ? $value->value : $value;
+            $key = strtolower(trim((string)$v));
             if (0 === strlen($key)) {
                 continue;
             }
@@ -407,7 +409,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function removeFromSet(string $fieldName, array $values): self
+    final public function removeFromSet(string $fieldName, array $values): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -416,7 +418,8 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         unset($this->decoded[$fieldName]);
 
         foreach ($values as $value) {
-            $key = strtolower(trim((string)$value));
+            $v = $value instanceof \BackedEnum ? $value->value : $value;
+            $key = strtolower(trim((string)$v));
             if (0 === strlen($key)) {
                 continue;
             }
@@ -427,7 +430,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function isInList(string $fieldName, $value): bool
+    final public function isInList(string $fieldName, mixed $value): bool
     {
         if (!$this->has($fieldName)) {
             return false;
@@ -436,7 +439,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return in_array($value, $this->get($fieldName));
     }
 
-    final public function getFromListAt(string $fieldName, int $index, $default = null)
+    final public function getFromListAt(string $fieldName, int $index, mixed $default = null): mixed
     {
         if (!$this->has($fieldName)) {
             return $default;
@@ -446,7 +449,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $values[$index] ?? $default;
     }
 
-    final public function addToList(string $fieldName, array $values): self
+    final public function addToList(string $fieldName, array $values): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -462,7 +465,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function removeFromListAt(string $fieldName, int $index): self
+    final public function removeFromListAt(string $fieldName, int $index): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -492,7 +495,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return isset($this->data[$fieldName][$key]);
     }
 
-    final public function getFromMap(string $fieldName, string $key, $default = null)
+    final public function getFromMap(string $fieldName, string $key, mixed $default = null): mixed
     {
         if (!$this->isInMap($fieldName, $key)) {
             return $default;
@@ -502,7 +505,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $values[$key] ?? $default;
     }
 
-    final public function addToMap(string $fieldName, string $key, $value): self
+    final public function addToMap(string $fieldName, string $key, mixed $value): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -519,7 +522,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $this;
     }
 
-    final public function removeFromMap(string $fieldName, string $key): self
+    final public function removeFromMap(string $fieldName, string $key): static
     {
         $this->guardFrozenMessage();
         $field = static::schema()->getField($fieldName);
@@ -544,7 +547,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return isset($this->decoded[$fieldName]);
     }
 
-    private function encodeValue($value, Field $field)
+    private function encodeValue(mixed $value, Field $field): mixed
     {
         $type = $field->getType();
         if ($type->isMessage()) {
@@ -554,7 +557,7 @@ abstract class AbstractMessage implements Message, \JsonSerializable
         return $type->encode($value, $field, self::getSerializer());
     }
 
-    private function decodeValue($value, Field $field)
+    private function decodeValue(mixed $value, Field $field): mixed
     {
         $decoded = $field->getType()->decode($value, $field, self::getSerializer());
         $field->guardValue($decoded);
