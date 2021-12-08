@@ -7,6 +7,7 @@ use Gdbots\Pbj\Exception\FieldAlreadyDefined;
 use Gdbots\Pbj\Exception\FieldNotDefined;
 use Gdbots\Pbj\Exception\FieldOverrideNotCompatible;
 use Gdbots\Pbj\Util\ClassUtil;
+use JetBrains\PhpStorm\Pure;
 
 final class Schema implements \JsonSerializable
 {
@@ -31,7 +32,7 @@ final class Schema implements \JsonSerializable
      * @param Field[]         $fields
      * @param string[]        $mixins
      */
-    public function __construct($id, string $className, array $fields = [], array $mixins = [])
+    public function __construct(SchemaId|string $id, string $className, array $fields = [], array $mixins = [])
     {
         $this->id = $id instanceof SchemaId ? $id : SchemaId::fromString($id);
         $this->className = $className;
@@ -147,8 +148,8 @@ final class Schema implements \JsonSerializable
      * For example, an ImportUserV1 message would be handled by:
      * SomeClass::importUserV1(Message $command)
      *
-     * @param bool   $withMajor
-     * @param string $prefix
+     * @param bool        $withMajor
+     * @param string|null $prefix
      *
      * @return string
      */
@@ -254,7 +255,7 @@ final class Schema implements \JsonSerializable
      *
      * @return bool
      */
-    public function usesCurie($curie): bool
+    public function usesCurie(SchemaCurie|string $curie): bool
     {
         $curie = (string)$curie;
 

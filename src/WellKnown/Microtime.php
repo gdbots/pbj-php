@@ -91,7 +91,7 @@ final class Microtime implements \JsonSerializable
      * @return self
      * @throws InvalidArgumentException
      */
-    public static function fromString($stringOrInteger): self
+    public static function fromString(string|int $stringOrInteger): self
     {
         $int = (int)$stringOrInteger;
         $len = strlen((string)$int);

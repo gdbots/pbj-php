@@ -55,7 +55,7 @@ final class MessageRef implements \JsonSerializable
     {
         if (isset($data['curie'])) {
             $id = isset($data['id']) ? (string)$data['id'] : 'null';
-            $tag = isset($data['tag']) ? $data['tag'] : null;
+            $tag = $data['tag'] ?? null;
             return new self(SchemaCurie::fromString($data['curie']), $id, $tag);
         }
 
@@ -80,7 +80,7 @@ final class MessageRef implements \JsonSerializable
     {
         $parts = explode('#', $string, 2);
         $ref = $parts[0];
-        $tag = isset($parts[1]) ? $parts[1] : null;
+        $tag = $parts[1] ?? null;
 
         $parts = explode(':', $ref, 5);
         $id = array_pop($parts);

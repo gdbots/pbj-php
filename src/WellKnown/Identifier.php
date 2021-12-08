@@ -13,7 +13,7 @@ interface Identifier extends \JsonSerializable
      * @return static
      * @throws \InvalidArgumentException
      */
-    public static function fromString(string $string): self;
+    public static function fromString(string $string): static;
 
     /**
      * Returns a string that can be parsed by fromString()

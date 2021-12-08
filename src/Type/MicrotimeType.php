@@ -10,12 +10,12 @@ use Gdbots\Pbj\WellKnown\Microtime;
 
 final class MicrotimeType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::isInstanceOf($value, Microtime::class, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         if ($value instanceof Microtime) {
             return $value->toString();
@@ -24,7 +24,7 @@ final class MicrotimeType extends AbstractType
         return !empty($value) ? (string)$value : null;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): Microtime|string|null
     {
         if (null === $value || $value instanceof Microtime) {
             return $value;
@@ -42,7 +42,7 @@ final class MicrotimeType extends AbstractType
         return false;
     }
 
-    public function getDefault()
+    public function getDefault(): Microtime
     {
         return Microtime::create();
     }

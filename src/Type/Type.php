@@ -12,7 +12,7 @@ use Gdbots\Pbj\Field;
 
 interface Type
 {
-    public static function create(): self;
+    public static function create(): static;
 
     public function getTypeName(): TypeName;
 
@@ -29,31 +29,31 @@ interface Type
      *
      * @throws \Throwable
      */
-    public function guard($value, Field $field): void;
+    public function guard(mixed $value, Field $field): void;
 
     /**
-     * @param mixed $value
-     * @param Field $field
-     * @param Codec $codec
+     * @param mixed      $value
+     * @param Field      $field
+     * @param Codec|null $codec
      *
      * @return mixed
      *
      * @throws GdbotsPbjException
      * @throws EncodeValueFailed
      */
-    public function encode($value, Field $field, ?Codec $codec = null);
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): mixed;
 
     /**
-     * @param mixed $value
-     * @param Field $field
-     * @param Codec $codec
+     * @param mixed      $value
+     * @param Field      $field
+     * @param Codec|null $codec
      *
      * @return mixed
      *
      * @throws GdbotsPbjException
      * @throws DecodeValueFailed
      */
-    public function decode($value, Field $field, ?Codec $codec = null);
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): mixed;
 
     /**
      * Returns true if the value gets decoded and stored during runtime as a scalar value.
@@ -71,10 +71,7 @@ interface Type
      */
     public function encodesToScalar(): bool;
 
-    /**
-     * @return mixed
-     */
-    public function getDefault();
+    public function getDefault(): mixed;
 
     public function isBoolean(): bool;
 

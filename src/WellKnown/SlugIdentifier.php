@@ -21,12 +21,12 @@ abstract class SlugIdentifier implements Identifier
         $this->slug = $slug;
     }
 
-    public static function create(string $string): self
+    public static function create(string $string): static
     {
         return new static(SlugUtil::create($string));
     }
 
-    public static function fromString(string $string): self
+    public static function fromString(string $string): static
     {
         return new static($string);
     }

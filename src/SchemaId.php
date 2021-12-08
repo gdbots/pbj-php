@@ -78,13 +78,6 @@ final class SchemaId implements \JsonSerializable
     private string $message;
     private SchemaVersion $version;
 
-    /**
-     * @param string $vendor
-     * @param string $package
-     * @param string $category
-     * @param string $message
-     * @param string $version
-     */
     private function __construct(string $vendor, string $package, string $category, string $message, string $version)
     {
         $this->vendor = $vendor;

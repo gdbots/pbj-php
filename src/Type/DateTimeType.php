@@ -13,12 +13,12 @@ final class DateTimeType extends AbstractType
 {
     private ?\DateTimeZone $utc = null;
 
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::isInstanceOf($value, \DateTimeInterface::class, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         if ($value instanceof \DateTimeInterface) {
             return $this->convertToUtc($value)->format(DateUtil::ISO8601_ZULU);
@@ -27,7 +27,7 @@ final class DateTimeType extends AbstractType
         return !empty($value) ? (string)$value : null;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): \DateTimeInterface|string|null
     {
         if (empty($value)) {
             return null;

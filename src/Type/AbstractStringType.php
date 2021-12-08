@@ -13,7 +13,7 @@ use Gdbots\Pbj\Util\NumberUtil;
 
 abstract class AbstractStringType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         $fieldName = $field->getName();
         Assertion::string($value, null, $fieldName);
@@ -46,7 +46,7 @@ abstract class AbstractStringType extends AbstractType
             return;
         }
 
-        switch ($field->getFormat()->getValue()) {
+        switch ($field->getFormat()) {
             case Format::DATE:
                 Assertion::regex($value, '/^\d{4}-\d{2}-\d{2}$/', null, $fieldName);
                 break;
@@ -96,7 +96,7 @@ abstract class AbstractStringType extends AbstractType
                  * the value with a http so it looks like a url.  this won't work for thinks like mailto:
                  * urn:, etc.
                  */
-                if (false === strpos($value, 'http')) {
+                if (!str_contains($value, 'http')) {
                     $value = 'https://' . $value;
                 }
 
@@ -112,7 +112,7 @@ abstract class AbstractStringType extends AbstractType
         }
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         $value = trim((string)$value);
         if ($value === '') {
@@ -122,7 +122,7 @@ abstract class AbstractStringType extends AbstractType
         return $value;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         $value = trim((string)$value);
         if ($value === '') {

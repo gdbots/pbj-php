@@ -7,7 +7,6 @@ use Gdbots\Pbj\Enum\FieldRule;
 use Gdbots\Pbj\Enum\Format;
 use Gdbots\Pbj\Enum\TypeName;
 use Gdbots\Pbj\Type\Type;
-use Gdbots\Pbj\Util\ArrayUtil;
 use Gdbots\Pbj\Util\NumberUtil;
 use Gdbots\Pbj\WellKnown\Identifier;
 
@@ -32,7 +31,7 @@ final class Field implements \JsonSerializable
      * A regular expression to match against for string types.
      * @link http://spacetelescope.github.io/understanding-json-schema/reference/string.html#pattern
      *
-     * @var string
+     * @var string|null
      */
     private ?string $pattern = null;
     private ?Format $format = null;
@@ -40,46 +39,33 @@ final class Field implements \JsonSerializable
     private ?int $max = null;
     private int $precision = 10;
     private int $scale = 2;
-    /** @var mixed */
-    private $default;
+    private mixed $default;
     private bool $useTypeDefault;
     private ?string $className;
     private ?array $anyOfCuries;
     private ?\Closure $assertion;
     private bool $overridable;
 
-    private static ?FieldRule $aSingleValue = null;
-    private static ?FieldRule $aSet = null;
-    private static ?FieldRule $aList = null;
-    private static ?FieldRule $aMap = null;
-
     public function __construct(
-        string $name,
-        Type $type,
+        string    $name,
+        Type      $type,
         FieldRule $rule,
-        bool $required = false,
-        ?int $minLength = null,
-        ?int $maxLength = null,
-        ?string $pattern = null,
-        ?Format $format = null,
-        ?int $min = null,
-        ?int $max = null,
-        $precision = 10,
-        $scale = 2,
-        $default = null,
-        bool $useTypeDefault = true,
-        ?string $className = null,
-        ?array $anyOfCuries = null,
+        bool      $required = false,
+        ?int      $minLength = null,
+        ?int      $maxLength = null,
+        ?string   $pattern = null,
+        ?Format   $format = null,
+        ?int      $min = null,
+        ?int      $max = null,
+        int       $precision = 10,
+        int       $scale = 2,
+        mixed     $default = null,
+        bool      $useTypeDefault = true,
+        ?string   $className = null,
+        ?array    $anyOfCuries = null,
         ?\Closure $assertion = null,
-        bool $overridable = false
+        bool      $overridable = false
     ) {
-        if (null === self::$aSingleValue) {
-            self::$aSingleValue = FieldRule::A_SINGLE_VALUE();
-            self::$aSet = FieldRule::A_SET();
-            self::$aList = FieldRule::A_LIST();
-            self::$aMap = FieldRule::A_MAP();
-        }
-
         Assertion::betweenLength($name, 1, 127);
         Assertion::regex($name, self::VALID_NAME_PATTERN, 'Field name must match pattern.', $name);
 
@@ -117,8 +103,8 @@ final class Field implements \JsonSerializable
     }
 
     private function applyStringOptions(
-        ?int $minLength = null,
-        ?int $maxLength = null,
+        ?int    $minLength = null,
+        ?int    $maxLength = null,
         ?string $pattern = null,
         ?Format $format = null
     ): void {
@@ -163,12 +149,12 @@ final class Field implements \JsonSerializable
         $this->default = $default;
 
         if ($this->type->isScalar()) {
-            if ($this->type->getTypeName() !== TypeName::TIMESTAMP()) {
+            if ($this->type->getTypeName() !== TypeName::TIMESTAMP) {
                 $this->useTypeDefault = true;
             }
         } else {
             $decodeDefault = null !== $this->default && !$this->default instanceof \Closure;
-            switch ($this->type->getTypeValue()) {
+            switch ($this->type) {
                 case TypeName::IDENTIFIER:
                     Assertion::notNull($this->className, 'Field requires a className.', $this->name);
                     if ($decodeDefault && !$this->default instanceof Identifier) {
@@ -179,7 +165,7 @@ final class Field implements \JsonSerializable
                 case TypeName::INT_ENUM:
                 case TypeName::STRING_ENUM:
                     Assertion::notNull($this->className, 'Field requires a className.', $this->name);
-                    if ($decodeDefault && !$this->default instanceof Enum) {
+                    if ($decodeDefault && !$this->default instanceof \BackedEnum) {
                         $this->default = $this->type->decode($this->default, $this);
                     }
                     break;
@@ -211,22 +197,22 @@ final class Field implements \JsonSerializable
 
     public function isASingleValue(): bool
     {
-        return self::$aSingleValue === $this->rule;
+        return FieldRule::A_SINGLE_VALUE === $this->rule;
     }
 
     public function isASet(): bool
     {
-        return self::$aSet === $this->rule;
+        return FieldRule::A_SET === $this->rule;
     }
 
     public function isAList(): bool
     {
-        return self::$aList === $this->rule;
+        return FieldRule::A_LIST === $this->rule;
     }
 
     public function isAMap(): bool
     {
-        return self::$aMap === $this->rule;
+        return FieldRule::A_MAP === $this->rule;
     }
 
     public function isRequired(): bool
@@ -291,7 +277,7 @@ final class Field implements \JsonSerializable
         return $this->scale;
     }
 
-    public function getDefault(?Message $message = null)
+    public function getDefault(?Message $message = null): mixed
     {
         if (null === $this->default) {
             if ($this->useTypeDefault) {
@@ -315,7 +301,7 @@ final class Field implements \JsonSerializable
         return $this->default;
     }
 
-    private function guardDefault($default): void
+    private function guardDefault(mixed $default): void
     {
         if ($this->isASingleValue()) {
             $this->guardValue($default);
@@ -329,7 +315,7 @@ final class Field implements \JsonSerializable
 
         if ($this->isAMap()) {
             Assertion::true(
-                ArrayUtil::isAssoc($default),
+                !array_is_list($default),
                 'Field default must be an associative array.',
                 $this->name
             );
@@ -366,7 +352,7 @@ final class Field implements \JsonSerializable
         return $this->overridable;
     }
 
-    public function guardValue($value): void
+    public function guardValue(mixed $value): void
     {
         if ($this->required) {
             Assertion::notNull($value, 'Field is required and cannot be null.');
@@ -386,12 +372,12 @@ final class Field implements \JsonSerializable
         return [
             'name'             => $this->name,
             'type'             => $this->type->getTypeValue(),
-            'rule'             => $this->rule->getName(),
+            'rule'             => $this->rule->name,
             'required'         => $this->required,
             'min_length'       => $this->minLength,
             'max_length'       => $this->maxLength,
             'pattern'          => $this->pattern,
-            'format'           => $this->format ? $this->format->getValue() : Format::UNKNOWN,
+            'format'           => $this->format ? $this->format->value : Format::UNKNOWN->value,
             'min'              => $this->min,
             'max'              => $this->max,
             'precision'        => $this->precision,

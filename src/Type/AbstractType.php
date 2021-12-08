@@ -22,13 +22,13 @@ abstract class AbstractType implements Type
         $this->typeName = $typeName;
     }
 
-    final public static function create(): self
+    final public static function create(): static
     {
         $class = static::class;
         if (!isset(self::$instances[$class])) {
             $a = explode('\\', static::class);
             $typeName = StringUtil::toSlugFromCamel(str_replace('Type', '', end($a)));
-            self::$instances[$class] = new static(TypeName::create($typeName));
+            self::$instances[$class] = new static(TypeName::from($typeName));
         }
 
         return self::$instances[$class];
@@ -41,7 +41,7 @@ abstract class AbstractType implements Type
 
     final public function getTypeValue(): string
     {
-        return $this->typeName->getValue();
+        return $this->typeName->value;
     }
 
     public function isScalar(): bool
@@ -54,7 +54,7 @@ abstract class AbstractType implements Type
         return true;
     }
 
-    public function getDefault()
+    public function getDefault(): mixed
     {
         return null;
     }

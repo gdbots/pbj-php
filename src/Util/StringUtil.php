@@ -123,9 +123,9 @@ final class StringUtil
             }
 
             if ($thisLen == 1) {
-                $encodedLetter = '&#' . str_pad($decimalCode, 3, '0', STR_PAD_LEFT) . ';';
+                $encodedLetter = '&#' . str_pad((string)$decimalCode, 3, '0', STR_PAD_LEFT) . ';';
             } else {
-                $encodedLetter = '&#' . str_pad($decimalCode, 5, '0', STR_PAD_LEFT) . ';';
+                $encodedLetter = '&#' . str_pad((string)$decimalCode, 5, '0', STR_PAD_LEFT) . ';';
             }
 
             $c = $decimalCode;
@@ -134,22 +134,13 @@ final class StringUtil
             if ($c > 0 && $c < 32) {
                 $xml .= $encodedLetter;
             } else if ($c >= 32 && $c < 127) {
-                switch ($thisLetter) {
-                    case '<':
-                        $xml .= '&lt;';
-                        break;
-                    case '>':
-                        $xml .= '&gt;';
-                        break;
-                    case '&':
-                        $xml .= '&amp;';
-                        break;
-                    case '"':
-                        $xml .= '&quot;';
-                        break;
-                    default:
-                        $xml .= $thisLetter;
-                }
+                $xml .= match ($thisLetter) {
+                    '<' => '&lt;',
+                    '>' => '&gt;',
+                    '&' => '&amp;',
+                    '"' => '&quot;',
+                    default => $thisLetter,
+                };
             } else {
                 $xml .= $encodedLetter;
             }

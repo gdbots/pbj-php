@@ -8,7 +8,7 @@ use Gdbots\Pbj\Message;
 
 class JsonSerializer extends PhpArraySerializer
 {
-    public function serialize(Message $message, array $options = [])
+    public function serialize(Message $message, array $options = []): string
     {
         if (isset($options['json_encode_options'])) {
             return json_encode(parent::serialize($message, $options), $options['json_encode_options']);

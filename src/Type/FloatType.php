@@ -9,22 +9,22 @@ use Gdbots\Pbj\Field;
 
 final class FloatType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         Assertion::float($value, null, $field->getName());
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): float
     {
         return (float)$value;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): float
     {
         return (float)$value;
     }
 
-    public function getDefault()
+    public function getDefault(): float
     {
         return 0.0;
     }

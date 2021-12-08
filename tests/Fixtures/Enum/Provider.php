@@ -3,18 +3,10 @@ declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
-use Gdbots\Pbj\Enum;
-
-/**
- * @method static Provider UNKNOWN()
- * @method static Provider AOL()
- * @method static Provider GMAIL()
- * @method static Provider HOTMAIL()
- */
-final class Provider extends Enum
+enum Provider: string
 {
-    const UNKNOWN = 'unknown';
-    const AOL = 'aol';
-    const GMAIL = 'gmail';
-    const HOTMAIL = 'hotmail';
+    case UNKNOWN = 'unknown';
+    case AOL = 'aol';
+    case GMAIL = 'gmail';
+    case HOTMAIL = 'hotmail';
 }

@@ -10,7 +10,7 @@ use Gdbots\Pbj\Util\DateUtil;
 
 final class TimestampType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         $fieldName = $field->getName();
         Assertion::integer($value, null, $fieldName);
@@ -21,17 +21,17 @@ final class TimestampType extends AbstractType
         );
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): int
     {
         return (int)$value;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): int
     {
         return (int)$value;
     }
 
-    public function getDefault()
+    public function getDefault(): int
     {
         return time();
     }

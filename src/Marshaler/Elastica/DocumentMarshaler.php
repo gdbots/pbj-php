@@ -7,7 +7,6 @@ use Elastica\Document;
 use Gdbots\Pbj\Assertion;
 use Gdbots\Pbj\Codec;
 use Gdbots\Pbj\Enum\FieldRule;
-use Gdbots\Pbj\Exception\GdbotsPbjException;
 use Gdbots\Pbj\Exception\InvalidResolvedSchema;
 use Gdbots\Pbj\Field;
 use Gdbots\Pbj\Message;
@@ -37,15 +36,7 @@ final class DocumentMarshaler implements Codec
         return $document->setData($this->doMarshal($message));
     }
 
-    /**
-     * @param Document|array $documentOrSource
-     *
-     * @return Message
-     *
-     * @throws \Throwable
-     * @throws GdbotsPbjException
-     */
-    public function unmarshal($documentOrSource): Message
+    public function unmarshal(Document|array $documentOrSource): Message
     {
         if ($documentOrSource instanceof Document) {
             return $this->doUnmarshal($documentOrSource->getData());
@@ -54,7 +45,7 @@ final class DocumentMarshaler implements Codec
         return $this->doUnmarshal($documentOrSource);
     }
 
-    public function encodeDynamicField($dynamicField, Field $field)
+    public function encodeDynamicField(DynamicField|array $dynamicField, Field $field): array
     {
         if ($dynamicField instanceof DynamicField) {
             return $dynamicField->toArray();
@@ -63,7 +54,7 @@ final class DocumentMarshaler implements Codec
         return $dynamicField;
     }
 
-    public function decodeDynamicField($value, Field $field)
+    public function decodeDynamicField(mixed $value, Field $field): DynamicField|array
     {
         if ($value instanceof DynamicField) {
             return $value;
@@ -76,7 +67,7 @@ final class DocumentMarshaler implements Codec
         return DynamicField::fromArray($value);
     }
 
-    public function encodeGeoPoint($geoPoint, Field $field)
+    public function encodeGeoPoint(GeoPoint|array $geoPoint, Field $field): array
     {
         if ($geoPoint instanceof GeoPoint) {
             return [$geoPoint->getLongitude(), $geoPoint->getLatitude()];
@@ -85,7 +76,7 @@ final class DocumentMarshaler implements Codec
         return [$geoPoint['coordinates'][0], $geoPoint['coordinates'][1]];
     }
 
-    public function decodeGeoPoint($value, Field $field)
+    public function decodeGeoPoint(mixed $value, Field $field): GeoPoint|array
     {
         if ($value instanceof GeoPoint) {
             return $value;
@@ -98,12 +89,12 @@ final class DocumentMarshaler implements Codec
         return new GeoPoint($value[1], $value[0]);
     }
 
-    public function encodeMessage(Message $message, Field $field)
+    public function encodeMessage(Message $message, Field $field): array
     {
         return $this->doMarshal($message);
     }
 
-    public function decodeMessage($value, Field $field): Message
+    public function decodeMessage(mixed $value, Field $field): Message
     {
         if ($value instanceof Message) {
             return $value;
@@ -112,7 +103,7 @@ final class DocumentMarshaler implements Codec
         return $this->doUnmarshal($value);
     }
 
-    public function encodeMessageRef($messageRef, Field $field)
+    public function encodeMessageRef(MessageRef|array $messageRef, Field $field): array
     {
         if ($messageRef instanceof MessageRef) {
             return $messageRef->toArray();
@@ -121,7 +112,7 @@ final class DocumentMarshaler implements Codec
         return $messageRef;
     }
 
-    public function decodeMessageRef($value, Field $field)
+    public function decodeMessageRef(mixed $value, Field $field): MessageRef|array
     {
         if ($value instanceof MessageRef) {
             return $value;
@@ -197,7 +188,7 @@ final class DocumentMarshaler implements Codec
                 continue;
             }
 
-            switch ($field->getRule()->getValue()) {
+            switch ($field->getRule()) {
                 case FieldRule::A_SINGLE_VALUE:
                     $message->set($fieldName, $type->decode($value, $field, $this));
                     break;
@@ -219,6 +210,7 @@ final class DocumentMarshaler implements Codec
 
                 case FieldRule::A_MAP:
                     Assertion::isArray($value, 'Field must be an associative array.', $fieldName);
+                    // Assertion::true(!array_is_list($value), 'Field must be an associative array.', $fieldName);
                     foreach ($value as $k => $v) {
                         $message->addToMap($fieldName, $k, $type->decode($v, $field, $this));
                     }

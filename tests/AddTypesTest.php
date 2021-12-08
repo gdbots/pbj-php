@@ -36,7 +36,7 @@ class AddTypesTest extends TestCase
             'DynamicField'    => DynamicField::createIntVal('int_val', 1),
             'Float'           => 13213.032468,
             'GeoPoint'        => new GeoPoint(0.5, 102.0),
-            'IntEnum'         => IntEnum::UNKNOWN(),
+            'IntEnum'         => IntEnum::UNKNOWN,
             'Int'             => [0, 4294967295],
             'MediumInt'       => [0, 16777215],
             'MediumBlob'      => 'aG9tZXIgc2ltcHNvbg==',
@@ -50,7 +50,7 @@ class AddTypesTest extends TestCase
             'SignedSmallInt'  => [-32768, 32767],
             'SignedTinyInt'   => [-128, 127],
             'SmallInt'        => [0, 65535],
-            'StringEnum'      => StringEnum::UNKNOWN(),
+            'StringEnum'      => StringEnum::UNKNOWN,
             'String'          => 'string',
             'Text'            => 'text',
             'TimeUuid'        => TimeUuidIdentifier::generate(),
@@ -73,7 +73,7 @@ class AddTypesTest extends TestCase
             'DynamicField'    => 'not_a_dynamic_field',
             'Float'           => 1,
             'GeoPoint'        => 'not_a_geo_point',
-            'IntEnum'         => Priority::NORMAL(), // not the correct enum
+            'IntEnum'         => Priority::NORMAL, // not the correct enum
             'Int'             => [-1, 4294967296],
             'MediumInt'       => [-1, 16777216],
             'MediumBlob'      => false,
@@ -87,7 +87,7 @@ class AddTypesTest extends TestCase
             'SignedSmallInt'  => [-32769, 32768],
             'SignedTinyInt'   => [-129, 128],
             'SmallInt'        => [-1, 65536],
-            'StringEnum'      => Provider::AOL(), // not the correct enum
+            'StringEnum'      => Provider::AOL, // not the correct enum
             'String'          => false,
             'Text'            => false,
             'TimeUuid'        => 'not_a_time_uuid',

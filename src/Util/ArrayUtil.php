@@ -15,12 +15,14 @@ final class ArrayUtil
     /**
      * Returns true if the array is associative
      *
+     * @deprecated use built-in array_is_list instead
+     *
      * @param array $array
      *
      * @return bool
      */
     public static function isAssoc(array $array): bool
     {
-        return array_keys($array) !== range(0, count($array) - 1);
+        return !array_is_list($array);
     }
 }

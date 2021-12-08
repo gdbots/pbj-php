@@ -11,7 +11,7 @@ use Gdbots\Pbj\WellKnown\Identifier;
 
 final class IdentifierType extends AbstractType
 {
-    public function guard($value, Field $field): void
+    public function guard(mixed $value, Field $field): void
     {
         $fieldName = $field->getName();
         /** @var Identifier $value */
@@ -39,7 +39,7 @@ final class IdentifierType extends AbstractType
         }
     }
 
-    public function encode($value, Field $field, ?Codec $codec = null)
+    public function encode(mixed $value, Field $field, ?Codec $codec = null): ?string
     {
         if ($value instanceof Identifier) {
             return (string)$value->toString();
@@ -48,7 +48,7 @@ final class IdentifierType extends AbstractType
         return !empty($value) ? (string)$value : null;
     }
 
-    public function decode($value, Field $field, ?Codec $codec = null)
+    public function decode(mixed $value, Field $field, ?Codec $codec = null): Identifier|string|null
     {
         if (null === $value || $value instanceof Identifier) {
             return $value;

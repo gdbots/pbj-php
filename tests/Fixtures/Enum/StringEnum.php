@@ -3,14 +3,8 @@ declare(strict_types=1);
 
 namespace Gdbots\Tests\Pbj\Fixtures\Enum;
 
-use Gdbots\Pbj\Enum;
-
-/**
- * @method static StringEnum UNKNOWN()
- * @method static StringEnum A_STRING()
- */
-final class StringEnum extends Enum
+enum StringEnum: string
 {
-    const UNKNOWN = 'unknown';
-    const A_STRING = 'string';
+    case UNKNOWN = 'unknown';
+    case A_STRING = 'string';
 }

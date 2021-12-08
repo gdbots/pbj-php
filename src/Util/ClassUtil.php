@@ -34,7 +34,7 @@ final class ClassUtil
      *
      * @return array
      */
-    private static function loadTraits($class, bool $deep = true, bool $autoload = true): array
+    private static function loadTraits(string|object $class, bool $deep = true, bool $autoload = true): array
     {
         $cacheKey = is_object($class) ? get_class($class) : (string)$class;
         $cacheKey .= $deep ? ':deep' : '';
@@ -73,7 +73,7 @@ final class ClassUtil
      *
      * @return array
      */
-    public static function getTraits($class, bool $deep = true, bool $autoload = true): array
+    public static function getTraits(string|object $class, bool $deep = true, bool $autoload = true): array
     {
         return array_keys(self::loadTraits($class, $deep, $autoload));
     }
@@ -86,7 +86,7 @@ final class ClassUtil
      *
      * @return bool
      */
-    public static function usesTrait($class, string $trait): bool
+    public static function usesTrait(string|object $class, string $trait): bool
     {
         return isset(self::loadTraits($class)[$trait]);
     }
@@ -98,7 +98,7 @@ final class ClassUtil
      *
      * @return string
      */
-    public static function getShortName($objectOrString): string
+    public static function getShortName(object|string $objectOrString): string
     {
         $parts = explode('\\', is_object($objectOrString) ? get_class($objectOrString) : $objectOrString);
         return end($parts);

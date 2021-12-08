@@ -22,55 +22,19 @@ interface Codec
      */
     public function skipValidation(?bool $skipValidation = null): bool;
 
-    /**
-     * @param DynamicField|array $dynamicField
-     * @param Field              $field
-     *
-     * @return mixed
-     */
-    public function encodeDynamicField($dynamicField, Field $field);
+    public function encodeDynamicField(DynamicField|array $dynamicField, Field $field): mixed;
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return DynamicField|array
-     */
-    public function decodeDynamicField($value, Field $field);
+    public function decodeDynamicField(mixed $value, Field $field): DynamicField|array;
 
-    /**
-     * @param GeoPoint|array $geoPoint
-     * @param Field          $field
-     *
-     * @return mixed
-     */
-    public function encodeGeoPoint($geoPoint, Field $field);
+    public function encodeGeoPoint(GeoPoint|array $geoPoint, Field $field): mixed;
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return GeoPoint|array
-     */
-    public function decodeGeoPoint($value, Field $field);
+    public function decodeGeoPoint(mixed $value, Field $field): GeoPoint|array;
 
-    public function encodeMessage(Message $message, Field $field);
+    public function encodeMessage(Message $message, Field $field): mixed;
 
-    public function decodeMessage($value, Field $field): Message;
+    public function decodeMessage(mixed $value, Field $field): Message;
 
-    /**
-     * @param MessageRef|array $messageRef
-     * @param Field            $field
-     *
-     * @return mixed
-     */
-    public function encodeMessageRef($messageRef, Field $field);
+    public function encodeMessageRef(MessageRef|array $messageRef, Field $field): mixed;
 
-    /**
-     * @param mixed $value
-     * @param Field $field
-     *
-     * @return MessageRef|array
-     */
-    public function decodeMessageRef($value, Field $field);
+    public function decodeMessageRef(mixed $value, Field $field): MessageRef|array;
 }

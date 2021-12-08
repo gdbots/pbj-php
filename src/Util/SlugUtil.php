@@ -145,13 +145,13 @@ final class SlugUtil
     {
         $slug = trim($slug, '/');
         while (preg_match('/^\d{4}\/\d{2}\/\d{2}\/?(\S+)?/', $slug, $m)) {
-            $slug = trim(isset($m[1]) ? $m[1] : '', '/');
+            $slug = trim($m[1] ?? '', '/');
         }
         return $slug;
     }
 
     /**
-     * Detemines if the slug contains a date in the format YYYY/mm/dd
+     * Determines if the slug contains a date in the format YYYY/mm/dd
      *
      * @param string $slug
      *
