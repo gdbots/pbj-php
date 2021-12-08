@@ -154,7 +154,7 @@ final class Field implements \JsonSerializable
             }
         } else {
             $decodeDefault = null !== $this->default && !$this->default instanceof \Closure;
-            switch ($this->type) {
+            switch ($this->type->getTypeName()) {
                 case TypeName::IDENTIFIER:
                     Assertion::notNull($this->className, 'Field requires a className.', $this->name);
                     if ($decodeDefault && !$this->default instanceof Identifier) {

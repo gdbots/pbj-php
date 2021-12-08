@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 4.x versions.
 
 
+## v4.0.1
+* Fix bug in `Gdbots\Pbj\Field::applyDefault` that didn't check the correct type name value.
+
+
 ## v4.0.0
 __BREAKING CHANGES__
 
