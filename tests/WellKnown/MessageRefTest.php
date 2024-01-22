@@ -48,10 +48,7 @@ class MessageRefTest extends TestCase
         $this->fail(sprintf('MessageRef accepted and invalid string [%s].', $string));
     }
 
-    /**
-     * @return array
-     */
-    public function getValidMessageRefs()
+    public static function getValidMessageRefs(): array
     {
         return [
             ['acme:blog:node:article:123#tag'],
@@ -64,10 +61,7 @@ class MessageRefTest extends TestCase
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function getInvalidMessageRefs()
+    public static function getInvalidMessageRefs(): array
     {
         return [
             ['test::what'],

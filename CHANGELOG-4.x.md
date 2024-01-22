@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 4.x versions.
 
 
+## v4.0.3
+* Eliminate use of deprecated utf8_encode and utf8_decode.
+
+
 ## v4.0.2
 * Use brick/math v0.11.
 
