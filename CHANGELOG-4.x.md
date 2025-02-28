@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 4.x versions.
 
 
+## v4.0.5
+* Do not use implicit nullable in `Gdbots\Pbj\Exception\AssertionFailed::__construct`.
+
+
 ## v4.0.4
 * Allow brick/math 0.11 or 0.12
 

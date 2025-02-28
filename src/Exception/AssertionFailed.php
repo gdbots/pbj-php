@@ -7,7 +7,7 @@ use Assert\InvalidArgumentException;
 
 final class AssertionFailed extends InvalidArgumentException implements GdbotsPbjException
 {
-    public function __construct($message, $code, string $propertyPath = null, $value = null, array $constraints = [])
+    public function __construct($message, $code, ?string $propertyPath = null, $value = null, array $constraints = [])
     {
         if (null !== $propertyPath) {
             $message = $propertyPath . ' :: ' . $message;

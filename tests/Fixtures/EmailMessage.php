@@ -31,7 +31,7 @@ final class EmailMessage extends AbstractMessage
                     ->format(Format::EMAIL)
                     ->build(),
                 Fb::create('subject', T\StringType::create())
-                    ->withDefault(function (EmailMessage $message = null) {
+                    ->withDefault(function (?EmailMessage $message = null) {
                         if (!$message) {
                             return null;
                         }
