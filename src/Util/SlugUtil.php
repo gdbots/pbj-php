@@ -30,7 +30,8 @@ final class SlugUtil
 
         $string = preg_replace("/https*:\/\//", '', $string);
         for ($i = 0; $i <= strlen($string); $i++) {
-            $c = ord(substr($string, $i, 1));
+            $s = substr($string, $i, 1);
+            $c = '' === $s ? 0 : ord($s);
             if ($c < 128) {
                 $slug .= chr($c);
             }

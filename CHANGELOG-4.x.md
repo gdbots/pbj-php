@@ -2,6 +2,10 @@
 This changelog references the relevant changes done in 4.x versions.
 
 
+## v4.0.6
+* Fix deprecation of ord call with empty string in `SlugUtil::create`.
+
+
 ## v4.0.5
 * Do not use implicit nullable in `Gdbots\Pbj\Exception\AssertionFailed::__construct`.
 
